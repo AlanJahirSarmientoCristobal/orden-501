@@ -77,7 +77,7 @@ func _probar_compras() -> void:
 	GameState.nueva_partida("dificil")
 	_check(GameState.dinero == 700, "El dinero inicial de Difícil debe ser $700")
 	_check(GameState.comprar("carne", 5) == "", "La compra válida falló")
-	_check(GameState.dinero == 600, "La compra no descontó el dinero")
+	_check(GameState.dinero == 700 - 5 * int(Catalogo.INSUMOS["carne"]["precio"]), "La compra no descontó el dinero")
 	_check(GameState.comprar("carne", 100) != "", "Se permitió comprar sin dinero")
 	GameState.dinero = 100000
 	var libre := GameState.espacio_libre()
@@ -86,7 +86,7 @@ func _probar_compras() -> void:
 	_check(GameState.espacio_libre() == 0, "El espacio libre no llegó a 0")
 	GameState.mejoras["almacen"] = 1
 	_check(GameState.espacio_libre() == 30, "La mejora de almacén no agregó espacio")
-	_check(GameState.costo_urgente("carne", 3) == 180, "El pedido urgente en Difícil debe costar ×3")
+	_check(GameState.costo_urgente("carne", 3) == 3 * 3 * int(Catalogo.INSUMOS["carne"]["precio"]), "El pedido urgente en Difícil debe costar ×3")
 	_check(is_equal_approx(GameState.tiempo_manana, 120.0), "La mañana en Difícil debe durar 2 min")
 	GameState.tiempo_manana = 50.0
 	GameState.posicion_pueblo = Vector2(10, 10)

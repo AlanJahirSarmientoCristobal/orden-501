@@ -129,6 +129,7 @@ FALTANTE: si un insumo se acaba, elige entre marcar el platillo como agotado, pe
 CIERRE: revisa el reporte del día y compra mejoras.
 
 W A S D / Flechas: moverse
+Shift: correr (gasta estamina; si se agota, espera a que se recupere)
 Espacio: interactuar (mantener para limpiar mesas)
 E: tablet (stock, cocina, reservaciones, avisos)
 Q: pedido urgente al proveedor

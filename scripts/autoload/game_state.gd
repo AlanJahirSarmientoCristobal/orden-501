@@ -494,6 +494,7 @@ func _configurar_controles() -> void:
 		"mover_arriba": [KEY_W, KEY_UP],
 		"mover_abajo": [KEY_S, KEY_DOWN],
 		"interactuar": [KEY_SPACE, KEY_ENTER],
+		"correr": [KEY_SHIFT],
 		"tablet": [KEY_E],
 		"pedido_urgente": [KEY_Q],
 		"reservaciones": [KEY_R],

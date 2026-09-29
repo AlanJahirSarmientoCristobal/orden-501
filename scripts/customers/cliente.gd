@@ -75,17 +75,17 @@ func _construir() -> void:
 	_sprite.sprite_frames = AssetPaths.frames_personaje(clave_sprite())
 	_sprite.animation = &"down"
 	_sprite.frame = 1
-	_sprite.scale = Vector2(3, 3)
-	_sprite.position = Vector2(0, -10)
+	_sprite.scale = Vector2(AssetPaths.ESCALA_PERSONAJE, AssetPaths.ESCALA_PERSONAJE)
+	_sprite.position = Vector2(0, AssetPaths.ALTURA_PERSONAJE)
 	add_child(_sprite)
 
 	_insignia = UIKit.etiqueta(nombre_tipo(), 10, color_insignia(), true)
-	_insignia.position = Vector2(-50, 16)
+	_insignia.position = Vector2(-50, 19)
 	_insignia.size = Vector2(100, 14)
 	add_child(_insignia)
 
 	_barra = ProgressBar.new()
-	_barra.position = Vector2(-26, -46)
+	_barra.position = Vector2(-26, -52)
 	_barra.size = Vector2(52, 7)
 	_barra.show_percentage = false
 	_barra.max_value = 1.0
@@ -94,7 +94,7 @@ func _construir() -> void:
 	add_child(_barra)
 
 	_burbuja = UIKit.panel(Color("f4efe3"), Color("1b1f2a"), 4)
-	_burbuja.position = Vector2(-60, -84)
+	_burbuja.position = Vector2(-60, -90)
 	_burbuja.custom_minimum_size = Vector2(120, 32)
 	var fila := UIKit.hbox(4)
 	_icono = TextureRect.new()

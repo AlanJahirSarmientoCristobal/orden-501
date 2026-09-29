@@ -31,6 +31,10 @@ Resumen de cómo se implementó cada sección de `ORDEN_501_Actividad1.docx`, y 
 
 - **Mapa del pueblo más grande:** 2×2 pantallas (el documento hablaba de "una o dos pantallas"). Tiene un minimapa para orientarse, y el reloj de la mañana sigue corriendo dentro de las tiendas.
 - **Mercado y Cervecería con interior:** son cuartos de una pantalla, con cada producto en un lugar distinto.
+- **Sprint con estamina (Shift):** no aparece en el documento de diseño; se agregó a petición del equipo.
+  - Corre 60 % más rápido y gasta 35 de estamina por segundo; se recupera a 22 por segundo sin correr.
+  - Si se agota, no puede volver a correr hasta recuperar 25. Valores en `scripts/entities/dani.gd`.
+- **Personajes:** se dibujan a escala 3.5 (56 px) en lugar de 3, en `AssetPaths.ESCALA_PERSONAJE`.
 - **Monster:** bebida de la Cervecería ($20 en tienda, $45 en el menú). No caduca, se sirve en la barra, forma parte de las rondas por gol y sirve como sustituto de refresco y cerveza.
 
 ## Valores decididos durante el desarrollo

@@ -26,6 +26,7 @@ func _run() -> void:
 	await get_tree().process_frame
 	r.set_process(false)   # El partido se controla a mano en la prueba.
 
+	_probar_estamina()
 	_probar_ciclo_cliente()
 	_probar_faltante_sustituto()
 	_probar_faltante_agotado()
@@ -67,6 +68,21 @@ func _avanzar_estaciones(segundos: float) -> void:
 		r.cocina._process(paso)
 		r.barra._process(paso)
 		t += paso
+
+func _probar_estamina() -> void:
+	var d: Dani = r.dani
+	_check(d.actualizar_estamina(0.1, true, true), "Con Shift y moviéndose, Dani debe correr")
+	_check(not d.actualizar_estamina(0.1, true, false), "Quieto no debe contar como correr")
+	# Correr hasta agotarse (100 / 35 ≈ 2.9 s)
+	for i in range(40):
+		d.actualizar_estamina(0.1, true, true)
+	_check(d.agotado and d.estamina < Dani.MINIMO_PARA_CORRER, "La estamina debe agotarse al correr sin parar")
+	_check(not d.actualizar_estamina(0.1, true, true), "Agotado no debe poder correr")
+	# Recupera: con 25 de estamina vuelve a poder correr
+	for i in range(12):
+		d.actualizar_estamina(0.1, false, true)
+	_check(not d.agotado and d.actualizar_estamina(0.1, true, true), "Tras recuperar el mínimo debe poder correr de nuevo")
+	d.estamina = Dani.ESTAMINA_MAX
 
 func _probar_ciclo_cliente() -> void:
 	var mesa: Mesa = r.mesas[0]

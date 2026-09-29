@@ -191,7 +191,7 @@ func _construir_escenario() -> void:
 	chef.sprite_frames = AssetPaths.frames_personaje("chef")
 	chef.animation = &"side"
 	chef.flip_h = false
-	chef.scale = Vector2(3, 3)
+	chef.scale = Vector2(AssetPaths.ESCALA_PERSONAJE, AssetPaths.ESCALA_PERSONAJE)
 	chef.position = Vector2(72, 215)
 	chef.play()
 	add_child(chef)
@@ -605,7 +605,7 @@ func _construir_hud() -> void:
 	lateral.add_child(_panel_lateral)
 	capa.add_child(lateral)
 
-	var ayuda := UIKit.etiqueta("Espacio Interactuar · E Tablet · Esc Pausa\nQ Pedido urgente · R Reservaciones", 10, UIKit.TEXTO_TENUE, true)
+	var ayuda := UIKit.etiqueta("Shift Correr · Espacio Usar · E Tablet\nQ Urgente · R Reservas · Esc Pausa", 10, UIKit.TEXTO_TENUE, true)
 	ayuda.position = Vector2(1006, 689)
 	ayuda.size = Vector2(268, 30)
 	capa.add_child(ayuda)

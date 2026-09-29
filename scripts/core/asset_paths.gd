@@ -6,6 +6,11 @@ class_name AssetPaths
 ## mismo nombre). Si una ruta no existe, el juego dibuja un reemplazo simple.
 
 const TILES := "res://Assets/sprites/rpg_urban/Tiles/tile_%04d.png"
+
+## Escala de todos los personajes (sprites de 16 px). 3.5 = 56 px, un poco más grandes que un tile.
+const ESCALA_PERSONAJE := 3.5
+## Desplazamiento vertical del sprite para que los pies queden en la posición del nodo.
+const ALTURA_PERSONAJE := -12.0
 const COMIDA := "res://Assets/sprites/food_kit/Previews/%s.png"
 
 ## Texturas sueltas.

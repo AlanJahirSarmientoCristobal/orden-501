@@ -43,6 +43,7 @@ Al ganar la Gran Final se desbloquea la **terraza** (2 mesas más) y se muestra 
 | Tecla | Acción |
 |---|---|
 | W A S D / Flechas | Moverse por el pueblo y el restaurante |
+| Shift | Correr (gasta estamina; si se agota hay que esperar a recuperar un poco) |
 | Espacio | Interactuar: tiendas, tomar pedidos, recoger y servir, limpiar mesas (mantener) |
 | E | Tablet: stock, cola de cocina, reservaciones y avisos del partido |
 | Q | Pedido urgente al proveedor |

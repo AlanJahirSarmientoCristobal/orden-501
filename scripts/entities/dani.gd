@@ -6,18 +6,29 @@ class_name Dani
 signal bandeja_cambiada(platillos: Array[String])
 
 const VELOCIDAD_BASE := 240.0
-const ESCALA := 3.0
+
+# Sprint (Shift): corre más rápido gastando estamina. Si se agota, hay que esperar
+# a recuperar un mínimo antes de volver a correr.
+const MULTIPLICADOR_SPRINT := 1.6
+const ESTAMINA_MAX := 100.0
+const GASTO_ESTAMINA := 35.0          # por segundo corriendo
+const RECUPERACION_ESTAMINA := 22.0   # por segundo sin correr
+const MINIMO_PARA_CORRER := 25.0
 
 @export var usar_camara := false
 @export var limites_camara := Rect2(0, 0, 1280, 720)
 
 var bloqueado := false
 var bandeja: Array[String] = []
+var estamina := ESTAMINA_MAX
+var agotado := false
+var corriendo := false
 
 var _sprite: AnimatedSprite2D
 var _detector: Area2D
 var _etiqueta: Label
 var _barra_mantener: ProgressBar
+var _barra_estamina: ProgressBar
 var _vista_bandeja: HBoxContainer
 var _cercanos: Array[Interactuable] = []
 var _objetivo_mantener: Interactuable
@@ -35,8 +46,8 @@ func _construir() -> void:
 	_sprite = AnimatedSprite2D.new()
 	_sprite.sprite_frames = AssetPaths.frames_personaje("dani")
 	_sprite.animation = &"down"
-	_sprite.scale = Vector2(ESCALA, ESCALA)
-	_sprite.position = Vector2(0, -10)
+	_sprite.scale = Vector2(AssetPaths.ESCALA_PERSONAJE, AssetPaths.ESCALA_PERSONAJE)
+	_sprite.position = Vector2(0, AssetPaths.ALTURA_PERSONAJE)
 	add_child(_sprite)
 
 	var cuerpo := CollisionShape2D.new()
@@ -60,7 +71,7 @@ func _construir() -> void:
 	_detector.area_exited.connect(_al_salir)
 
 	var nombre := UIKit.etiqueta("DANI", 10, UIKit.ACENTO, true)
-	nombre.position = Vector2(-40, 18)
+	nombre.position = Vector2(-40, 20)
 	nombre.size = Vector2(80, 14)
 	add_child(nombre)
 
@@ -80,6 +91,16 @@ func _construir() -> void:
 	_barra_mantener.add_theme_stylebox_override("fill", UIKit.estilo(UIKit.VERDE, 3, Color.TRANSPARENT, 0, 0))
 	_barra_mantener.add_theme_stylebox_override("background", UIKit.estilo(Color(0, 0, 0, 0.6), 3, Color.TRANSPARENT, 0, 0))
 	add_child(_barra_mantener)
+
+	_barra_estamina = ProgressBar.new()
+	_barra_estamina.position = Vector2(-24, 36)
+	_barra_estamina.size = Vector2(48, 6)
+	_barra_estamina.show_percentage = false
+	_barra_estamina.max_value = ESTAMINA_MAX
+	_barra_estamina.value = ESTAMINA_MAX
+	_barra_estamina.visible = false
+	_barra_estamina.add_theme_stylebox_override("background", UIKit.estilo(Color(0, 0, 0, 0.6), 3, Color.TRANSPARENT, 0, 0))
+	add_child(_barra_estamina)
 
 	_vista_bandeja = UIKit.hbox(2)
 	_vista_bandeja.position = Vector2(-44, -40)
@@ -104,10 +125,13 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector2.ZERO
 		_sprite.stop()
 		_cancelar_mantener()
+		actualizar_estamina(delta, false, false)
 		_actualizar_prompt()
 		return
 	var direccion := Input.get_vector("mover_izquierda", "mover_derecha", "mover_arriba", "mover_abajo")
-	velocity = direccion * VELOCIDAD_BASE * GameState.multiplicador_velocidad()
+	var corre := actualizar_estamina(delta, Input.is_action_pressed("correr"), direccion != Vector2.ZERO)
+	velocity = direccion * VELOCIDAD_BASE * GameState.multiplicador_velocidad() * (MULTIPLICADOR_SPRINT if corre else 1.0)
+	_sprite.speed_scale = 1.6 if corre else 1.0
 	if direccion != Vector2.ZERO:
 		_animar(direccion)
 		_cancelar_mantener()
@@ -117,6 +141,24 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_procesar_mantener(delta)
 	_actualizar_prompt()
+
+## Actualiza la estamina y devuelve si Dani está corriendo en este cuadro.
+func actualizar_estamina(delta: float, quiere_correr: bool, moviendose: bool) -> bool:
+	corriendo = quiere_correr and moviendose and not agotado and estamina > 0.0
+	if corriendo:
+		estamina = maxf(0.0, estamina - GASTO_ESTAMINA * delta)
+		if estamina <= 0.0:
+			agotado = true
+	else:
+		estamina = minf(ESTAMINA_MAX, estamina + RECUPERACION_ESTAMINA * delta)
+		if agotado and estamina >= MINIMO_PARA_CORRER:
+			agotado = false
+	if _barra_estamina:
+		_barra_estamina.value = estamina
+		_barra_estamina.visible = estamina < ESTAMINA_MAX
+		var color := UIKit.ROJO if agotado else Color("7fe0ff")
+		_barra_estamina.add_theme_stylebox_override("fill", UIKit.estilo(color, 3, Color.TRANSPARENT, 0, 0))
+	return corriendo
 
 func _animar(direccion: Vector2) -> void:
 	if absf(direccion.x) > absf(direccion.y):

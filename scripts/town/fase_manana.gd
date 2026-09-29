@@ -126,13 +126,13 @@ func npc(clave: String, pos: Vector2, nombre: String, animacion: StringName = &"
 	s.sprite_frames = AssetPaths.frames_personaje(clave)
 	s.animation = animacion
 	s.frame = 1
-	s.scale = Vector2(3, 3)
+	s.scale = Vector2(AssetPaths.ESCALA_PERSONAJE, AssetPaths.ESCALA_PERSONAJE)
 	s.position = pos
 	s.z_index = 5
 	add_child(s)
 	if nombre != "":
 		var l := UIKit.etiqueta(nombre, 11, UIKit.TEXTO, true)
-		l.position = pos + Vector2(-60, 22)
+		l.position = pos + Vector2(-60, 26)
 		l.size = Vector2(120, 16)
 		l.z_index = 5
 		add_child(l)
@@ -156,7 +156,7 @@ func _crear_hud() -> void:
 	for l in [_hud_dinero, _hud_reputacion, _hud_almacen, _hud_tiempo]:
 		fila.add_child(l)
 	capa.add_child(barra)
-	var ayuda := UIKit.etiqueta("WASD Moverse · Espacio Interactuar · E Tablet · I Inventario · R Reservaciones · Esc Pausa", 13, UIKit.TEXTO_TENUE, true)
+	var ayuda := UIKit.etiqueta("WASD Moverse · Shift Correr · Espacio Interactuar · E Tablet · I Inventario · R Reservaciones · Esc Pausa", 13, UIKit.TEXTO_TENUE, true)
 	ayuda.position = Vector2(0, 694)
 	ayuda.size = Vector2(1280, 20)
 	capa.add_child(ayuda)

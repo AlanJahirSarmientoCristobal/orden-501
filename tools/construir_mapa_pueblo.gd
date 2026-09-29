@@ -21,21 +21,17 @@ func _init() -> void:
 	var columnas_atlas := int(datos["atlas_columnas"])
 	var tam := int(datos["tile"])
 
-	# Tiles sólidos: los que aparecen en alguna celda marcada como sólida.
-	var celdas_solidas := {}
-	for p in datos["solidos"]:
-		celdas_solidas[Vector2i(int(p[0]), int(p[1]))] = true
+	# Tiles sólidos: el tile de la MISMA capa en cada celda marcada como sólida
+	# (así un auto sobre la calle no vuelve sólido el asfalto de abajo).
 	var ids_solidos := {}
-	for capa in ["suelo", "objetos"]:
-		var filas: Array = datos[capa]
-		for y in range(filas.size()):
-			for x in range(filas[y].size()):
-				var id := int(filas[y][x])
-				if id >= 0 and celdas_solidas.has(Vector2i(x, y)):
-					# En la capa de suelo solo cuentan los tiles sin objeto encima o las piezas de edificio/agua.
-					ids_solidos[id] = true
-	# Los objetos decorativos del suelo (banqueta, pasto, calle) nunca son sólidos.
-	for libre in [8, 9, 10, 35, 36, 37, 62, 63, 64, 0, 1, 2, 27, 28, 29, 54, 55, 56, 441, 442]:
+	for p in datos["solidos"]:
+		var id := int(datos[str(p[0])][int(p[2])][int(p[1])])
+		if id >= 0:
+			ids_solidos[id] = true
+	# Banqueta, pasto y calle siempre se pueden pisar.
+	var transitables := [8, 9, 10, 35, 36, 37, 62, 63, 64, 0, 1, 2, 27, 28, 29, 54, 55, 56, 441, 442]
+	transitables.append_array([405, 406, 432, 433, 434, 435, 436, 459, 460, 461, 462, 463])
+	for libre in transitables:
 		ids_solidos.erase(libre)
 
 	var tileset := TileSet.new()

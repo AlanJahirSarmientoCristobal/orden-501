@@ -22,7 +22,7 @@ random.seed(501)
 VACIO = -1
 suelo = [[VACIO] * COLUMNAS for _ in range(FILAS)]
 objetos = [[VACIO] * COLUMNAS for _ in range(FILAS)]
-solidos = set()        # tiles (de cualquier capa) que bloquean el paso
+solidos = set()        # (capa, x, y) de las celdas que bloquean el paso
 
 # ------------------------------------------------------------------ Piezas del tileset
 
@@ -70,8 +70,11 @@ SOLIDOS_OBJETO = set(ARBOLES + [BANCA, BOTE, BUZON, HIDRANTE, 382, 383, 384, 385
 def poner(capa, x, y, tile, solido=False):
     if 0 <= x < COLUMNAS and 0 <= y < FILAS:
         capa[y][x] = tile
+        nombre_capa = "suelo" if capa is suelo else "objetos"
         if solido:
-            solidos.add((x, y))
+            solidos.add((nombre_capa, x, y))
+        else:
+            solidos.discard((nombre_capa, x, y))
 
 
 def nueve(capa, x0, y0, ancho, alto, piezas, solido=False):
@@ -295,7 +298,7 @@ for x in range(35, 53):
 
 # Más árboles y maceteros en las banquetas amplias
 for x, y in [(2, 8), (12, 10), (23, 8), (30, 8), (44, 9), (52, 10), (29, 20), (44, 21), (2, 28), (23, 28), (33, 28)]:
-    if objetos[y][x] == VACIO and (x, y) not in solidos:
+    if objetos[y][x] == VACIO and ("objetos", x, y) not in solidos:
         poner(objetos, x, y, random.choice(ARBOLES), solido=True)
 
 # ------------------------------------------------------------------ Salida
@@ -308,7 +311,7 @@ datos = {
     "atlas_columnas": ATLAS_COLUMNAS,
     "suelo": suelo,
     "objetos": objetos,
-    "solidos": sorted([list(p) for p in solidos]),
+    "solidos": sorted([list(p) for p in solidos]),   # [capa, x, y]
     "calles": {"avenida": [0, AV_Y, COLUMNAS, 3], "avenida_vertical": [AV_X, 0, 3, FILAS], "calle_sur": [AV_X + 3, SUR_Y, COLUMNAS - AV_X - 3, 3]},
     "lugares": lugares,
     "inicio": [lugares["restaurante"]["puerta"][0], lugares["restaurante"]["puerta"][1] + 1],

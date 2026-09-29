@@ -31,6 +31,14 @@ func _run() -> void:
 	var pueblo := get_tree().current_scene
 	_check(pueblo != null and pueblo.name == "Town", "No se abrió el pueblo")
 
+	# La calle no debe tener colisión: Dani cruza la avenida de banqueta a banqueta.
+	var cruzar: Dani = pueblo.dani
+	var t: float = pueblo.tile
+	cruzar.global_position = Vector2(22.5 * t, 12.5 * t)
+	for i in range(60):
+		cruzar.move_and_collide(Vector2(0, 8))
+	_check(cruzar.global_position.y >= 16.4 * t, "Dani no pudo cruzar la avenida (quedó en y=%d)" % int(cruzar.global_position.y))
+
 	# Entrar a la Cervecería, comprar Monster en su exhibidor y volver al pueblo.
 	var puerta: Vector2 = pueblo.puerta("cerveceria") + Vector2(0, pueblo.tile * 0.6)
 	pueblo._entrar_tienda(Catalogo.CERVECERIA, puerta)

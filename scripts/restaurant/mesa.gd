@@ -16,7 +16,7 @@ var restaurante: Node = null
 var _cuerpo: StaticBody2D
 var _etiqueta: Label
 var _cartel: Label
-var _platos: TextureRect
+var _platos: Node2D
 
 func configurar(nuevo_numero: int, pos: Vector2, es_terraza: bool = false) -> void:
 	numero = nuevo_numero
@@ -38,42 +38,63 @@ func _ready() -> void:
 	add_child(_cuerpo)
 
 	_etiqueta = UIKit.etiqueta("MESA %d · %d pers." % [numero, capacidad], 11, UIKit.TEXTO, true)
-	_etiqueta.position = Vector2(-60, _tamano_mesa().y * 0.5 + 18)
+	_etiqueta.position = Vector2(-60, 70)
 	_etiqueta.size = Vector2(120, 14)
 	add_child(_etiqueta)
 
 	_cartel = UIKit.etiqueta("", 11, UIKit.AZUL, true)
-	_cartel.position = Vector2(-70, -_tamano_mesa().y * 0.5 - 40)
+	_cartel.position = Vector2(-70, -94)
 	_cartel.size = Vector2(140, 14)
 	add_child(_cartel)
 
-	_platos = UIKit.icono("plato_sucio", 30)
-	_platos.position = Vector2(-15, -15)
+	_construir_muebles()
+	_platos = Node2D.new()
+	_platos.z_index = 1
+	var plato := Sprite2D.new()
+	plato.texture = Interior.textura(Interior.RPG, 1081)
+	plato.scale = Vector2(2.5, 2.5)
+	plato.position = Vector2(-10, -4)
+	_platos.add_child(plato)
+	var tazon := Sprite2D.new()
+	tazon.texture = Interior.textura(Interior.RPG, 854)
+	tazon.scale = Vector2(2.5, 2.5)
+	tazon.position = Vector2(12, 6)
+	_platos.add_child(tazon)
 	_platos.visible = false
 	add_child(_platos)
-	queue_redraw()
 
 func _tamano_mesa() -> Vector2:
-	return Vector2(70, 50) if capacidad <= 2 else Vector2(100, 56)
+	return Vector2(48, 48) if capacidad <= 2 else Vector2(96, 48)
 
-func _draw() -> void:
-	var t := _tamano_mesa()
-	# Sillas
-	var color_silla := Color("6b4a2b")
-	var sillas := [Vector2(-t.x * 0.5 - 14, -8), Vector2(t.x * 0.5 + 2, -8)]
-	if capacidad > 2:
-		sillas.append(Vector2(-t.x * 0.25 - 6, -t.y * 0.5 - 16))
-		sillas.append(Vector2(t.x * 0.25 - 6, -t.y * 0.5 - 16))
-	for s in sillas:
-		draw_rect(Rect2(s, Vector2(12, 16)), color_silla)
-	# Mesa
-	var madera := Color("a0652f") if not terraza else Color("c9a26b")
-	draw_rect(Rect2(-t * 0.5 + Vector2(0, 4), t), Color(0, 0, 0, 0.25))
-	draw_rect(Rect2(-t * 0.5, t), madera)
-	draw_rect(Rect2(-t * 0.5, t), madera.darkened(0.35), false, 3.0)
-	if estado == EstadoMesa.SUCIA:
-		draw_circle(Vector2(-t.x * 0.3, t.y * 0.2), 5, Color("7a5230"))
-		draw_circle(Vector2(t.x * 0.25, -t.y * 0.15), 4, Color("7a5230"))
+## Mesa y sillas con tiles del pack Roguelike Indoors.
+## 2 personas: mesa redonda de 1 tile; 4 personas: mesa ovalada de 2x1.
+func _construir_muebles() -> void:
+	var I := Interior.INDOOR
+	if capacidad <= 2:
+		_tile(I, 7, Vector2(0, 0))
+		_tile(I, 54, Vector2(0, -44))    # Silla de arriba (donde se sienta el cliente)
+		_tile(I, 55, Vector2(0, 44))     # Silla de abajo, de espaldas
+	else:
+		_tile(I, 3, Vector2(-24, 0))
+		_tile(I, 4, Vector2(24, 0))
+		for x in [-24, 24]:
+			_tile(I, 54, Vector2(x, -44))
+			_tile(I, 55, Vector2(x, 44))
+	if terraza:
+		for hijo in _muebles:
+			hijo.modulate = Color(1.08, 1.05, 0.95)
+
+var _muebles: Array[Sprite2D] = []
+
+func _tile(fuente: String, id: int, desfase: Vector2) -> Sprite2D:
+	var s := Sprite2D.new()
+	s.texture = Interior.textura(fuente, id)
+	s.scale = Vector2(Interior.ESCALA, Interior.ESCALA)
+	s.position = desfase
+	s.z_index = -1
+	add_child(s)
+	_muebles.append(s)
+	return s
 
 func posicion_asiento() -> Vector2:
 	return position + Vector2(0, -_tamano_mesa().y * 0.5 - 14)

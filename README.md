@@ -121,7 +121,15 @@ godot --headless --path . --script res://tools/construir_mapa_pueblo.gd
 
 Si cambias en el editor dónde están las puertas, actualiza también sus coordenadas en `mapa_pueblo.json`.
 
-El interior de las tiendas y el restaurante todavía se dibuja con formas simples (`store.gd` y `restaurant.gd`), porque el pack urbano no incluye tiles de interiores.
+### Interiores (tiendas y restaurante)
+
+El Mercado, la Cervecería y el restaurante se arman con tiles de **Kenney Roguelike RPG Pack** y **Roguelike Indoors** (`Assets/sprites/interiores/`), usando la clase `scripts/core/interior.gd`:
+
+- `cuarto()` arma las paredes, el piso y la puerta.
+- `poner()`, `fila()` y `columna()` colocan muebles por número de tile.
+- `solido()` agrega la colisión.
+
+La distribución de cada tienda está en `store.gd` (`_amueblar_mercado` y `_amueblar_cerveceria`) y la del restaurante en `restaurant.gd` (`_construir_escenario`).
 
 Los gráficos temporales son de Kenney (CC0). Consulta `THIRD_PARTY_LICENSES.md`.
 

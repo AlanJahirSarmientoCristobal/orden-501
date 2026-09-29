@@ -5,8 +5,10 @@ extends Node2D
 ## pantallas en la pared superior, entrada abajo y panel de gestión a la derecha.
 
 const AREA_JUEGO := Rect2(0, 100, 1000, 620)
-const PUERTA := Vector2(540, 770)
-const INICIO_FILA := Vector2(620, 668)
+const PUERTA := Vector2(552, 770)
+const INICIO_FILA := Vector2(660, 652)
+const ORIGEN_TILES := Vector2(0, 4)
+const COLUMNAS_TILES := 21
 const MAX_FILA := 6
 const MINUTOS_PARTIDO := 90.0
 
@@ -102,16 +104,66 @@ func _al_agotar_reputacion() -> void:
 # ---------------------------------------------------------------- Construcción
 
 func _construir_escenario() -> void:
-	_pared(Rect2(0, 60, 1000, 40))                 # Pared superior
+	# Interior con tiles de Kenney (Roguelike RPG + Indoors). Cada tile mide 48 px;
+	# la fila 0 empieza en y = 4, así la fila 2 (el piso) empieza en y = 100.
+	var fondo := ColorRect.new()
+	fondo.color = Color("15171f")
+	fondo.size = Vector2(1280, 720)
+	fondo.z_index = -20
+	add_child(fondo)
+	var interior := Interior.new()
+	interior.position = ORIGEN_TILES
+	interior.z_index = -10
+	add_child(interior)
+	var R := Interior.RPG
+	var I := Interior.INDOOR
+	for x in range(COLUMNAS_TILES):
+		interior.poner(x, 0, R, Interior.PARED_ALTA, 0)
+		interior.poner(x, 1, R, Interior.PARED_BAJA, 0)
+	interior.rellenar(3, 2, COLUMNAS_TILES - 3, 13, R, Interior.PISO_MADERA)
+	interior.rellenar(0, 2, 3, 13, R, Interior.PISO_PIEDRA)
+	if GameState.terraza_desbloqueada:
+		interior.rellenar(18, 2, 3, 13, R, Interior.PISO_CLARO)
+	# Ventanas entre las pantallas
+	for x in [10, 11]:
+		interior.columna(x, 0, R, [158, 215], 0)
+	# Cocina: estufa, horno y mostradores con trastes; pase de cocina (mostrador gris)
+	interior.fila(0, 2, I, [392, 393])
+	interior.columna(0, 3, I, [328, 329, 330, 331])
+	interior.columna(2, 3, I, [361, 361, 361, 388])
+	# Barra de bebidas (madera), refrigerador y repisa con botellas
+	interior.columna(2, 8, I, [390, 417, 444])
+	interior.columna(0, 8, R, [207, 264])
+	interior.columna(1, 8, R, [784, 785])
+	interior.columna(1, 8, R, [738, 852], 2)
+	interior.fila(0, 11, R, [23, 24])
+	interior.fila(0, 12, R, [24, 23])
+	# Mueble del teléfono
+	interior.poner(2, 12, I, 408)
+	interior.poner(2, 12, R, 1017, 2)
+	# Pared inferior con la entrada al centro y tapete
+	for x in range(COLUMNAS_TILES):
+		if x < 10 or x > 12:
+			interior.poner(x, 14, R, Interior.BORDE_INF[1], 0)
+	interior.poner(9, 14, R, Interior.BORDE_INF_CORTE[0], 0)
+	interior.poner(13, 14, R, Interior.BORDE_INF_CORTE[1], 0)
+	interior.fila(10, 12, R, [922, 923, 924], 0)
+	interior.fila(10, 13, R, [1036, 1037, 1038], 0)
+	# Plantas
+	interior.poner(20, 2, I, 16)
+	interior.poner(3, 13, I, 17)
+
+	_pared(Rect2(0, 52, 1000, 48))                 # Pared superior
 	_pared(Rect2(-40, 60, 40, 700))                # Izquierda
 	_pared(Rect2(1000, 60, 40, 700))               # Derecha (panel lateral)
-	_pared(Rect2(0, 710, 470, 30))                 # Pared inferior (con entrada al centro)
-	_pared(Rect2(610, 710, 390, 30))
-	_pared(Rect2(470, 740, 140, 20))
-	_pared(Rect2(90, 140, 50, 190))                # Mostrador del pase
-	_pared(Rect2(90, 410, 50, 140))                # Barra
-	_pared(Rect2(90, 570, 50, 60))                 # Mueble del teléfono
-	_pared(Rect2(0, 100, 90, 560))                 # Zona del chef y refrigerador
+	_pared(Rect2(0, 700, 480, 40))                 # Pared inferior (entrada entre x 480 y 624)
+	_pared(Rect2(624, 700, 376, 40))
+	_pared(Rect2(480, 740, 144, 20))
+	_pared(Rect2(96, 148, 48, 192))                # Mostrador del pase
+	_pared(Rect2(96, 388, 48, 144))                # Barra
+	_pared(Rect2(96, 580, 48, 48))                 # Mueble del teléfono
+	_pared(Rect2(0, 100, 96, 628))                 # Cocina y trastienda
+	_pared(Rect2(144, 628, 48, 48))                # Maceta
 	for i in range(2):
 		var pantalla := UIKit.etiqueta("", 12, Color("d9ffd9"), true)
 		pantalla.position = Vector2(250 + i * 380, 66)
@@ -123,28 +175,17 @@ func _construir_escenario() -> void:
 	chef.animation = &"side"
 	chef.flip_h = false
 	chef.scale = Vector2(3, 3)
-	chef.position = Vector2(55, 225)
+	chef.position = Vector2(72, 215)
 	chef.play()
 	add_child(chef)
 	var etiqueta_chef := UIKit.etiqueta("CHEF", 10, UIKit.ACENTO, true)
-	etiqueta_chef.position = Vector2(20, 250)
+	etiqueta_chef.position = Vector2(37, 240)
 	etiqueta_chef.size = Vector2(70, 14)
 	add_child(etiqueta_chef)
-	var refri := AssetPaths.textura("refrigerador")
-	if refri:
-		var s := Sprite2D.new()
-		s.texture = refri
-		s.scale = Vector2(3, 3)
-		s.position = Vector2(45, 460)
-		add_child(s)
-	for pos in [Vector2(975, 130), Vector2(20, 690)]:
-		var planta := AssetPaths.textura("planta")
-		if planta:
-			var p := Sprite2D.new()
-			p.texture = planta
-			p.scale = Vector2(2.5, 2.5)
-			p.position = pos
-			add_child(p)
+	var etiqueta_tel := UIKit.etiqueta("TELÉFONO", 9, UIKit.TEXTO, true)
+	etiqueta_tel.position = Vector2(80, 626)
+	etiqueta_tel.size = Vector2(80, 12)
+	add_child(etiqueta_tel)
 	queue_redraw()
 
 func _pared(rect: Rect2) -> void:
@@ -159,47 +200,16 @@ func _pared(rect: Rect2) -> void:
 	add_child(cuerpo)
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, 1280, 720), Color("15171f"))
-	# Piso de madera
-	draw_rect(Rect2(0, 100, 1000, 620), Color("7a4f2e"))
-	for y in range(100, 720, 24):
-		draw_line(Vector2(0, y), Vector2(1000, y), Color(0, 0, 0, 0.12), 1.0)
-	# Cocina y barra (piso de azulejo)
-	draw_rect(Rect2(0, 100, 150, 560), Color("3d4a5c"))
-	for x in range(0, 150, 30):
-		for y in range(100, 660, 30):
-			if (x / 30 + y / 30) % 2 == 0:
-				draw_rect(Rect2(x, y, 30, 30), Color("46556a"))
-	# Mostradores
-	draw_rect(Rect2(90, 140, 50, 190), Color("b8b8c8"))
-	draw_rect(Rect2(90, 140, 50, 190), Color("6c6c80"), false, 3.0)
-	draw_rect(Rect2(90, 410, 50, 140), Color("8a5a34"))
-	draw_rect(Rect2(90, 410, 50, 140), Color("5a3a20"), false, 3.0)
-	draw_rect(Rect2(90, 570, 50, 60), Color("8a5a34"))
-	draw_rect(Rect2(102, 584, 26, 30), Color("d9534f"))   # Teléfono
-	draw_rect(Rect2(10, 150, 60, 50), Color("2b2b33"))    # Estufa
+	# El piso, las paredes y los muebles son tiles (ver _construir_escenario).
+	# Pantallas del partido sobre la pared
 	for i in range(2):
-		draw_circle(Vector2(26 + i * 28, 175), 9, Color("f28c38"))
-	# Pared superior con pantallas del partido
-	draw_rect(Rect2(0, 60, 1000, 40), Color("2a2f3d"))
-	for i in range(2):
-		draw_rect(Rect2(240 + i * 380, 62, 220, 36), Color("0e3b1f"))
-		draw_rect(Rect2(240 + i * 380, 62, 220, 36), Color("111111"), false, 3.0)
+		draw_rect(Rect2(240 + i * 380, 60, 220, 38), Color("111111"))
+		draw_rect(Rect2(244 + i * 380, 64, 212, 30), Color("0e3b1f"))
 	# Letrero de neón
-	draw_rect(Rect2(20, 64, 180, 32), Color("1b1f2a"))
-	draw_rect(Rect2(20, 64, 180, 32), Color("ff5fa2"), false, 2.0)
-	# Terraza
-	if GameState.terraza_desbloqueada:
-		draw_rect(Rect2(860, 100, 140, 610), Color("9a8a6a"))
-		draw_rect(Rect2(860, 100, 140, 610), Color("5fd38d"), false, 3.0)
-	# Entrada y tapete
-	draw_rect(Rect2(470, 700, 140, 20), Color("5a3a20"))
-	draw_rect(Rect2(490, 680, 100, 20), Color("a33b3b"))
-	# Paredes inferiores
-	draw_rect(Rect2(0, 710, 470, 10), Color("2a2f3d"))
-	draw_rect(Rect2(610, 710, 390, 10), Color("2a2f3d"))
+	draw_rect(Rect2(20, 62, 180, 34), Color("1b1f2a"))
+	draw_rect(Rect2(20, 62, 180, 34), Color("ff5fa2"), false, 2.0)
 	# Separador del panel lateral
-	draw_rect(Rect2(1000, 60, 280, 660), Color("1b1f2a"))
+	draw_rect(Rect2(1000, 52, 280, 668), Color("1b1f2a"))
 
 func _construir_estaciones() -> void:
 	cocina = Estacion.new()

@@ -1,64 +1,80 @@
 extends FaseManana
 
-## Interior del Mercado o la Cervecería. Cada producto está en su propio estante:
-## Dani camina hasta él y compra ahí. La tienda es pequeña (una sola pantalla).
+## Interior del Mercado o la Cervecería, construido con tiles de Kenney (Roguelike RPG + Indoors).
+## Cada producto está en su propio mueble: Dani camina hasta él y compra ahí.
 
-const CUARTO := Rect2(240, 110, 800, 560)
-const PUERTA := Vector2(640, 670)
+const ANCHO := 17
+const ALTO := 12
+const PUERTA_DESDE := 7
+const PUERTA_HASTA := 9
+const ORIGEN := Vector2(232, 100)
 
-## Estantes por tienda: insumo, mueble (rect), tipo de mueble y punto de compra.
+const R := Interior.RPG
+const I := Interior.INDOOR
+
+## Estantes: insumo, título, rect de tiles del mueble (sólido) y tile donde se compra.
 const ESTANTES := {
 	Catalogo.MERCADO: [
-		{"insumo": "carne", "rect": Rect2(280, 150, 200, 70), "tipo": "vitrina", "titulo": "CARNICERÍA", "compra": Vector2(380, 250)},
-		{"insumo": "pollo", "rect": Rect2(540, 150, 200, 70), "tipo": "vitrina", "titulo": "POLLERÍA", "compra": Vector2(640, 250)},
-		{"insumo": "pan", "rect": Rect2(800, 150, 200, 70), "tipo": "repisa", "titulo": "PANADERÍA", "compra": Vector2(900, 250)},
-		{"insumo": "papas", "rect": Rect2(280, 350, 90, 170), "tipo": "costales", "titulo": "PAPAS", "compra": Vector2(410, 435)},
-		{"insumo": "verdura", "rect": Rect2(540, 360, 200, 90), "tipo": "puesto", "titulo": "VERDURAS", "compra": Vector2(640, 485)},
+		{"insumo": "carne", "titulo": "CARNICERÍA", "rect": [2, 3, 4, 1], "compra": [3.5, 4.2]},
+		{"insumo": "pollo", "titulo": "POLLERÍA", "rect": [7, 3, 3, 1], "compra": [8.0, 4.2]},
+		{"insumo": "pan", "titulo": "PANADERÍA", "rect": [11, 3, 4, 1], "compra": [12.5, 4.2]},
+		{"insumo": "papas", "titulo": "PAPAS", "rect": [1, 6, 2, 3], "compra": [3.3, 7.0]},
+		{"insumo": "verdura", "titulo": "VERDURAS", "rect": [6, 6, 5, 3], "compra": [8.0, 9.2]},
 	],
 	Catalogo.CERVECERIA: [
-		{"insumo": "cerveza", "rect": Rect2(280, 150, 300, 70), "tipo": "refri", "titulo": "CERVEZAS", "compra": Vector2(430, 250)},
-		{"insumo": "refresco", "rect": Rect2(960, 180, 60, 240), "tipo": "refri_lateral", "titulo": "REFRESCOS", "compra": Vector2(910, 300)},
-		{"insumo": "hielo", "rect": Rect2(280, 470, 150, 70), "tipo": "congelador", "titulo": "HIELO", "compra": Vector2(355, 580)},
-		{"insumo": "monster", "rect": Rect2(590, 330, 100, 90), "tipo": "exhibidor", "titulo": "MONSTER ENERGY", "compra": Vector2(640, 460)},
+		{"insumo": "cerveza", "titulo": "CERVEZAS", "rect": [1, 3, 6, 2], "compra": [4.0, 5.2]},
+		{"insumo": "refresco", "titulo": "REFRESCOS", "rect": [11, 3, 5, 2], "compra": [13.0, 5.2]},
+		{"insumo": "hielo", "titulo": "HIELO", "rect": [1, 8, 3, 1], "compra": [2.0, 9.2]},
+		{"insumo": "monster", "titulo": "MONSTER ENERGY", "rect": [7, 6, 3, 2], "compra": [8.0, 8.2]},
 	],
 }
-
-const CAJA := Rect2(840, 550, 140, 50)
+const CAJA := [12, 9, 3, 1]
 
 var tienda := Catalogo.MERCADO
+var interior: Interior
 var _exhibidor: Sprite2D
-var _estante: PanelTienda
 var _rotacion := 0.0
+var _estante: PanelTienda
 
 func nombre_lugar() -> String:
 	return "MERCADO CENTRAL" if tienda == Catalogo.MERCADO else "CERVECERÍA LA ESQUINA"
 
 func _ready() -> void:
 	tienda = GameState.tienda_actual if GameState.tienda_actual != "" else Catalogo.MERCADO
-	_crear_paredes()
+	var fondo := ColorRect.new()
+	fondo.color = Color("15171f")
+	fondo.size = Vector2(1280, 720)
+	fondo.z_index = -20
+	add_child(fondo)
+
+	interior = Interior.new()
+	interior.position = ORIGEN
+	interior.z_index = -10
+	add_child(interior)
+	var piso := Interior.PISO_PIEDRA if tienda == Catalogo.MERCADO else Interior.PISO_MADERA
+	interior.cuarto(ANCHO, ALTO, piso, PUERTA_DESDE, PUERTA_HASTA)
+	if tienda == Catalogo.MERCADO:
+		_amueblar_mercado()
+	else:
+		_amueblar_cerveceria()
+	_amueblar_caja()
+
 	for estante in ESTANTES[tienda]:
 		_crear_estante(estante)
-	pared(CAJA)
-	var vendedor := "vendedor_mercado" if tienda == Catalogo.MERCADO else "encargado_cerveceria"
-	var nombre_vendedor := "Don Chema" if tienda == Catalogo.MERCADO else "Lupita"
-	npc(vendedor, Vector2(CAJA.get_center().x, CAJA.position.y - 22), nombre_vendedor, &"down")
-	etiqueta_mapa("CAJA", Vector2(CAJA.position.x, CAJA.position.y + 12), CAJA.size.x, UIKit.TEXTO, 12)
-	add_child(PuntoInteraccion.crear("Platicar con %s" % nombre_vendedor, Vector2(CAJA.get_center().x, CAJA.end.y + 22), _platicar, 36))
-	add_child(PuntoInteraccion.crear("Salir al pueblo", PUERTA + Vector2(0, -24), _salir, 36))
-	etiqueta_mapa(nombre_lugar(), Vector2(CUARTO.position.x, CUARTO.position.y - 44), CUARTO.size.x, UIKit.ACENTO, 20)
+	etiqueta_mapa(nombre_lugar(), ORIGEN + Vector2(0, -2), ANCHO * Interior.LADO, UIKit.ACENTO, 20)
+	add_child(PuntoInteraccion.crear("Salir al pueblo", interior.a_mundo(8, ALTO - 1.6), _salir, 36))
 
-	crear_dani(PUERTA + Vector2(0, -60), false)
+	crear_dani(interior.a_mundo(8, ALTO - 2.6), false)
 	preparar_fase()
 	# Ventana compacta para comprar un solo producto desde su estante.
 	_estante = PanelTienda.new()
 	_estante._producto = "compacto"
 	add_child(_estante)
-	queue_redraw()
 	GameState.aviso.emit("Acércate a cada estante y presiona Espacio para comprar.")
 
 func _process(delta: float) -> void:
 	super._process(delta)
-	# La lata del exhibidor cambia de diseño cada momento.
+	# La lata del refrigerador de Monster cambia de diseño cada momento.
 	if _exhibidor:
 		_rotacion += delta
 		if _rotacion >= 1.2:
@@ -66,52 +82,92 @@ func _process(delta: float) -> void:
 			_exhibidor.texture = AssetPaths.siguiente_diseno("monster")
 			_ajustar_exhibidor()
 
+# ---------------------------------------------------------------- Mobiliario
+
+func _amueblar_mercado() -> void:
+	# Ventanas en la pared
+	for x in [4, 12]:
+		interior.columna(x, 1, R, [158, 215], 0)
+	# Carnicería: mostrador con carne
+	interior.fila(2, 3, I, [324, 325, 325, 326])
+	interior.fila(3, 3, R, [795, 795], 2)
+	# Pollería: mostrador con pollo asado
+	interior.fila(7, 3, I, [324, 325, 326])
+	interior.fila(7, 3, R, [909, 909, 909], 2)
+	# Panadería: mostrador de madera con pan
+	interior.fila(11, 3, R, [295, 238, 238, 352])
+	interior.fila(12, 3, R, [796, 796], 2)
+	# Papas: cajas apiladas junto a barriles
+	interior.columna(1, 6, R, [413, 413, 413])
+	interior.columna(2, 6, R, [413, 23, 413])
+	# Puesto de verduras con toldo a rayas
+	interior.fila(6, 6, R, [10, 11, 10, 11, 10], 2)
+	interior.fila(6, 7, R, [67, 68, 67, 68, 67], 1)
+	interior.fila(6, 8, R, [356, 358, 356, 358, 356])
+	# Plantas y barriles de adorno
+	interior.poner(15, 3, I, 16)
+	interior.poner(15, 6, R, 23)
+	interior.poner(15, 7, R, 24)
+	interior.solido(15, 3, 1, 1)
+	interior.solido(15, 6, 1, 2)
+
+func _amueblar_cerveceria() -> void:
+	# Repisas con botellas en la pared
+	interior.fila(8, 1, R, [784, 785], 0)
+	interior.fila(8, 1, R, [738, 739], 2)
+	interior.columna(12, 1, R, [158, 215], 0)
+	# Cerveza: refrigeradores verdes y barriles
+	for x in range(1, 5):
+		interior.columna(x, 3, R, [207, 264])
+	interior.columna(5, 3, R, [23, 24])
+	interior.columna(6, 3, R, [24, 23])
+	# Refresco: refrigeradores blancos de dos puertas
+	interior.fila(11, 3, R, [378, 379, 378, 379], 1)
+	interior.fila(11, 4, R, [435, 436, 435, 436], 1)
+	interior.poner(15, 3, I, 16)
+	interior.solido(15, 3, 1, 1)
+	# Hielo: congeladores
+	interior.fila(1, 8, R, [146, 147, 146])
+	# Monster: refrigeradores negros con la lata rotando al frente
+	interior.columna(7, 6, R, [208, 265])
+	interior.columna(8, 6, R, [208, 265])
+	interior.columna(9, 6, R, [208, 265])
+	_exhibidor = Sprite2D.new()
+	_exhibidor.texture = AssetPaths.siguiente_diseno("monster")
+	_exhibidor.position = interior.a_mundo(8, 6.5)
+	_exhibidor.z_index = 3
+	add_child(_exhibidor)
+	_ajustar_exhibidor()
+	interior.poner(15, 8, I, 17)
+	interior.solido(15, 8, 1, 1)
+
+func _amueblar_caja() -> void:
+	var x: int = CAJA[0]
+	var y: int = CAJA[1]
+	interior.fila(x, y, I, [405, 406, 407])
+	interior.poner(x + 2, y, R, 1017, 2)
+	interior.solido(x, y, CAJA[2], CAJA[3])
+	var vendedor := "vendedor_mercado" if tienda == Catalogo.MERCADO else "encargado_cerveceria"
+	var nombre_vendedor := "Don Chema" if tienda == Catalogo.MERCADO else "Lupita"
+	npc(vendedor, interior.a_mundo(x + 1, y - 0.8), nombre_vendedor, &"down")
+	add_child(PuntoInteraccion.crear("Platicar con %s" % nombre_vendedor, interior.a_mundo(x + 1, y + 1.1), _platicar, 34))
+
 func _ajustar_exhibidor() -> void:
-	if _exhibidor.texture:
-		var escala := 70.0 / float(_exhibidor.texture.get_height())
+	if _exhibidor and _exhibidor.texture:
+		var escala := 56.0 / float(_exhibidor.texture.get_height())
 		_exhibidor.scale = Vector2(escala, escala)
 
-func _crear_paredes() -> void:
-	var grosor := 30.0
-	pared(Rect2(CUARTO.position.x - grosor, CUARTO.position.y - grosor, CUARTO.size.x + grosor * 2, grosor))
-	pared(Rect2(CUARTO.position.x - grosor, CUARTO.position.y, grosor, CUARTO.size.y + grosor))
-	pared(Rect2(CUARTO.end.x, CUARTO.position.y, grosor, CUARTO.size.y + grosor))
-	pared(Rect2(CUARTO.position.x, CUARTO.end.y, PUERTA.x - 50 - CUARTO.position.x, grosor))
-	pared(Rect2(PUERTA.x + 50, CUARTO.end.y, CUARTO.end.x - PUERTA.x - 50, grosor))
-	pared(Rect2(PUERTA.x - 50, CUARTO.end.y + 20, 100, grosor))
-
 func _crear_estante(estante: Dictionary) -> void:
-	var rect: Rect2 = estante["rect"]
+	var r: Array = estante["rect"]
+	interior.solido(r[0], r[1], r[2], r[3])
 	var insumo: String = estante["insumo"]
-	pared(rect)
 	var datos: Dictionary = Catalogo.INSUMOS[insumo]
-	# Productos exhibidos en el mueble.
-	if estante["tipo"] == "exhibidor":
-		_exhibidor = Sprite2D.new()
-		_exhibidor.texture = AssetPaths.siguiente_diseno("monster")
-		_exhibidor.position = rect.get_center() + Vector2(0, -6)
-		_exhibidor.z_index = 3
-		add_child(_exhibidor)
-		_ajustar_exhibidor()
-	else:
-		var vertical: bool = rect.size.y > rect.size.x
-		var cantidad := 3 if vertical else int(rect.size.x / 44.0)
-		for i in range(cantidad):
-			var icono := Sprite2D.new()
-			icono.texture = AssetPaths.textura(datos["icono"])
-			if icono.texture:
-				var escala := 30.0 / float(icono.texture.get_width())
-				icono.scale = Vector2(escala, escala)
-			icono.position = rect.position + (Vector2(rect.size.x * 0.5, 40 + i * 55) if vertical else Vector2(26 + i * 44, rect.size.y * 0.5))
-			icono.z_index = 3
-			add_child(icono)
-	var etiqueta_pos := Vector2(rect.position.x - 30, rect.end.y + 2)
-	var etiqueta := etiqueta_mapa("%s · %s" % [estante["titulo"], UIKit.dinero(datos["precio"])], etiqueta_pos, rect.size.x + 60, Color("fff0a6"), 12)
-	if rect.size.y > rect.size.x:
-		etiqueta.position = Vector2(rect.position.x - 100, rect.position.y - 26)
-		etiqueta.size.x = 200
+	var zona := interior.rect_mundo(r[0], r[1], r[2], r[3])
+	var etiqueta := etiqueta_mapa("%s · %s" % [estante["titulo"], UIKit.dinero(datos["precio"])], Vector2(zona.position.x - 40, zona.position.y - 22), zona.size.x + 80, Color("fff0a6"), 12)
+	etiqueta.z_index = 20
+	var compra: Array = estante["compra"]
 	var titulo := "%s · %s" % [estante["titulo"], nombre_lugar()]
-	add_child(PuntoInteraccion.crear("Comprar %s" % datos["nombre"], estante["compra"], _comprar.bind(insumo, titulo), 34))
+	add_child(PuntoInteraccion.crear("Comprar %s" % datos["nombre"], interior.a_mundo(compra[0] - 0.5, compra[1] - 0.5), _comprar.bind(insumo, titulo), 34))
 
 func _comprar(insumo: String, titulo: String) -> void:
 	_estante.abrir_producto(insumo, titulo)
@@ -125,60 +181,3 @@ func _salir() -> void:
 	terminando = true
 	GameState.tienda_actual = ""
 	GameState.cambiar_escena(GameState.ESCENA_PUEBLO)
-
-func _draw() -> void:
-	draw_rect(Rect2(0, 0, 1280, 720), Color("15171f"))
-	# Piso
-	var claro := Color("d8cfb8") if tienda == Catalogo.MERCADO else Color("6b4a2b")
-	var oscuro := Color("c4b99d") if tienda == Catalogo.MERCADO else Color("5e4025")
-	for x in range(int(CUARTO.position.x), int(CUARTO.end.x), 40):
-		for y in range(int(CUARTO.position.y), int(CUARTO.end.y), 40):
-			var par := (int((x - CUARTO.position.x) / 40) + int((y - CUARTO.position.y) / 40)) % 2 == 0
-			draw_rect(Rect2(x, y, 40, 40), claro if par else oscuro)
-	# Paredes
-	var pared_color := Color("2f6f5e") if tienda == Catalogo.MERCADO else Color("3b4a7a")
-	draw_rect(Rect2(CUARTO.position.x - 30, CUARTO.position.y - 30, CUARTO.size.x + 60, 30), pared_color)
-	draw_rect(Rect2(CUARTO.position.x - 30, CUARTO.position.y, 30, CUARTO.size.y + 30), pared_color.darkened(0.2))
-	draw_rect(Rect2(CUARTO.end.x, CUARTO.position.y, 30, CUARTO.size.y + 30), pared_color.darkened(0.2))
-	draw_rect(Rect2(CUARTO.position.x, CUARTO.end.y, PUERTA.x - 50 - CUARTO.position.x, 20), pared_color.darkened(0.2))
-	draw_rect(Rect2(PUERTA.x + 50, CUARTO.end.y, CUARTO.end.x - PUERTA.x - 50, 20), pared_color.darkened(0.2))
-	# Tapete de la entrada
-	draw_rect(Rect2(PUERTA.x - 45, CUARTO.end.y - 30, 90, 30), Color("a33b3b"))
-	# Caja registradora
-	draw_rect(CAJA, Color("8a5a34"))
-	draw_rect(CAJA, Color("5a3a20"), false, 3.0)
-	draw_rect(Rect2(CAJA.position.x + 90, CAJA.position.y + 8, 36, 22), Color("2b2b33"))
-	for estante in ESTANTES[tienda]:
-		_dibujar_mueble(estante["rect"], estante["tipo"])
-
-func _dibujar_mueble(rect: Rect2, tipo: String) -> void:
-	draw_rect(Rect2(rect.position + Vector2(4, 6), rect.size), Color(0, 0, 0, 0.25))
-	match tipo:
-		"vitrina":
-			draw_rect(rect, Color("dfe6ee"))
-			draw_rect(rect.grow(-6), Color("a9d6f0"))
-			draw_rect(rect, Color("6c7a8c"), false, 3.0)
-		"repisa":
-			draw_rect(rect, Color("a0652f"))
-			for i in range(3):
-				draw_line(Vector2(rect.position.x, rect.position.y + 18 + i * 18), Vector2(rect.end.x, rect.position.y + 18 + i * 18), Color("5a3a20"), 3.0)
-		"costales":
-			draw_rect(rect, Color("8a6a3a"))
-			for i in range(3):
-				draw_circle(rect.position + Vector2(rect.size.x * 0.5, 40 + i * 55), 30, Color("c9a26b"))
-		"puesto":
-			draw_rect(rect, Color("7a4f2e"))
-			for j in range(int(rect.size.x / 20.0)):
-				draw_rect(Rect2(rect.position.x + j * 20, rect.position.y - 14, 20, 14), Color("f5f0e1") if j % 2 == 0 else Color("5fd38d"))
-		"refri", "refri_lateral":
-			draw_rect(rect, Color("d9dde3"))
-			draw_rect(rect.grow(-5), Color("7fc4e8"))
-			draw_rect(rect, Color("5a6470"), false, 3.0)
-		"congelador":
-			draw_rect(rect, Color("f4f7fa"))
-			draw_rect(rect.grow(-6), Color("cdeeff"))
-			draw_rect(rect, Color("8fa3b5"), false, 3.0)
-		"exhibidor":
-			draw_rect(rect, Color("111111"))
-			draw_rect(rect.grow(-4), Color("1d1d1d"))
-			draw_rect(rect, Color("66e01f"), false, 3.0)

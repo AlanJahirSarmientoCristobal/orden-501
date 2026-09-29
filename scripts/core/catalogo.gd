@@ -19,6 +19,7 @@ const INSUMOS := {
 	"cerveza":  {"nombre": "Cerveza",  "tienda": CERVECERIA, "precio": 15, "perecedero": false, "icono": "insumo_cerveza"},
 	"refresco": {"nombre": "Refresco", "tienda": CERVECERIA, "precio": 8,  "perecedero": false, "icono": "insumo_refresco"},
 	"hielo":    {"nombre": "Hielo",    "tienda": CERVECERIA, "precio": 3,  "perecedero": true,  "icono": "insumo_hielo"},
+	"monster":  {"nombre": "Monster",  "tienda": CERVECERIA, "precio": 20, "perecedero": false, "icono": "monster"},
 }
 
 const HAMBURGUESA := "Hamburguesa 501"
@@ -26,6 +27,7 @@ const ALITAS := "Alitas del Estadio"
 const PAPAS := "Papas MVP"
 const REFRESCO := "Refresco"
 const CERVEZA := "Cerveza"
+const MONSTER := "Monster"
 const COMBO := "Combo VIP"
 
 ## Platillos: receta, precio, estación donde se prepara/recoge y tiempo de preparación base.
@@ -35,20 +37,22 @@ const PLATILLOS := {
 	PAPAS:       {"receta": {"papas": 2},                          "precio": 50,  "estacion": COCINA, "tiempo": 3.5, "icono": "platillo_papas",       "bebida": false},
 	REFRESCO:    {"receta": {"refresco": 1, "hielo": 1},           "precio": 30,  "estacion": BARRA,  "tiempo": 1.0, "icono": "platillo_refresco",    "bebida": true},
 	CERVEZA:     {"receta": {"cerveza": 1, "hielo": 1},            "precio": 50,  "estacion": BARRA,  "tiempo": 1.0, "icono": "platillo_cerveza",     "bebida": true},
+	MONSTER:     {"receta": {"monster": 1},                        "precio": 45,  "estacion": BARRA,  "tiempo": 0.8, "icono": "monster",              "bebida": true},
 	COMBO:       {"receta": {"carne": 1, "pan": 1, "verdura": 1, "papas": 2, "cerveza": 1, "hielo": 1}, "precio": 220, "estacion": COCINA, "tiempo": 7.0, "icono": "platillo_combo", "bebida": false},
 }
 
 ## Menú que piden los clientes habituales (el Combo es exclusivo de VIP).
-const MENU_HABITUAL := [HAMBURGUESA, ALITAS, PAPAS, REFRESCO, CERVEZA]
-const BEBIDAS := [REFRESCO, CERVEZA]
+const MENU_HABITUAL := [HAMBURGUESA, ALITAS, PAPAS, REFRESCO, CERVEZA, MONSTER]
+const BEBIDAS := [REFRESCO, CERVEZA, MONSTER]
 
 ## Sustitutos que Dani puede ofrecer cuando falta un insumo (en orden de preferencia).
 const SUSTITUTOS := {
 	HAMBURGUESA: [ALITAS, PAPAS],
 	ALITAS: [HAMBURGUESA, PAPAS],
 	PAPAS: [HAMBURGUESA, ALITAS],
-	REFRESCO: [CERVEZA],
-	CERVEZA: [REFRESCO],
+	REFRESCO: [MONSTER, CERVEZA],
+	CERVEZA: [REFRESCO, MONSTER],
+	MONSTER: [REFRESCO, CERVEZA],
 	COMBO: [HAMBURGUESA, ALITAS],
 }
 

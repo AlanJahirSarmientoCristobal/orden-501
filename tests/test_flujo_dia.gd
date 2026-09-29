@@ -23,14 +23,31 @@ func _run() -> void:
 
 	GameState.nueva_partida("facil")
 	GameState.intro_vista = true
-	var compras := {"carne": 10, "pollo": 14, "papas": 12, "verdura": 10, "pan": 10, "cerveza": 7, "refresco": 7, "hielo": 10}
+	var compras := {"carne": 10, "pollo": 14, "papas": 10, "verdura": 10, "pan": 10, "cerveza": 6, "refresco": 6, "hielo": 10}
 	for insumo in compras:
 		_check(GameState.comprar(insumo, compras[insumo]) == "", "No se pudo comprar %s" % insumo)
 	GameState.cambiar_escena(GameState.ESCENA_PUEBLO)
 	await _esperar_escena("Town")
 	var pueblo := get_tree().current_scene
 	_check(pueblo != null and pueblo.name == "Town", "No se abrió el pueblo")
-	pueblo._ir_al_restaurante()
+
+	# Entrar a la Cervecería, comprar Monster en su exhibidor y volver al pueblo.
+	var puerta: Vector2 = Vector2(pueblo.CERVECERIA.get_center().x, pueblo.CERVECERIA.end.y + 42)
+	pueblo._entrar_tienda(Catalogo.CERVECERIA, puerta)
+	await _esperar_escena("Store")
+	var tienda := get_tree().current_scene
+	_check(tienda.tienda == Catalogo.CERVECERIA, "No se entró a la Cervecería")
+	tienda._comprar("monster", "MONSTER")
+	_check(tienda._estante.esta_abierto(), "El exhibidor no abrió la compra de Monster")
+	tienda._estante._cantidades["monster"] = 4
+	tienda._estante._comprar("monster")
+	_check(GameState.inventario.total("monster") == 4, "No se compró el Monster en la tienda")
+	tienda._estante.cerrar()
+	tienda._salir()
+	await _esperar_escena("Town")
+	pueblo = get_tree().current_scene
+	_check(pueblo.dani.position == puerta, "Dani no reapareció en la puerta de la Cervecería")
+	pueblo.ir_al_restaurante()
 	await _esperar_escena("Restaurant")
 	var resto := get_tree().current_scene
 	_check(resto.name == "Restaurant", "No se abrió el restaurante")

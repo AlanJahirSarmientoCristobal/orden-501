@@ -8,7 +8,7 @@ Videojuego 2D de gestión en vista cenital (top-down), hecho con **Godot 4.7** p
 
 Dani, el nuevo gerente de La 501, debe poner en orden el negocio durante la temporada. Cada día tiene dos fases:
 
-1. **Mañana (pueblo):** recorre el pueblo y compra insumos en el **Mercado** (carne, pollo, papas, verdura, pan) y la **Cervecería** (cerveza, refresco, hielo). El dinero y el almacén son limitados, y algunos insumos caducan.
+1. **Mañana (pueblo):** recorre el pueblo (avenidas, plaza, parque, cancha y vecinos que dan consejos, con minimapa) y entra a las tiendas. Dentro del **Mercado** cada producto está en su estante: carnicería, pollería, panadería, costales de papas y puesto de verduras. En la **Cervecería** hay refrigeradores de cerveza y de refresco, un congelador de hielo y el exhibidor de **Monster**. El dinero y el almacén son limitados, y algunos insumos caducan.
 2. **Jornada (restaurante):** atiende las mesas durante el partido. Hay que tomar pedidos, recoger en el pase de cocina o la barra, servir y limpiar mesas antes de que se agote la paciencia de los clientes. En el medio tiempo llega una ola de aficionados y cada gol provoca una ronda de bebidas.
 
 Si un insumo se acaba, eliges entre **marcar el platillo como agotado**, hacer un **pedido urgente** por teléfono (más caro y tarda en llegar) u **ofrecer un sustituto** (menos propina). Al cerrar el día aparece el **reporte de cierre**, con ventas, merma, reservaciones y reputación, y ahí se compran **mejoras**.
@@ -80,15 +80,24 @@ scripts/
   customers/    Cliente (base) → ClienteHabitual, ClienteVIP, ClienteReservacion
   entities/     Dani, Interactuable, PuntoInteraccion
   restaurant/   Controlador del restaurante, Mesa y Estacion (cocina / barra)
-  town/         Pueblo (fase de mañana)
+  town/         Fase de mañana: base común, pueblo, interior de tiendas, peatones y minimapa
   ui/           Menú, tablet, tiendas, pedido urgente, diálogos, reporte, victoria
 scenes/         Escenas de cada pantalla (menu, town, restaurant, ui)
 tests/          Pruebas headless
+tools/          recortar_monster.py (recorta la hoja de diseños de Monster)
 ```
 
 El detalle de cómo se implementó cada mecánica del documento está en `DISENO.md`.
 
 ## Cambiar los assets
+
+**Monster:** es un solo producto con 7 diseños; cada vez que se muestra usa el siguiente. Guarda la hoja completa en `Assets/sprites/monster/monster_hoja.png` y ejecuta:
+
+```powershell
+python tools/recortar_monster.py
+```
+
+El script genera `monster_1.png` … `monster_7.png` sin el fondo. Mientras no existan esos archivos, el juego dibuja 7 latas provisionales con los mismos colores.
 
 Todos los gráficos y sonidos se referencian desde **`scripts/core/asset_paths.gd`**:
 

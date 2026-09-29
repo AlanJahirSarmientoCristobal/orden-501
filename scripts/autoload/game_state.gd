@@ -14,6 +14,7 @@ const SAVE_PATH := "user://orden501_save.json"
 
 const ESCENA_MENU := "res://scenes/menu/main_menu.tscn"
 const ESCENA_PUEBLO := "res://scenes/town/town.tscn"
+const ESCENA_TIENDA := "res://scenes/town/store.tscn"
 const ESCENA_RESTAURANTE := "res://scenes/restaurant/restaurant.tscn"
 const ESCENA_REPORTE := "res://scenes/ui/closing_report.tscn"
 const ESCENA_VICTORIA := "res://scenes/ui/victory.tscn"
@@ -65,6 +66,11 @@ var historial: Array[Dictionary] = []
 var ultimo_informe := {}
 var _snapshot := {}
 
+# Estado de la mañana: se conserva al entrar y salir de las tiendas.
+var tiempo_manana := 0.0              # Segundos restantes (si la dificultad tiene límite)
+var posicion_pueblo := Vector2.ZERO   # Dónde reaparece Dani al volver al pueblo (ZERO = inicio)
+var tienda_actual := ""               # Catalogo.MERCADO o Catalogo.CERVECERIA
+
 var _transicion: ColorRect
 
 func _ready() -> void:
@@ -102,6 +108,9 @@ func iniciar_manana() -> void:
 	_reiniciar_estadisticas()
 	_generar_reservaciones()
 	promo_activa = false
+	tiempo_manana = config.tiempo_pueblo
+	posicion_pueblo = Vector2.ZERO
+	tienda_actual = ""
 	_snapshot = _capturar()
 	guardar()
 	dinero_cambiado.emit(dinero)

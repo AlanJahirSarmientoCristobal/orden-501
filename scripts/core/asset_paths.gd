@@ -69,9 +69,29 @@ const AUDIO := {
 	"silbato": "res://Assets/audio/silbato.ogg",
 }
 
+## Productos con varios diseños: cada vez que se muestran usan el siguiente sprite.
+## Monster: coloca tus 7 diseños como Assets/sprites/monster/monster_1.png ... monster_7.png.
+const ROTATIVAS := {
+	"monster": {"ruta": "res://Assets/sprites/monster/monster_%d.png", "cantidad": 7},
+}
+## Latas provisionales mientras no existan los archivos: [color de la lata, color de la "M"],
+## en el mismo orden que la hoja de diseños del equipo.
+const COLORES_MONSTER := [
+	[Color("2b2b2b"), Color("66e01f")],   # Negra con garra verde
+	[Color("f4f4f4"), Color("c9c9c9")],   # Blanca
+	[Color("3a3a3a"), Color("8cc8f0")],   # Negra con azul claro
+	[Color("f28a1e"), Color("f7b36b")],   # Naranja
+	[Color("2b2b2b"), Color("9e1414")],   # Negra con rojo
+	[Color("f6a8d8"), Color("fde0f2")],   # Rosa
+	[Color("7ee62e"), Color("c8c8c8")],   # Verde lima
+]
+
 static var _cache := {}
+static var _indices_rotativos := {}
 
 static func textura(clave: String) -> Texture2D:
+	if ROTATIVAS.has(clave):
+		return siguiente_diseno(clave)
 	if _cache.has(clave):
 		return _cache[clave]
 	var ruta: String = TEXTURAS.get(clave, "")
@@ -81,9 +101,62 @@ static func textura(clave: String) -> Texture2D:
 	_cache[clave] = tex
 	return tex
 
+## Devuelve el siguiente diseño de un producto rotativo (Monster).
+static func siguiente_diseno(clave: String) -> Texture2D:
+	var disenos := disenos_de(clave)
+	if disenos.is_empty():
+		return null
+	var indice: int = _indices_rotativos.get(clave, 0)
+	_indices_rotativos[clave] = (indice + 1) % disenos.size()
+	return disenos[indice]
+
+## Todos los diseños de un producto rotativo (archivos del usuario o latas provisionales).
+static func disenos_de(clave: String) -> Array[Texture2D]:
+	var cache_clave := "disenos_" + clave
+	if _cache.has(cache_clave):
+		return _cache[cache_clave]
+	var disenos: Array[Texture2D] = []
+	var datos: Dictionary = ROTATIVAS.get(clave, {})
+	for i in range(int(datos.get("cantidad", 0))):
+		var ruta := str(datos["ruta"]) % (i + 1)
+		if ResourceLoader.exists(ruta):
+			disenos.append(load(ruta))
+	if disenos.is_empty() and clave == "monster":
+		for colores in COLORES_MONSTER:
+			disenos.append(_lata_provisional(colores[0], colores[1]))
+	_cache[cache_clave] = disenos
+	return disenos
+
+## Lata de bebida energética dibujada por código (reemplazo temporal del asset).
+static func _lata_provisional(lata: Color, garra: Color) -> Texture2D:
+	var img := Image.create(12, 20, false, Image.FORMAT_RGBA8)
+	var contorno := Color("111111")
+	var metal := Color("c8ccd4")
+	for y in range(20):
+		for x in range(12):
+			var c := Color.TRANSPARENT
+			if x == 0 or x == 11 or y == 0 or y == 19:
+				c = contorno if (x > 0 and x < 11) or (y > 0 and y < 19) else Color.TRANSPARENT
+			elif y <= 2:
+				c = metal
+			else:
+				c = lata
+				if x == 1:
+					c = lata.lightened(0.25)
+				# La "M" de garras: tres trazos verticales unidos arriba.
+				var trazo := (x == 3 or x == 6 or x == 9) and y >= 5 and y <= 13
+				var union := y == 5 and x >= 3 and x <= 9
+				if trazo or union:
+					c = garra
+				if y >= 15 and y <= 16 and x >= 3 and x <= 8:
+					c = lata.darkened(0.3)
+			img.set_pixel(x, y, c)
+	return ImageTexture.create_from_image(img)
+
 ## Libera las texturas en caché (se llama al cerrar el juego).
 static func limpiar_cache() -> void:
 	_cache.clear()
+	_indices_rotativos.clear()
 
 static func tile(indice: int) -> Texture2D:
 	var ruta := TILES % indice

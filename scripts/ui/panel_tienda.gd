@@ -9,27 +9,40 @@ const SALUDOS := {
 }
 
 var tienda := Catalogo.MERCADO
+var _producto := ""                    # Si no está vacío, solo se muestra ese insumo (estante)
 var _cantidades := {}
 
 func tamano() -> Vector2:
-	return Vector2(760, 520)
+	return Vector2(760, 300) if _producto != "" else Vector2(760, 520)
 
 func abrir_tienda(nueva: String) -> void:
 	tienda = nueva
+	_producto = ""
 	_cantidades = {}
 	for insumo in Catalogo.insumos_de_tienda(tienda):
 		_cantidades[insumo] = 5
 	abrir("MERCADO CENTRAL" if tienda == Catalogo.MERCADO else "CERVECERÍA LA ESQUINA")
 
+## Compra de un solo producto, desde su estante dentro de la tienda.
+func abrir_producto(insumo: String, titulo: String) -> void:
+	tienda = Catalogo.INSUMOS[insumo]["tienda"]
+	_producto = insumo
+	_cantidades = {insumo: 5}
+	abrir(titulo)
+
 func construir() -> void:
 	UIKit.limpiar(contenido)
-	var saludo := UIKit.etiqueta(SALUDOS.get(tienda, ""), 14, UIKit.TEXTO_TENUE)
-	saludo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	saludo.custom_minimum_size.x = 700
-	contenido.add_child(saludo)
+	if _producto == "":
+		var saludo := UIKit.etiqueta(SALUDOS.get(tienda, ""), 14, UIKit.TEXTO_TENUE)
+		saludo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		saludo.custom_minimum_size.x = 700
+		contenido.add_child(saludo)
 	contenido.add_child(UIKit.etiqueta("Dinero: %s    ·    Almacén: %d / %d (libre %d)" % [UIKit.dinero(GameState.dinero), GameState.inventario.total_unidades(), GameState.capacidad_almacen(), GameState.espacio_libre()], 17, UIKit.ACENTO))
 	contenido.add_child(HSeparator.new())
-	for insumo in Catalogo.insumos_de_tienda(tienda):
+	var lista: Array[String] = Catalogo.insumos_de_tienda(tienda)
+	if _producto != "":
+		lista = [_producto]
+	for insumo in lista:
 		contenido.add_child(_fila(insumo))
 
 func _fila(insumo: String) -> HBoxContainer:

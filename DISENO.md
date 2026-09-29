@@ -7,7 +7,9 @@ Resumen de cómo se implementó cada sección de `ORDEN_501_Actividad1.docx`, y 
 | Sección del documento | Implementación |
 |---|---|
 | Ciclo del día: mañana → jornada → faltante → cierre | `town.gd` → `restaurant.gd` → `closing_report.gd` |
-| Mapa del pueblo con Mercado y Cervecería | `scripts/town/town.gd`, `scripts/ui/panel_tienda.gd` |
+| Mapa del pueblo con Mercado y Cervecería | `scripts/town/town.gd` (2×2 pantallas, minimapa, peatones y vecinos con consejos) |
+| Tiendas con interior | `scripts/town/store.gd`: cada insumo en su propio estante; la compra se hace en `panel_tienda.gd` |
+| Monster (7 diseños, un solo producto) | `AssetPaths.siguiente_diseno("monster")` rota el sprite cada vez que se muestra |
 | Dinero y capacidad del almacén limitados | `GameState.comprar()`, `capacidad_almacen()` |
 | Caducidad y merma | `Inventario.retirar_caducados()`; la merma se calcula al cerrar la jornada |
 | Tablet (E): stock, cola de cocina, reservaciones, avisos | `scripts/ui/tablet.gd` |
@@ -24,6 +26,12 @@ Resumen de cómo se implementó cada sección de `ORDEN_501_Actividad1.docx`, y 
 | Terraza al final de la temporada | `GameState.terraza_desbloqueada` agrega las mesas 7 y 8 |
 | Clase de configuración de dificultad | `ConfiguracionDificultad` (tabla exacta de la sección 12) |
 | Guardado del progreso | `GameState.guardar()` / `cargar()` en `user://orden501_save.json` |
+
+## Ampliaciones pedidas por el equipo
+
+- **Mapa del pueblo más grande:** 2×2 pantallas (el documento hablaba de "una o dos pantallas"). Tiene un minimapa para orientarse, y el reloj de la mañana sigue corriendo dentro de las tiendas.
+- **Mercado y Cervecería con interior:** son cuartos de una pantalla, con cada producto en un lugar distinto.
+- **Monster:** bebida de la Cervecería ($20 en tienda, $45 en el menú). No caduca, se sirve en la barra, forma parte de las rondas por gol y sirve como sustituto de refresco y cerveza.
 
 ## Valores decididos durante el desarrollo
 

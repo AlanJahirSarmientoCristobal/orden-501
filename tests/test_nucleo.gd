@@ -87,6 +87,16 @@ func _probar_compras() -> void:
 	GameState.mejoras["almacen"] = 1
 	_check(GameState.espacio_libre() == 30, "La mejora de almacén no agregó espacio")
 	_check(GameState.costo_urgente("carne", 3) == 180, "El pedido urgente en Difícil debe costar ×3")
+	_check(is_equal_approx(GameState.tiempo_manana, 120.0), "La mañana en Difícil debe durar 2 min")
+	GameState.tiempo_manana = 50.0
+	GameState.posicion_pueblo = Vector2(10, 10)
+	GameState.iniciar_manana()
+	_check(is_equal_approx(GameState.tiempo_manana, 120.0) and GameState.posicion_pueblo == Vector2.ZERO, "Una nueva mañana debe reiniciar el reloj y la posición")
+	# Monster: un solo producto con 7 diseños que rotan.
+	_check(Catalogo.INSUMOS["monster"]["tienda"] == Catalogo.CERVECERIA, "El Monster se vende en la Cervecería")
+	_check(AssetPaths.disenos_de("monster").size() == 7, "El Monster debe tener 7 diseños")
+	var primero := AssetPaths.siguiente_diseno("monster")
+	_check(AssetPaths.siguiente_diseno("monster") != primero, "El sprite del Monster debe rotar")
 
 func _probar_reservaciones() -> void:
 	GameState.nueva_partida("normal")

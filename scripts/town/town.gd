@@ -1,287 +1,262 @@
-extends Node2D
+extends FaseManana
 
-## Fase de mañana: Dani recorre el pueblo y compra insumos en el Mercado y la Cervecería.
-## Al entrar a La 501 comienza la jornada.
+## Fase de mañana: el pueblo. Dani lo recorre y entra al Mercado y a la Cervecería
+## para comprar insumos. Al entrar a La 501 comienza la jornada.
 
-const TAMANO := Vector2(2560, 720)
+const TAMANO := Vector2(2560, 1440)
 
-const RESTAURANTE := Rect2(140, 70, 440, 230)
-const MERCADO := Rect2(1000, 70, 420, 230)
-const CERVECERIA := Rect2(1880, 70, 420, 230)
+# Calles
+const AVENIDA := Rect2(0, 600, 2560, 120)
+const AVENIDA_VERTICAL := Rect2(1200, 0, 120, 1440)
+const CALLE_SUR := Rect2(1320, 1150, 1240, 90)
 
-var dani: Dani
-var tiempo_restante := 0.0
-var _terminando := false
-var _aviso_30s := false
+# Edificios con puerta
+const RESTAURANTE := Rect2(180, 250, 520, 290)
+const MERCADO := Rect2(1560, 230, 560, 310)
+const CERVECERIA := Rect2(1600, 830, 480, 300)
 
-var _hud_dinero: Label
-var _hud_reputacion: Label
-var _hud_almacen: Label
-var _hud_tiempo: Label
-var _tablet: Tablet
-var _tienda: PanelTienda
-var _inventario: PanelInventario
-var _dialogo: DialogoOpciones
-var _notificaciones: Notificaciones
-var _pausa: MenuPausa
+# Zonas abiertas
+const PLAZA := Rect2(760, 230, 380, 330)
+const PARQUE := Rect2(60, 790, 1080, 590)
+const CANCHA := Rect2(1980, 1270, 520, 150)
+
+const CASAS := [
+	Rect2(1380, 290, 130, 250), Rect2(2180, 300, 150, 240), Rect2(2380, 300, 140, 240),
+	Rect2(1380, 860, 160, 250), Rect2(2140, 860, 170, 250), Rect2(2350, 860, 170, 250),
+	Rect2(1400, 1270, 150, 150), Rect2(1600, 1270, 150, 150), Rect2(1800, 1270, 150, 150),
+	Rect2(20, 290, 130, 250),
+]
+const COLORES_CASA := [Color("b86e52"), Color("c9a26b"), Color("7f9fb5"), Color("a86f8f"), Color("8fae6b")]
+
+const CONSEJOS := [
+	{"nombre": "Doña Mari", "pos": Vector2(930, 520), "sprite": "cliente_3",
+		"texto": "\"Dicen que en el medio tiempo todos piden bebidas. ¡Que no te falte hielo!\""},
+	{"nombre": "Profe Juve", "pos": Vector2(760, 1040), "sprite": "cliente_2",
+		"texto": "\"La carne, el pollo, la verdura, el pan y el hielo caducan. Compra lo que vayas a usar.\""},
+	{"nombre": "Capitán del equipo", "pos": Vector2(2240, 1230), "sprite": "cliente_1",
+		"texto": "\"Cuando metemos gol, la banda pide otra ronda. ¡Ten cerveza, refresco y Monster!\""},
+]
+
+func nombre_lugar() -> String:
+	return "PUEBLO · %s" % GameState.info_nivel()["nombre"].to_upper()
 
 func _ready() -> void:
-	AudioManager.musica("manana")
 	_crear_limites()
-	_crear_edificio(RESTAURANTE)
-	_crear_edificio(MERCADO)
-	_crear_edificio(CERVECERIA)
+	for rect in [RESTAURANTE, MERCADO, CERVECERIA]:
+		pared(Rect2(rect.position, Vector2(rect.size.x, rect.size.y - 10)))
+	for casa in CASAS:
+		pared(casa)
+	pared(Rect2(PARQUE.get_center() - Vector2(55, 55), Vector2(110, 110)))   # Estanque
 	_decorar()
 	_crear_personajes()
 	_crear_interacciones()
 
-	dani = Dani.new()
-	dani.usar_camara = true
-	dani.limites_camara = Rect2(Vector2.ZERO, TAMANO)
-	dani.position = Vector2(360, 380)
-	add_child(dani)
-
-	_notificaciones = Notificaciones.new()
-	add_child(_notificaciones)
-	_tablet = Tablet.new()
-	_tablet.notificaciones = _notificaciones
-	add_child(_tablet)
-	_tienda = PanelTienda.new()
-	add_child(_tienda)
-	_inventario = PanelInventario.new()
-	add_child(_inventario)
-	_dialogo = DialogoOpciones.new()
-	add_child(_dialogo)
-	_pausa = MenuPausa.new()
-	add_child(_pausa)
-	_crear_hud()
-
-	tiempo_restante = GameState.config.tiempo_pueblo
-	GameState.dinero_cambiado.connect(_al_cambiar_dinero)
-	GameState.inventario_cambiado.connect(_actualizar_hud)
-	_actualizar_hud()
+	var inicio := GameState.posicion_pueblo if GameState.posicion_pueblo != Vector2.ZERO else Vector2(RESTAURANTE.get_center().x, RESTAURANTE.end.y + 50)
+	crear_dani(inicio, true, Rect2(Vector2.ZERO, TAMANO))
+	preparar_fase()
 	queue_redraw()
 
 	if not GameState.intro_vista:
 		_mostrar_intro.call_deferred()
-	else:
-		GameState.aviso.emit("Día %d · Mañana. Compra lo necesario para: %s" % [GameState.dia, GameState.info_nivel()["nombre"]])
+	elif GameState.posicion_pueblo == Vector2.ZERO:
+		GameState.aviso.emit("Día %d · Mañana. Recorre el pueblo y compra para: %s" % [GameState.dia, GameState.info_nivel()["nombre"]])
 
-func _process(delta: float) -> void:
-	if _terminando or get_tree().paused:
-		return
-	# El reloj corre también dentro de las tiendas; solo se detiene en la pausa y en los diálogos.
-	if GameState.config.tiempo_pueblo > 0.0 and not _dialogo.esta_abierto():
-		tiempo_restante -= delta
-		if tiempo_restante <= 30.0 and not _aviso_30s:
-			_aviso_30s = true
-			AudioManager.sfx("stock_bajo")
-			GameState.aviso.emit("¡Quedan 30 segundos de mañana! Regresa a La 501.")
-		if tiempo_restante <= 0.0:
-			tiempo_restante = 0.0
-			GameState.aviso.emit("Se acabó la mañana: es hora de abrir el restaurante.")
-			_ir_al_restaurante()
-	_actualizar_tiempo()
-
-func _unhandled_input(evento: InputEvent) -> void:
-	if PanelModal.abiertos > 0 or _pausa.esta_abierto():
-		return
-	if evento.is_action_pressed("tablet"):
-		get_viewport().set_input_as_handled()
-		_tablet.abrir_seccion("avisos")
-	elif evento.is_action_pressed("inventario"):
-		get_viewport().set_input_as_handled()
-		_inventario.abrir("INVENTARIO DEL ALMACÉN")
-	elif evento.is_action_pressed("reservaciones"):
-		get_viewport().set_input_as_handled()
-		_tablet.abrir_seccion("reservaciones")
-
-func _al_cambiar_dinero(_valor: int) -> void:
-	_actualizar_hud()
+func extender_hud(capa: CanvasLayer) -> void:
+	var mapa := Minimapa.new()
+	mapa.position = Vector2(1058, 60)
+	mapa.size = Vector2(208, 117)
+	mapa.tamano_mundo = TAMANO
+	mapa.calles = [AVENIDA, AVENIDA_VERTICAL, CALLE_SUR]
+	mapa.lugares = [
+		{"rect": RESTAURANTE, "color": Color("c0503f"), "nombre": "La 501"},
+		{"rect": MERCADO, "color": Color("3f9a80"), "nombre": "Mercado"},
+		{"rect": CERVECERIA, "color": Color("5a6fb0"), "nombre": "Cervecería"},
+		{"rect": PARQUE, "color": Color("4f8f43"), "nombre": ""},
+	]
+	mapa.objetivo = dani
+	capa.add_child(mapa)
 
 func _mostrar_intro() -> void:
-	var texto := "Dani acaba de ser contratado como nuevo gerente de La 501, un restaurante que funcionaba con libretas, mensajes de WhatsApp y la memoria del personal.\n\nSe acerca la liguilla: los insumos se acaban a media jornada, hay reservaciones duplicadas y se tira comida caducada. Tu misión es poner orden hasta la Gran Final.\n\nCada mañana compra en el Mercado y la Cervecería; cada noche atiende el restaurante durante el partido."
+	var texto := "Dani acaba de ser contratado como nuevo gerente de La 501, un restaurante que funcionaba con libretas, mensajes de WhatsApp y la memoria del personal.\n\nSe acerca la liguilla: los insumos se acaban a media jornada, hay reservaciones duplicadas y se tira comida caducada. Tu misión es poner orden hasta la Gran Final.\n\nCada mañana recorre el pueblo y compra en el Mercado y la Cervecería; cada noche atiende el restaurante durante el partido."
 	_dialogo.mostrar("ORDEN 501", texto, [["¡A poner orden!", _cerrar_intro]], false)
 
 func _cerrar_intro() -> void:
 	GameState.intro_vista = true
 	GameState.guardar()
 
-# ---------------------------------------------------------------- Construcción del mapa
+# ---------------------------------------------------------------- Mapa
 
 func _crear_limites() -> void:
-	_pared(Rect2(-40, -40, TAMANO.x + 80, 40))
-	_pared(Rect2(-40, TAMANO.y, TAMANO.x + 80, 40))
-	_pared(Rect2(-40, 0, 40, TAMANO.y))
-	_pared(Rect2(TAMANO.x, 0, 40, TAMANO.y))
-
-func _crear_edificio(rect: Rect2) -> void:
-	_pared(Rect2(rect.position, Vector2(rect.size.x, rect.size.y - 10)))
-
-func _pared(rect: Rect2) -> void:
-	var cuerpo := StaticBody2D.new()
-	cuerpo.collision_layer = 1
-	cuerpo.position = rect.get_center()
-	var forma := CollisionShape2D.new()
-	var caja := RectangleShape2D.new()
-	caja.size = rect.size
-	forma.shape = caja
-	cuerpo.add_child(forma)
-	add_child(cuerpo)
+	pared(Rect2(-40, -40, TAMANO.x + 80, 40))
+	pared(Rect2(-40, TAMANO.y, TAMANO.x + 80, 40))
+	pared(Rect2(-40, 0, 40, TAMANO.y))
+	pared(Rect2(TAMANO.x, 0, 40, TAMANO.y))
 
 func _draw() -> void:
-	# Pasto
 	draw_rect(Rect2(Vector2.ZERO, TAMANO), Color("5b9e4d"))
-	# Banqueta y calle principal
-	draw_rect(Rect2(0, 300, TAMANO.x, 40), Color("c9c1ae"))
-	draw_rect(Rect2(0, 340, TAMANO.x, 120), Color("4a4f5c"))
-	draw_rect(Rect2(0, 460, TAMANO.x, 30), Color("c9c1ae"))
-	for x in range(20, int(TAMANO.x), 110):
-		draw_rect(Rect2(x, 396, 60, 8), Color("f2d16b"))
-	# Paso peatonal hacia cada edificio
-	for centro in [RESTAURANTE.get_center().x, MERCADO.get_center().x, CERVECERIA.get_center().x]:
-		for i in range(6):
-			draw_rect(Rect2(centro - 50 + i * 18, 344, 10, 112), Color(1, 1, 1, 0.75))
-	# Parque
-	draw_rect(Rect2(60, 520, 900, 180), Color("4f8f43"))
-	draw_rect(Rect2(70, 530, 880, 160), Color("6bb35a"), false, 4.0)
-	draw_circle(Vector2(510, 610), 60, Color("5aa9e6"))
-	draw_arc(Vector2(510, 610), 60, 0, TAU, 48, Color("c9c1ae"), 8.0)
-	# Plaza
-	draw_rect(Rect2(1100, 520, 700, 180), Color("b9ad98"))
-	draw_circle(Vector2(1450, 610), 55, Color("8f8575"))
-	draw_circle(Vector2(1450, 610), 38, Color("5aa9e6"))
-	# Casas del fondo
-	for x in [640, 780, 1500, 1640, 2360]:
-		draw_rect(Rect2(x, 150, 110, 150), Color("b86e52"))
-		draw_rect(Rect2(x - 6, 130, 122, 26), Color("7c3f33"))
-		draw_rect(Rect2(x + 40, 240, 30, 60), Color("3b2c2a"))
+	_dibujar_calles()
+	# Plaza con fuente
+	draw_rect(PLAZA, Color("c2b59b"))
+	for x in range(int(PLAZA.position.x), int(PLAZA.end.x), 40):
+		draw_line(Vector2(x, PLAZA.position.y), Vector2(x, PLAZA.end.y), Color(0, 0, 0, 0.06), 2.0)
+	draw_circle(PLAZA.get_center(), 60, Color("8f8575"))
+	draw_circle(PLAZA.get_center(), 44, Color("5aa9e6"))
+	# Parque con caminos y estanque
+	draw_rect(PARQUE, Color("4f8f43"))
+	draw_rect(PARQUE, Color("6bb35a"), false, 6.0)
+	var c := PARQUE.get_center()
+	draw_line(Vector2(PARQUE.position.x, c.y), Vector2(PARQUE.end.x, c.y), Color("d9c38f"), 26.0)
+	draw_line(Vector2(c.x, PARQUE.position.y), Vector2(c.x, PARQUE.end.y), Color("d9c38f"), 26.0)
+	draw_circle(c, 78, Color("d9c38f"))
+	draw_circle(c, 60, Color("5aa9e6"))
+	# Cancha de fútbol
+	draw_rect(CANCHA, Color("3f8f3a"))
+	draw_rect(CANCHA.grow(-8), Color(1, 1, 1, 0.8), false, 3.0)
+	draw_line(Vector2(CANCHA.get_center().x, CANCHA.position.y + 8), Vector2(CANCHA.get_center().x, CANCHA.end.y - 8), Color(1, 1, 1, 0.8), 3.0)
+	draw_arc(CANCHA.get_center(), 30, 0, TAU, 32, Color(1, 1, 1, 0.8), 3.0)
+	# Casas
+	for i in range(CASAS.size()):
+		_dibujar_casa(CASAS[i], COLORES_CASA[i % COLORES_CASA.size()])
 	# Edificios principales
-	_dibujar_edificio(RESTAURANTE, Color("8f3e32"), Color("f2b544"), "LA 501 · SPORTS BAR")
-	_dibujar_edificio(MERCADO, Color("2f6f5e"), Color("e49d45"), "MERCADO CENTRAL")
-	_dibujar_edificio(CERVECERIA, Color("3b4a7a"), Color("f2d16b"), "CERVECERÍA LA ESQUINA")
-	# Puestos del mercado
-	for i in range(3):
-		draw_rect(Rect2(MERCADO.position.x + 30 + i * 130, MERCADO.end.y - 70, 100, 44), Color("e49d45"))
-		for j in range(5):
-			draw_rect(Rect2(MERCADO.position.x + 30 + i * 130 + j * 20, MERCADO.end.y - 78, 20, 10), Color("f5f0e1") if j % 2 == 0 else Color("d9534f"))
+	_dibujar_edificio(RESTAURANTE, Color("8f3e32"), Color("f2b544"))
+	_dibujar_edificio(MERCADO, Color("2f6f5e"), Color("e49d45"))
+	_dibujar_edificio(CERVECERIA, Color("3b4a7a"), Color("f2d16b"))
+	# Toldos del mercado
+	for i in range(4):
+		var x := MERCADO.position.x + 20 + i * 135
+		for j in range(6):
+			draw_rect(Rect2(x + j * 18, MERCADO.end.y - 90, 18, 14), Color("f5f0e1") if j % 2 == 0 else Color("d9534f"))
+	# Autos estacionados
+	for pos in [Vector2(120, 606), Vector2(880, 690), Vector2(1450, 606), Vector2(2300, 690), Vector2(1206, 300), Vector2(1290, 1000), Vector2(2100, 1156)]:
+		_dibujar_auto(pos)
 
-func _dibujar_edificio(rect: Rect2, pared: Color, acento: Color, _nombre: String) -> void:
-	draw_rect(rect, pared)
-	draw_rect(Rect2(rect.position.x - 10, rect.position.y - 16, rect.size.x + 20, 30), pared.darkened(0.35))
+func _dibujar_calles() -> void:
+	var banqueta := Color("c9c1ae")
+	var asfalto := Color("4a4f5c")
+	for calle in [AVENIDA, AVENIDA_VERTICAL, CALLE_SUR]:
+		draw_rect(calle.grow(20), banqueta)
+	for calle in [AVENIDA, AVENIDA_VERTICAL, CALLE_SUR]:
+		draw_rect(calle, asfalto)
+	var amarillo := Color("f2d16b")
+	for x in range(20, int(TAMANO.x), 110):
+		if x < AVENIDA_VERTICAL.position.x - 40 or x > AVENIDA_VERTICAL.end.x + 20:
+			draw_rect(Rect2(x, AVENIDA.get_center().y - 4, 60, 8), amarillo)
+	for y in range(20, int(TAMANO.y), 110):
+		if y < AVENIDA.position.y - 40 or y > AVENIDA.end.y + 20:
+			draw_rect(Rect2(AVENIDA_VERTICAL.get_center().x - 4, y, 8, 60), amarillo)
+	for x in range(int(CALLE_SUR.position.x) + 40, int(TAMANO.x), 110):
+		draw_rect(Rect2(x, CALLE_SUR.get_center().y - 3, 50, 6), amarillo)
+	# Pasos peatonales frente a cada puerta
+	for puerta_x in [RESTAURANTE.get_center().x, MERCADO.get_center().x]:
+		for i in range(6):
+			draw_rect(Rect2(puerta_x - 50 + i * 18, AVENIDA.position.y + 4, 10, AVENIDA.size.y - 8), Color(1, 1, 1, 0.75))
+	for i in range(5):
+		draw_rect(Rect2(CERVECERIA.get_center().x - 45 + i * 18, CALLE_SUR.position.y + 4, 10, CALLE_SUR.size.y - 8), Color(1, 1, 1, 0.75))
+
+func _dibujar_edificio(rect: Rect2, pared_color: Color, acento: Color) -> void:
+	draw_rect(Rect2(rect.position + Vector2(6, 8), rect.size), Color(0, 0, 0, 0.25))
+	draw_rect(rect, pared_color)
+	draw_rect(Rect2(rect.position.x - 10, rect.position.y - 16, rect.size.x + 20, 30), pared_color.darkened(0.35))
 	draw_rect(Rect2(rect.position.x + 20, rect.position.y + 40, rect.size.x - 40, 36), Color("1b1f2a"))
 	draw_rect(Rect2(rect.position.x + 20, rect.position.y + 40, rect.size.x - 40, 36), acento, false, 3.0)
+	var ancho := (rect.size.x - 60) / 3.0
 	for i in range(3):
-		draw_rect(Rect2(rect.position.x + 30 + i * (rect.size.x - 60) / 3.0, rect.position.y + 100, (rect.size.x - 60) / 3.0 - 16, 60), Color("9ad1e8"))
+		draw_rect(Rect2(rect.position.x + 30 + i * ancho, rect.position.y + 100, ancho - 16, 60), Color("9ad1e8"))
 	var puerta := Rect2(rect.get_center().x - 30, rect.end.y - 70, 60, 70)
 	draw_rect(puerta, Color("3b2c2a"))
 	draw_rect(puerta, acento, false, 3.0)
 
+func _dibujar_casa(rect: Rect2, color: Color) -> void:
+	draw_rect(Rect2(rect.position + Vector2(5, 6), rect.size), Color(0, 0, 0, 0.2))
+	draw_rect(rect, color)
+	draw_rect(Rect2(rect.position.x - 6, rect.position.y - 14, rect.size.x + 12, 26), color.darkened(0.4))
+	draw_rect(Rect2(rect.get_center().x - 15, rect.end.y - 50, 30, 50), Color("3b2c2a"))
+	if rect.size.y > 180:
+		draw_rect(Rect2(rect.position.x + 16, rect.position.y + 40, 34, 30), Color("9ad1e8"))
+		draw_rect(Rect2(rect.end.x - 50, rect.position.y + 40, 34, 30), Color("9ad1e8"))
+
+func _dibujar_auto(pos: Vector2) -> void:
+	var vertical := pos.x > AVENIDA_VERTICAL.position.x - 10 and pos.x < AVENIDA_VERTICAL.end.x and (pos.y < AVENIDA.position.y or pos.y > AVENIDA.end.y)
+	var tam := Vector2(24, 44) if vertical else Vector2(44, 24)
+	var colores := [Color("d9534f"), Color("3fa9f5"), Color("f2d16b"), Color("5fd38d")]
+	var color: Color = colores[int(pos.x + pos.y) % colores.size()]
+	draw_rect(Rect2(pos, tam), color)
+	draw_rect(Rect2(pos + tam * 0.25, tam * 0.5), Color("1b1f2a"))
+
 func _decorar() -> void:
-	_etiqueta_mapa("LA 501 · SPORTS BAR", Vector2(RESTAURANTE.position.x + 20, RESTAURANTE.position.y + 44), RESTAURANTE.size.x - 40, UIKit.ACENTO)
-	_etiqueta_mapa("MERCADO CENTRAL", Vector2(MERCADO.position.x + 20, MERCADO.position.y + 44), MERCADO.size.x - 40, Color("f7c686"))
-	_etiqueta_mapa("CERVECERÍA LA ESQUINA", Vector2(CERVECERIA.position.x + 20, CERVECERIA.position.y + 44), CERVECERIA.size.x - 40, Color("f2d16b"))
-	for pos in [Vector2(100, 560), Vector2(240, 660), Vector2(820, 560), Vector2(930, 650), Vector2(620, 40), Vector2(900, 40), Vector2(1760, 40), Vector2(2460, 60), Vector2(1080, 650), Vector2(1830, 560)]:
-		_sprite("arbol", pos, 4.0)
-	for pos in [Vector2(380, 560), Vector2(640, 560), Vector2(1300, 560), Vector2(1600, 560)]:
-		_sprite("banca", pos, 3.0)
-	for x in range(80, int(TAMANO.x), 320):
-		_sprite("farol", Vector2(x, 300), 3.0)
-	for pos in [Vector2(MERCADO.position.x - 30, 280), Vector2(MERCADO.end.x + 30, 280)]:
-		_sprite("caja_frutas", pos, 3.0)
-	for pos in [Vector2(CERVECERIA.position.x - 30, 280), Vector2(CERVECERIA.end.x + 30, 280)]:
-		_sprite("barril", pos, 3.0)
-	_sprite("planta", Vector2(RESTAURANTE.position.x - 26, 280), 3.0)
-	_sprite("planta", Vector2(RESTAURANTE.end.x + 26, 280), 3.0)
-	_etiqueta_mapa("PARQUE", Vector2(420, 670), 180, Color("e6f5c9"))
-	_etiqueta_mapa("PLAZA", Vector2(1360, 670), 180, Color("fff0a6"))
-
-func _sprite(clave: String, pos: Vector2, escala: float) -> void:
-	var tex := AssetPaths.textura(clave)
-	if tex == null:
-		return
-	var s := Sprite2D.new()
-	s.texture = tex
-	s.position = pos
-	s.scale = Vector2(escala, escala)
-	add_child(s)
-
-func _etiqueta_mapa(texto: String, pos: Vector2, ancho: float, color: Color) -> void:
-	var l := UIKit.etiqueta(texto, 18, color, true)
-	l.position = pos
-	l.size = Vector2(ancho, 30)
-	add_child(l)
+	etiqueta_mapa("LA 501 · SPORTS BAR", Vector2(RESTAURANTE.position.x + 20, RESTAURANTE.position.y + 44), RESTAURANTE.size.x - 40, UIKit.ACENTO)
+	etiqueta_mapa("MERCADO CENTRAL", Vector2(MERCADO.position.x + 20, MERCADO.position.y + 44), MERCADO.size.x - 40, Color("f7c686"))
+	etiqueta_mapa("CERVECERÍA LA ESQUINA", Vector2(CERVECERIA.position.x + 20, CERVECERIA.position.y + 44), CERVECERIA.size.x - 40, Color("f2d16b"))
+	etiqueta_mapa("PLAZA 501", Vector2(PLAZA.position.x, PLAZA.position.y + 10), PLAZA.size.x, Color("fff0a6"))
+	etiqueta_mapa("PARQUE DE LA RIBERA", Vector2(PARQUE.position.x, PARQUE.position.y + 12), PARQUE.size.x, Color("e6f5c9"))
+	etiqueta_mapa("CANCHA DEL BARRIO", Vector2(CANCHA.position.x, CANCHA.position.y - 30), CANCHA.size.x, Color("e6f5c9"), 14)
+	# Letrero en el cruce principal
+	var letrero := etiqueta_mapa("← La 501      Mercado →\nCervecería ↘", Vector2(1330, 740), 240, UIKit.TEXTO, 13)
+	letrero.add_theme_stylebox_override("normal", UIKit.estilo(Color("1b1f2a", 0.85), 6, UIKit.BORDE, 2, 6))
+	# Árboles
+	for x in range(80, int(TAMANO.x), 180):
+		if absf(x - AVENIDA_VERTICAL.get_center().x) > 120:
+			sprite("arbol" if x % 360 == 80 else "arbol_2", Vector2(x, 150), 4.0)
+	var arboles_parque := [Vector2(140, 880), Vector2(320, 1000), Vector2(160, 1280), Vector2(420, 1320), Vector2(820, 880), Vector2(1020, 1000), Vector2(900, 1300), Vector2(1080, 1320), Vector2(300, 1180), Vector2(760, 1200)]
+	for i in range(arboles_parque.size()):
+		sprite("arbol_otono" if i % 3 == 0 else "arbol", arboles_parque[i], 4.0)
+	for pos in [Vector2(2300, 1340), Vector2(1960, 1260), Vector2(2520, 800)]:
+		sprite("arbol_2", pos, 3.5)
+	# Bancas y faroles
+	for pos in [Vector2(470, 1000), Vector2(650, 1000), Vector2(470, 1170), Vector2(650, 1170), Vector2(820, 500), Vector2(1060, 500)]:
+		sprite("banca", pos, 3.0)
+	for x in range(100, int(TAMANO.x), 300):
+		sprite("farol", Vector2(x, AVENIDA.position.y - 22), 3.0)
+	for y in range(100, int(TAMANO.y), 300):
+		sprite("farol", Vector2(AVENIDA_VERTICAL.position.x - 22, y), 3.0)
+	# Frente de las tiendas
+	for pos in [Vector2(MERCADO.position.x - 28, 520), Vector2(MERCADO.end.x + 28, 520), Vector2(MERCADO.end.x + 28, 470)]:
+		sprite("caja_frutas", pos, 3.0)
+	sprite("caja_verduras", Vector2(MERCADO.position.x - 28, 470), 3.0)
+	for pos in [Vector2(CERVECERIA.position.x - 28, 1100), Vector2(CERVECERIA.end.x + 28, 1100)]:
+		sprite("barril", pos, 3.0)
+	sprite("planta", Vector2(RESTAURANTE.position.x - 26, 520), 3.0)
+	sprite("planta", Vector2(RESTAURANTE.end.x + 26, 520), 3.0)
+	sprite("bote_basura", Vector2(1150, 580), 2.5)
 
 func _crear_personajes() -> void:
-	_npc("vendedor_mercado", Vector2(MERCADO.get_center().x + 70, MERCADO.end.y + 16), "Don Chema")
-	_npc("encargado_cerveceria", Vector2(CERVECERIA.get_center().x + 70, CERVECERIA.end.y + 16), "Lupita")
-
-func _npc(clave: String, pos: Vector2, nombre: String) -> void:
-	var s := AnimatedSprite2D.new()
-	s.sprite_frames = AssetPaths.frames_personaje(clave)
-	s.animation = &"down"
-	s.frame = 1
-	s.scale = Vector2(3, 3)
-	s.position = pos
-	add_child(s)
-	var l := UIKit.etiqueta(nombre, 11, UIKit.TEXTO, true)
-	l.position = pos + Vector2(-50, 22)
-	l.size = Vector2(100, 16)
-	add_child(l)
+	npc("vendedor_mercado", Vector2(MERCADO.get_center().x + 80, MERCADO.end.y + 18), "")
+	for consejo in CONSEJOS:
+		npc(consejo["sprite"], consejo["pos"], consejo["nombre"])
+	var rutas: Array = [
+		["cliente_1", [Vector2(60, 750), Vector2(1100, 750), Vector2(1100, 580), Vector2(60, 580)]],
+		["cliente_2", [Vector2(1360, 580), Vector2(2500, 580), Vector2(2500, 750), Vector2(1360, 750)]],
+		["cliente_3", [Vector2(1180, 60), Vector2(1180, 1400), Vector2(1340, 1400), Vector2(1340, 60)]],
+		["cliente_vip", [Vector2(470, 960), Vector2(730, 960), Vector2(730, 1210), Vector2(470, 1210)]],
+		["cliente_1", [Vector2(1360, 1130), Vector2(2520, 1130), Vector2(2520, 1260), Vector2(1360, 1260)]],
+		["cliente_2", [Vector2(780, 540), Vector2(1120, 540), Vector2(1120, 250), Vector2(780, 250)]],
+	]
+	for ruta in rutas:
+		var puntos: Array[Vector2] = []
+		puntos.assign(ruta[1])
+		add_child(Peaton.crear(ruta[0], puntos))
 
 func _crear_interacciones() -> void:
-	add_child(PuntoInteraccion.crear("Entrar al Mercado (comprar comida)", Vector2(MERCADO.get_center().x, MERCADO.end.y + 10), func(): _tienda.abrir_tienda(Catalogo.MERCADO), 60))
-	add_child(PuntoInteraccion.crear("Entrar a la Cervecería (bebidas y hielo)", Vector2(CERVECERIA.get_center().x, CERVECERIA.end.y + 10), func(): _tienda.abrir_tienda(Catalogo.CERVECERIA), 60))
-	add_child(PuntoInteraccion.crear("Abrir La 501 (empezar la jornada)", Vector2(RESTAURANTE.get_center().x, RESTAURANTE.end.y + 10), _confirmar_restaurante, 60))
+	var puerta_mercado := Vector2(MERCADO.get_center().x, MERCADO.end.y + 12)
+	var puerta_cerveceria := Vector2(CERVECERIA.get_center().x, CERVECERIA.end.y + 12)
+	add_child(PuntoInteraccion.crear("Entrar al Mercado", puerta_mercado, _entrar_tienda.bind(Catalogo.MERCADO, puerta_mercado + Vector2(0, 30)), 50))
+	add_child(PuntoInteraccion.crear("Entrar a la Cervecería", puerta_cerveceria, _entrar_tienda.bind(Catalogo.CERVECERIA, puerta_cerveceria + Vector2(0, 30)), 50))
+	add_child(PuntoInteraccion.crear("Abrir La 501 (empezar la jornada)", Vector2(RESTAURANTE.get_center().x, RESTAURANTE.end.y + 12), _confirmar_restaurante, 50))
+	for consejo in CONSEJOS:
+		add_child(PuntoInteraccion.crear("Platicar con %s" % consejo["nombre"], consejo["pos"], _platicar.bind(consejo), 40))
+
+func _platicar(consejo: Dictionary) -> void:
+	GameState.aviso.emit("%s: %s" % [consejo["nombre"], consejo["texto"]])
+
+func _entrar_tienda(tienda: String, regreso: Vector2) -> void:
+	if terminando:
+		return
+	terminando = true
+	GameState.tienda_actual = tienda
+	GameState.posicion_pueblo = regreso
+	AudioManager.sfx("click")
+	GameState.cambiar_escena(GameState.ESCENA_TIENDA)
 
 func _confirmar_restaurante() -> void:
 	var mensaje := "Durante la jornada no podrás volver al pueblo; si algo se acaba tendrás que pedirlo por teléfono (más caro y tarda en llegar).\n\nAlmacén: %d unidades. ¿Abrir el restaurante?" % GameState.inventario.total_unidades()
-	_dialogo.mostrar("¿Listo para el partido?", mensaje, [["Sí, abrir La 501", _ir_al_restaurante], ["Todavía no", Callable()]])
-
-func _ir_al_restaurante() -> void:
-	if _terminando:
-		return
-	_terminando = true
-	GameState.iniciar_jornada()
-	GameState.cambiar_escena(GameState.ESCENA_RESTAURANTE)
-
-# ---------------------------------------------------------------- HUD
-
-func _crear_hud() -> void:
-	var capa := UIKit.capa(20)
-	add_child(capa)
-	var barra := UIKit.panel(UIKit.FONDO, UIKit.BORDE, 8)
-	barra.position = Vector2(10, 8)
-	barra.size = Vector2(1260, 44)
-	var fila := UIKit.hbox(26)
-	barra.add_child(fila)
-	fila.add_child(UIKit.etiqueta("DÍA %d · MAÑANA · %s" % [GameState.dia, GameState.info_nivel()["nombre"].to_upper()], 16, UIKit.ACENTO))
-	_hud_dinero = UIKit.etiqueta("", 16)
-	_hud_reputacion = UIKit.etiqueta("", 16)
-	_hud_almacen = UIKit.etiqueta("", 16)
-	_hud_tiempo = UIKit.etiqueta("", 16, UIKit.VERDE)
-	for l in [_hud_dinero, _hud_reputacion, _hud_almacen, _hud_tiempo]:
-		fila.add_child(l)
-	capa.add_child(barra)
-	var ayuda := UIKit.etiqueta("WASD Moverse · Espacio Interactuar · E Tablet · I Inventario · R Reservaciones · Esc Pausa", 13, UIKit.TEXTO_TENUE, true)
-	ayuda.position = Vector2(0, 694)
-	ayuda.size = Vector2(1280, 20)
-	capa.add_child(ayuda)
-
-func _actualizar_hud() -> void:
-	if _hud_dinero == null:
-		return
-	_hud_dinero.text = "Dinero %s" % UIKit.dinero(GameState.dinero)
-	_hud_reputacion.text = "%s %d%%" % [UIKit.estrellas(GameState.reputacion), int(GameState.reputacion)]
-	_hud_almacen.text = "Almacén %d/%d" % [GameState.inventario.total_unidades(), GameState.capacidad_almacen()]
-	_actualizar_tiempo()
-
-func _actualizar_tiempo() -> void:
-	if _hud_tiempo == null:
-		return
-	if GameState.config.tiempo_pueblo <= 0.0:
-		_hud_tiempo.text = "Tiempo: sin límite"
-		return
-	var segundos := int(ceil(tiempo_restante))
-	_hud_tiempo.text = "Tiempo %d:%02d" % [segundos / 60, segundos % 60]
-	_hud_tiempo.add_theme_color_override("font_color", UIKit.ROJO if tiempo_restante <= 30.0 else UIKit.VERDE)
+	_dialogo.mostrar("¿Listo para el partido?", mensaje, [["Sí, abrir La 501", ir_al_restaurante], ["Todavía no", Callable()]])

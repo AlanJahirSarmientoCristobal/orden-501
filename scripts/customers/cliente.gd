@@ -129,6 +129,7 @@ func _construir() -> void:
 	_insignia = UIKit.etiqueta(texto_grupo(), 10, color_insignia(), true)
 	_insignia.position = Vector2(-50, 19)
 	_insignia.size = Vector2(100, 14)
+	_insignia.visible = false      # Se muestra al sentarse (en la fila se enciman)
 	add_child(_insignia)
 
 	_barra = ProgressBar.new()
@@ -163,8 +164,8 @@ func _construir() -> void:
 func _process(delta: float) -> void:
 	match estado:
 		Estado.EN_FILA:
-			# En la fila la paciencia baja a la mitad de velocidad.
-			_gastar_paciencia(delta * 0.5)
+			# En la fila la paciencia baja más despacio (35 % del ritmo normal).
+			_gastar_paciencia(delta * 0.35)
 		Estado.ORDENANDO, Estado.ESPERANDO_COMIDA:
 			_gastar_paciencia(delta)
 		Estado.COMIENDO:
@@ -199,6 +200,7 @@ func razon_paciencia() -> float:
 
 func ir_a_mesa(nueva_mesa: Node) -> void:
 	mesa = nueva_mesa
+	_insignia.visible = true
 	estado = Estado.CAMINANDO
 	_barra.visible = false
 	var destino: Vector2 = mesa.posicion_asiento()

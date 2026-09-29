@@ -36,13 +36,13 @@ const _TABLA := {
 		"nombre": "Normal", "paciencia": 40.0, "cocina": 1.0, "llegada": 8.0, "vip": 0.25,
 		"limpieza": 1.5, "suciedad": "Normal", "dinero": 1000, "urg_costo": 2.0, "urg_demora": 25.0,
 		"caducidad": 2, "pueblo": 180.0, "reputacion": 70.0,
-		"pareja": 0.25, "familia": 0.15
+		"pareja": 0.20, "familia": 0.10
 	},
 	DIFICIL: {
 		"nombre": "Difícil", "paciencia": 25.0, "cocina": 1.3, "llegada": 5.0, "vip": 0.40,
 		"limpieza": 2.5, "suciedad": "Rápido", "dinero": 700, "urg_costo": 3.0, "urg_demora": 40.0,
 		"caducidad": 1, "pueblo": 120.0, "reputacion": 85.0,
-		"pareja": 0.35, "familia": 0.30
+		"pareja": 0.30, "familia": 0.15
 	}
 }
 

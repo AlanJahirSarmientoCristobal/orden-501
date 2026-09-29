@@ -30,7 +30,7 @@ Al ganar la Gran Final se desbloquea la **terraza** (2 mesas más) y se muestra 
 | Paciencia del cliente | 60 s | 40 s | 25 s |
 | Tiempo de cocinado | ×0.8 | ×1.0 | ×1.3 |
 | Llegada de clientes | cada 12 s | cada 8 s | cada 5 s |
-| Parejas / familias de 4 | — | 25 % / 15 % | 35 % / 30 % |
+| Parejas / familias de 4 (familias desde la Liguilla) | — | 20 % / 10 % | 30 % / 15 % |
 | Clientes VIP | 10 % | 25 % | 40 % |
 | Mesas se ensucian (tiempo para limpiar) | Lento | Normal | Rápido |
 | Dinero inicial | $1,500 | $1,000 | $700 |

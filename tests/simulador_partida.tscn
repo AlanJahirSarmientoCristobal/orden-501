@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/simulador_partida.gd" id="1_script"]
+
+[node name="SimuladorPartida" type="Node"]
+script = ExtResource("1_script")

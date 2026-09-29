@@ -24,16 +24,18 @@ const CAPACIDAD_ALMACEN_BASE := 100
 const CAPACIDAD_ALMACEN_MEJORA := 30
 
 const NIVELES := {
-	1: {"nombre": "Jornada Regular", "partido": "La 501 FC vs Deportivo Huasteco", "duracion": 180.0,
+	1: {"nombre": "Jornada Regular", "partido": "La 501 FC vs Deportivo Huasteco", "duracion": 150.0,
 		"objetivo": "Terminar el partido sin quedarte sin stock y perdiendo máximo 3 clientes."},
-	2: {"nombre": "Liguilla", "partido": "Cuartos de final: Tuzos vs Águilas", "duracion": 210.0,
+	2: {"nombre": "Liguilla", "partido": "Cuartos de final: Tuzos vs Águilas", "duracion": 180.0,
 		"objetivo": "Cero reservaciones duplicadas y alcanzar la meta de ventas."},
-	3: {"nombre": "Gran Final", "partido": "Gran Final: La 501 FC vs Rayados de la Sierra", "duracion": 240.0,
+	3: {"nombre": "Gran Final", "partido": "Gran Final: La 501 FC vs Rayados de la Sierra", "duracion": 210.0,
 		"objetivo": "Terminar con la reputación igual o mayor a la meta de la dificultad."},
 }
 
 const META_VENTAS := {"facil": 1000, "normal": 1200, "dificil": 1400}
 const MAX_CLIENTES_PERDIDOS_N1 := 3
+## Unidades a partir de las cuales se avisa de stock bajo (alcanza para una familia mientras llega el proveedor).
+const STOCK_BAJO := 6
 
 const MEJORAS := {
 	"velocidad": {"nombre": "Tenis nuevos", "descripcion": "Dani camina 15% más rápido.", "costo": 350, "maximo": 2},
@@ -105,6 +107,9 @@ func nueva_partida(nueva_dificultad: String) -> void:
 
 ## Prepara la fase de mañana del día actual y toma la "foto" para poder reiniciar la jornada.
 func iniciar_manana() -> void:
+	# La afición vuelve cada día: la reputación arranca en al menos 75 % (si traes más, se
+	# conserva). Evita que un mal día deje la siguiente jornada imposible de ganar.
+	reputacion = maxf(reputacion, REPUTACION_INICIAL)
 	_reiniciar_estadisticas()
 	_generar_reservaciones()
 	promo_activa = false
@@ -173,11 +178,13 @@ func tiempo_limpieza() -> float:
 	return config.tiempo_limpieza * (1.3 if nivel_actual == 3 else 1.0)
 
 ## Tamaño del grupo que llega (1, 2 o 4), según la dificultad.
+## En la Jornada Regular (nivel 1) llegan parejas, pero las familias empiezan en la Liguilla.
 func tamano_grupo() -> int:
 	var tirada := randf()
-	if tirada < config.probabilidad_familia:
+	var familia := config.probabilidad_familia if nivel_actual >= 2 else 0.0
+	if tirada < familia:
 		return 4
-	if tirada < config.probabilidad_familia + config.probabilidad_pareja:
+	if tirada < familia + config.probabilidad_pareja:
 		return 2
 	return 1
 
@@ -256,7 +263,7 @@ func registrar_quiebre(platillo: String) -> void:
 func _revisar_stock_bajo(platillo: String) -> void:
 	for insumo in Catalogo.receta(platillo):
 		var restante := inventario.total(insumo)
-		if restante <= 2:
+		if restante <= STOCK_BAJO and restante + int(Catalogo.receta(platillo)[insumo]) > STOCK_BAJO:
 			AudioManager.sfx("stock_bajo")
 			aviso.emit("Stock bajo: %s (%d)" % [Catalogo.nombre_insumo(insumo), restante])
 			return

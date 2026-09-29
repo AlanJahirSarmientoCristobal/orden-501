@@ -11,15 +11,15 @@ const BARRA := "barra"
 
 ## Insumos: tienda donde se compran, precio por unidad y si caducan.
 const INSUMOS := {
-	"carne":    {"nombre": "Carne",    "tienda": MERCADO,    "precio": 20, "perecedero": true,  "icono": "insumo_carne"},
-	"pollo":    {"nombre": "Pollo",    "tienda": MERCADO,    "precio": 18, "perecedero": true,  "icono": "insumo_pollo"},
-	"papas":    {"nombre": "Papas",    "tienda": MERCADO,    "precio": 8,  "perecedero": false, "icono": "insumo_papas"},
-	"verdura":  {"nombre": "Verdura",  "tienda": MERCADO,    "precio": 6,  "perecedero": true,  "icono": "insumo_verdura"},
-	"pan":      {"nombre": "Pan",      "tienda": MERCADO,    "precio": 5,  "perecedero": true,  "icono": "insumo_pan"},
-	"cerveza":  {"nombre": "Cerveza",  "tienda": CERVECERIA, "precio": 15, "perecedero": false, "icono": "insumo_cerveza"},
-	"refresco": {"nombre": "Refresco", "tienda": CERVECERIA, "precio": 8,  "perecedero": false, "icono": "insumo_refresco"},
-	"hielo":    {"nombre": "Hielo",    "tienda": CERVECERIA, "precio": 3,  "perecedero": true,  "icono": "insumo_hielo"},
-	"monster":  {"nombre": "Monster",  "tienda": CERVECERIA, "precio": 20, "perecedero": false, "icono": "monster"},
+	"carne":    {"nombre": "Carne",    "tienda": MERCADO,    "precio": 12, "perecedero": true,  "icono": "insumo_carne"},
+	"pollo":    {"nombre": "Pollo",    "tienda": MERCADO,    "precio": 10, "perecedero": true,  "icono": "insumo_pollo"},
+	"papas":    {"nombre": "Papas",    "tienda": MERCADO,    "precio": 5,  "perecedero": false, "icono": "insumo_papas"},
+	"verdura":  {"nombre": "Verdura",  "tienda": MERCADO,    "precio": 4,  "perecedero": true,  "icono": "insumo_verdura"},
+	"pan":      {"nombre": "Pan",      "tienda": MERCADO,    "precio": 3,  "perecedero": true,  "icono": "insumo_pan"},
+	"cerveza":  {"nombre": "Cerveza",  "tienda": CERVECERIA, "precio": 9, "perecedero": false, "icono": "insumo_cerveza"},
+	"refresco": {"nombre": "Refresco", "tienda": CERVECERIA, "precio": 5,  "perecedero": false, "icono": "insumo_refresco"},
+	"hielo":    {"nombre": "Hielo",    "tienda": CERVECERIA, "precio": 2,  "perecedero": true,  "icono": "insumo_hielo"},
+	"monster":  {"nombre": "Monster",  "tienda": CERVECERIA, "precio": 12, "perecedero": false, "icono": "monster"},
 }
 
 const HAMBURGUESA := "Hamburguesa 501"

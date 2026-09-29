@@ -13,7 +13,7 @@ func color_insignia() -> Color:
 	return UIKit.ACENTO
 
 func multiplicador_paciencia() -> float:
-	return 0.6
+	return 0.7
 
 func propina_base() -> float:
 	return 0.35

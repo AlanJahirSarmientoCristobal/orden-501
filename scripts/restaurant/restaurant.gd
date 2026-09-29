@@ -9,7 +9,7 @@ const PUERTA := Vector2(552, 770)
 const INICIO_FILA := Vector2(660, 652)
 const ORIGEN_TILES := Vector2(0, 4)
 const COLUMNAS_TILES := 21
-const MAX_FILA := 6
+const MAX_FILA := 5
 const MINUTOS_PARTIDO := 90.0
 
 const POS_MESAS := [Vector2(330, 250), Vector2(540, 250), Vector2(750, 250), Vector2(330, 450), Vector2(540, 450), Vector2(750, 450)]
@@ -310,7 +310,7 @@ func _agregar_a_fila(cliente: Cliente, prioridad: bool) -> void:
 
 func _reordenar_fila() -> void:
 	for i in range(fila.size()):
-		fila[i].mover_en_fila(INICIO_FILA + Vector2(i * 50, 0))
+		fila[i].mover_en_fila(INICIO_FILA + Vector2(i * 68, 0))
 
 func _procesar_reservaciones() -> void:
 	for reserva in GameState.reservaciones:
@@ -646,7 +646,8 @@ func _actualizar_panel_lateral() -> void:
 		for e in entregas:
 			if e["insumo"] == insumo:
 				en_camino += int(e["cantidad"])
-		_fijar(_lateral["stock"][insumo], "%s: %d%s" % [Catalogo.nombre_insumo(insumo), cantidad, "  (+%d en camino)" % en_camino if en_camino > 0 else ""], UIKit.ROJO if cantidad <= 2 else UIKit.TEXTO)
+		var color_stock := UIKit.ROJO if cantidad <= 2 else (Color("f2d16b") if cantidad <= GameState.STOCK_BAJO else UIKit.TEXTO)
+		_fijar(_lateral["stock"][insumo], "%s: %d%s" % [Catalogo.nombre_insumo(insumo), cantidad, "  (+%d en camino)" % en_camino if en_camino > 0 else ""], color_stock)
 	_lateral["agotados"].visible = not agotados.is_empty()
 	_fijar(_lateral["agotados"], "Agotado: " + ", ".join(agotados), UIKit.ROJO)
 	_fijar(_lateral["cocina"], "Cocina: %d en cola · %d listos" % [cocina.pendientes(), cocina.listos.size()], UIKit.TEXTO)

@@ -35,7 +35,7 @@ Resumen de cómo se implementó cada sección de `ORDEN_501_Actividad1.docx`, y 
   - Corre 60 % más rápido y gasta 35 de estamina por segundo; se recupera a 22 por segundo sin correr.
   - Si se agota, no puede volver a correr hasta recuperar 25. Valores en `scripts/entities/dani.gd`.
 - **Personajes:** se dibujan a escala 4 (64 px) en lugar de 3, en `AssetPaths.ESCALA_PERSONAJE`.
-- **Monster:** bebida de la Cervecería ($20 en tienda, $45 en el menú). No caduca, se sirve en la barra, forma parte de las rondas por gol y sirve como sustituto de refresco y cerveza.
+- **Monster:** bebida de la Cervecería ($12 en tienda, $45 en el menú). No caduca, se sirve en la barra, forma parte de las rondas por gol y sirve como sustituto de refresco y cerveza.
 
 ## Valores decididos durante el desarrollo
 
@@ -45,21 +45,32 @@ El documento no fijaba estos valores:
   - Sube: +1.5 por pedido entregado y +3 por pedido VIP.
   - Baja: −8 si se va un cliente, −12 si se va un VIP, −8 por reservación duplicada y −5 si una reservación llega sin mesa asignada.
 - **Almacén:** 100 unidades. La mejora "Estantes extra" agrega 30, hasta dos veces.
-- **Duración del partido** (tiempo real para 90'): 3 min en el Nivel 1, 3.5 min en el Nivel 2 y 4 min en el Nivel 3.
+- **Duración del partido** (tiempo real para 90'): 2.5 min en el Nivel 1, 3 min en el Nivel 2 y 3.5 min en el Nivel 3.
 - **Meta de ventas del Nivel 2:** $1,000 en Fácil, $1,200 en Normal y $1,400 en Difícil.
 - **"Mesas se ensucian":** se interpretó como el tiempo que hay que mantener Espacio para limpiar (0.8 / 1.5 / 2.5 s). En la Gran Final ese tiempo se multiplica por 1.3.
 - **Nivel 1:** no hay VIP ni reservaciones, y la paciencia es 20 % mayor ("clientes pacientes").
-- **Clientes VIP:** piden el Combo VIP ($220), tienen el 60 % de la paciencia y dejan 35 % de propina (15 % el habitual).
+- **Clientes VIP:** piden el Combo VIP ($220), tienen el 70 % de la paciencia y dejan 35 % de propina (15 % el habitual).
 - **Propina:** es mayor mientras más rápido se atiende (se multiplica por la paciencia restante). Un sustituto deja 40 % de la propina normal.
 - **Medio tiempo (45'):** llegan 2 + nivel clientes de golpe, y hasta el minuto 60 el 75 % de los pedidos son bebidas.
 - **Goles:** 1 o 2 goles al azar (3 en la Gran Final). Cada mesa que está comiendo tiene 70 % de probabilidad de pedir otra ronda de bebidas.
 - **Reservaciones:** 4 en la Liguilla y 6 en la Gran Final, en horarios que a veces coinciden. Una mesa reservada se aparta 10 minutos antes de la llegada.
 - **Mesas:** la 1 a la 3 son para 2 personas; la 4 a la 8 son para 4.
-- **Grupos de clientes** (pedido del equipo): en Fácil solo llegan personas solas. En Normal, 25 % de parejas y 15 % de familias de 4; en Difícil, 35 % y 30 %.
+- **Grupos de clientes** (pedido del equipo): en Fácil solo llegan personas solas. En Normal, 20 % de parejas y 10 % de familias de 4; en Difícil, 30 % y 15 %. En la Jornada Regular (nivel 1) no llegan familias; empiezan en la Liguilla.
   - Las familias solo caben en mesas de 4; las parejas y las personas solas prefieren las de 2.
   - El grupo hace una sola comanda por persona (×2 o ×4): gasta y paga ese múltiplo, y la cocina tarda 35 % más por cada persona adicional.
   - Los VIP siempre llegan solos. Las reservaciones llegan con su número de personas.
 - **Quiebre de stock:** cuenta una vez por pedido que no se pudo preparar.
+- **Stock bajo:** se avisa a partir de 6 unidades (amarillo en el panel; rojo con 2 o menos).
+- **Fila de la entrada:** máximo 5 grupos; mientras esperan, la paciencia baja al 35 % del ritmo normal.
+- **Precios de insumos:** carne $12, pollo $10, papas $5, verdura $4, pan $3, cerveza $9, refresco $5, hielo $2 y Monster $12. Se bajaron para que el límite real sea el almacén y no el dinero.
+
+### Cómo se balanceó
+
+`tests/simulador_partida.tscn` simula a un jugador que respeta los límites reales de Dani: camina a su velocidad, usa sprint con estamina, mantiene Espacio para limpiar, carga 3 platillos y tarda en decidir. Con ese simulador se juega la temporada completa y se ajustan los valores anteriores:
+
+```powershell
+godot --headless --path . res://tests/simulador_partida.tscn -- dificil 3
+```
 - **Promoción 2x1:** mejora de un solo uso. En la siguiente jornada llegan alrededor de 40 % más clientes (el intervalo entre llegadas se divide entre 1.4).
 
 Los precios y las recetas están en `scripts/core/catalogo.gd`, y los valores de progresión en `scripts/autoload/game_state.gd`.

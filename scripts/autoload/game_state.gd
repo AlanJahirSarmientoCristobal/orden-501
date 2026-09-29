@@ -1,0 +1,493 @@
+extends Node
+
+## Estado global de la partida: dificultad, día, dinero, reputación, inventario,
+## reservaciones, mejoras, estadísticas de la jornada y guardado.
+
+signal dinero_cambiado(total: int)
+signal reputacion_cambiada(valor: float)
+signal inventario_cambiado
+signal reservaciones_cambiadas
+signal aviso(mensaje: String)
+signal reputacion_agotada
+
+const SAVE_PATH := "user://orden501_save.json"
+
+const ESCENA_MENU := "res://scenes/menu/main_menu.tscn"
+const ESCENA_PUEBLO := "res://scenes/town/town.tscn"
+const ESCENA_RESTAURANTE := "res://scenes/restaurant/restaurant.tscn"
+const ESCENA_REPORTE := "res://scenes/ui/closing_report.tscn"
+const ESCENA_VICTORIA := "res://scenes/ui/victory.tscn"
+
+const REPUTACION_INICIAL := 75.0
+const CAPACIDAD_ALMACEN_BASE := 80
+const CAPACIDAD_ALMACEN_MEJORA := 30
+
+const NIVELES := {
+	1: {"nombre": "Jornada Regular", "partido": "La 501 FC vs Deportivo Huasteco", "duracion": 180.0,
+		"objetivo": "Terminar el partido sin quedarte sin stock y perdiendo máximo 3 clientes."},
+	2: {"nombre": "Liguilla", "partido": "Cuartos de final: Tuzos vs Águilas", "duracion": 210.0,
+		"objetivo": "Cero reservaciones duplicadas y alcanzar la meta de ventas."},
+	3: {"nombre": "Gran Final", "partido": "Gran Final: La 501 FC vs Rayados de la Sierra", "duracion": 240.0,
+		"objetivo": "Terminar con la reputación igual o mayor a la meta de la dificultad."},
+}
+
+const META_VENTAS := {"facil": 1000, "normal": 1200, "dificil": 1400}
+const MAX_CLIENTES_PERDIDOS_N1 := 3
+
+const MEJORAS := {
+	"velocidad": {"nombre": "Tenis nuevos", "descripcion": "Dani camina 15% más rápido.", "costo": 350, "maximo": 2},
+	"bandeja": {"nombre": "Bandeja grande", "descripcion": "Cuarto espacio en la bandeja.", "costo": 450, "maximo": 1},
+	"cocina": {"nombre": "Parrilla industrial", "descripcion": "La cocina prepara 25% más rápido.", "costo": 500, "maximo": 1},
+	"almacen": {"nombre": "Estantes extra", "descripcion": "+30 espacios de almacén.", "costo": 300, "maximo": 2},
+	"promo": {"nombre": "Promoción 2x1", "descripcion": "Llegan 40% más clientes la siguiente jornada.", "costo": 250, "maximo": 1},
+}
+
+const NOMBRES_RESERVA := ["Familia Hernández", "Grupo Sarmiento", "Los Cruz", "Peña Tuzos", "Oficina Castelán", "Amigos del barrio", "Familia Bautista", "Club Huasteco"]
+const MINUTOS_RESERVA := [10, 20, 30, 45, 55, 65, 75]
+
+var dificultad := ConfiguracionDificultad.NORMAL
+var config: ConfiguracionDificultad = ConfiguracionDificultad.obtener(ConfiguracionDificultad.NORMAL)
+var partida_activa := false
+var dia := 1
+var nivel_actual := 1
+var nivel_desbloqueado := 1
+var dinero := 0
+var reputacion := REPUTACION_INICIAL
+var inventario := Inventario.new()
+var mejoras := {"velocidad": 0, "bandeja": 0, "cocina": 0, "almacen": 0, "promo": 0}
+var promo_activa := false
+var terraza_desbloqueada := false
+var temporada_completada := false
+var intro_vista := false
+var reservaciones: Array[Dictionary] = []
+var estadisticas := {}
+var historial: Array[Dictionary] = []
+var ultimo_informe := {}
+var _snapshot := {}
+
+var _transicion: ColorRect
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	_crear_capa_transicion()
+	_configurar_controles()
+	_reiniciar_estadisticas()
+
+# ---------------------------------------------------------------- Partida
+
+func nueva_partida(nueva_dificultad: String) -> void:
+	dificultad = nueva_dificultad if nueva_dificultad in ConfiguracionDificultad.TODAS else ConfiguracionDificultad.NORMAL
+	config = ConfiguracionDificultad.obtener(dificultad)
+	partida_activa = true
+	dia = 1
+	nivel_actual = 1
+	nivel_desbloqueado = 1
+	dinero = config.dinero_inicial
+	reputacion = REPUTACION_INICIAL
+	inventario = Inventario.new()
+	mejoras = {"velocidad": 0, "bandeja": 0, "cocina": 0, "almacen": 0, "promo": 0}
+	promo_activa = false
+	terraza_desbloqueada = false
+	temporada_completada = false
+	intro_vista = false
+	historial = []
+	ultimo_informe = {}
+	iniciar_manana()
+
+## Prepara la fase de mañana del día actual y toma la "foto" para poder reiniciar la jornada.
+func iniciar_manana() -> void:
+	_reiniciar_estadisticas()
+	_generar_reservaciones()
+	promo_activa = false
+	_snapshot = _capturar()
+	guardar()
+	dinero_cambiado.emit(dinero)
+	reputacion_cambiada.emit(reputacion)
+	inventario_cambiado.emit()
+
+func seleccionar_nivel(nivel: int) -> void:
+	nivel_actual = clampi(nivel, 1, nivel_desbloqueado)
+	iniciar_manana()
+
+## "Reiniciar jornada": vuelve a la mañana con el dinero e inventario que tenía al inicio.
+func reiniciar_jornada() -> void:
+	if not _snapshot.is_empty():
+		_restaurar(_snapshot)
+	iniciar_manana()
+
+func iniciar_jornada() -> void:
+	promo_activa = mejoras["promo"] > 0
+	if promo_activa:
+		mejoras["promo"] = 0
+	var compras: int = estadisticas.get("compras", 0)
+	_reiniciar_estadisticas()
+	estadisticas["compras"] = compras
+	estadisticas["reputacion_inicial"] = reputacion
+
+func info_nivel(nivel: int = nivel_actual) -> Dictionary:
+	return NIVELES.get(nivel, NIVELES[1])
+
+func meta_ventas() -> int:
+	return int(META_VENTAS.get(dificultad, 1200))
+
+# ---------------------------------------------------------------- Valores derivados
+
+func capacidad_almacen() -> int:
+	return CAPACIDAD_ALMACEN_BASE + CAPACIDAD_ALMACEN_MEJORA * int(mejoras["almacen"])
+
+func espacio_libre() -> int:
+	return capacidad_almacen() - inventario.total_unidades()
+
+func capacidad_bandeja() -> int:
+	return 3 + int(mejoras["bandeja"])
+
+func multiplicador_velocidad() -> float:
+	return 1.0 + 0.15 * float(mejoras["velocidad"])
+
+func multiplicador_cocina() -> float:
+	return config.multiplicador_cocina * (0.75 if int(mejoras["cocina"]) > 0 else 1.0)
+
+func intervalo_llegada() -> float:
+	return config.intervalo_llegada * (0.6 if promo_activa else 1.0)
+
+func paciencia_base() -> float:
+	return config.paciencia_cliente * (1.2 if nivel_actual == 1 else 1.0)
+
+func probabilidad_vip() -> float:
+	return 0.0 if nivel_actual == 1 else config.probabilidad_vip
+
+func tiempo_limpieza() -> float:
+	return config.tiempo_limpieza * (1.3 if nivel_actual == 3 else 1.0)
+
+func probabilidad_bebida() -> float:
+	return 0.55 if nivel_actual == 3 else 0.4
+
+func numero_mesas() -> int:
+	return 8 if terraza_desbloqueada else 6
+
+## Capacidad de cada mesa (las mesas 1-3 son de 2 personas, el resto de 4).
+func capacidad_mesa(numero: int) -> int:
+	return 2 if numero <= 3 else 4
+
+# ---------------------------------------------------------------- Dinero, reputación y compras
+
+func cambiar_dinero(cantidad: int) -> void:
+	dinero += cantidad
+	dinero_cambiado.emit(dinero)
+
+func cambiar_reputacion(delta: float, motivo: String = "") -> void:
+	var anterior := reputacion
+	reputacion = clampf(reputacion + delta, 0.0, 100.0)
+	reputacion_cambiada.emit(reputacion)
+	if motivo != "":
+		aviso.emit("%s (%+d%% reputación)" % [motivo, int(round(delta))])
+	if reputacion <= 0.0 and anterior > 0.0:
+		reputacion_agotada.emit()
+
+## Compra en la mañana. Devuelve "" si tuvo éxito o el motivo del rechazo.
+func comprar(insumo: String, cantidad: int) -> String:
+	if not Catalogo.INSUMOS.has(insumo) or cantidad <= 0:
+		return "Producto no válido."
+	var costo := int(Catalogo.INSUMOS[insumo]["precio"]) * cantidad
+	if costo > dinero:
+		return "No te alcanza el dinero."
+	if cantidad > espacio_libre():
+		return "No hay espacio en el almacén."
+	cambiar_dinero(-costo)
+	inventario.agregar(insumo, cantidad, dia)
+	estadisticas["compras"] = int(estadisticas.get("compras", 0)) + costo
+	inventario_cambiado.emit()
+	return ""
+
+func costo_urgente(insumo: String, cantidad: int) -> int:
+	return int(ceil(float(Catalogo.INSUMOS[insumo]["precio"] * cantidad) * config.urgente_multiplicador_costo))
+
+## Paga un pedido urgente por teléfono. La entrega la programa el restaurante.
+func pagar_urgente(insumo: String, cantidad: int) -> bool:
+	var costo := costo_urgente(insumo, cantidad)
+	if costo > dinero:
+		aviso.emit("No hay dinero suficiente para el pedido urgente.")
+		return false
+	cambiar_dinero(-costo)
+	estadisticas["urgentes"] += 1
+	estadisticas["gasto_urgente"] += costo
+	return true
+
+func recibir_urgente(insumo: String, cantidad: int) -> void:
+	inventario.agregar(insumo, cantidad, dia)
+	inventario_cambiado.emit()
+	aviso.emit("Llegó el proveedor: +%d %s" % [cantidad, Catalogo.nombre_insumo(insumo)])
+
+## Consume los insumos de un platillo. Si faltan, registra el quiebre de stock.
+func preparar(platillo: String) -> bool:
+	if inventario.consumir_receta(platillo):
+		inventario_cambiado.emit()
+		_revisar_stock_bajo(platillo)
+		return true
+	estadisticas["quiebres"] += 1
+	return false
+
+func _revisar_stock_bajo(platillo: String) -> void:
+	for insumo in Catalogo.receta(platillo):
+		var restante := inventario.total(insumo)
+		if restante <= 2:
+			AudioManager.sfx("stock_bajo")
+			aviso.emit("Stock bajo: %s (%d)" % [Catalogo.nombre_insumo(insumo), restante])
+			return
+
+func registrar_venta(platillo: String, propina: int) -> void:
+	var total := Catalogo.precio(platillo) + propina
+	cambiar_dinero(total)
+	estadisticas["ventas"] += total
+	estadisticas["propinas"] += propina
+	estadisticas["pedidos"] += 1
+
+func registrar_estadistica(clave: String, cantidad: int = 1) -> void:
+	estadisticas[clave] = int(estadisticas.get(clave, 0)) + cantidad
+
+# ---------------------------------------------------------------- Reservaciones
+
+func _generar_reservaciones() -> void:
+	reservaciones = []
+	if nivel_actual < 2:
+		reservaciones_cambiadas.emit()
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = dia * 1000 + nivel_actual * 17 + ConfiguracionDificultad.TODAS.find(dificultad)
+	var cantidad := 4 if nivel_actual == 2 else 6
+	var minutos := MINUTOS_RESERVA.duplicate()
+	for i in range(cantidad):
+		# Algunos horarios se repiten a propósito para que haya que repartir mesas.
+		var minuto: int = minutos[rng.randi_range(0, minutos.size() - 1)]
+		reservaciones.append({
+			"id": "R-%d%02d" % [nivel_actual, i + 1],
+			"nombre": NOMBRES_RESERVA[rng.randi_range(0, NOMBRES_RESERVA.size() - 1)],
+			"minuto": minuto,
+			"personas": 2 if rng.randf() < 0.5 else 4,
+			"mesa": 0,
+			"estado": "pendiente",
+		})
+	reservaciones.sort_custom(func(a, b): return int(a["minuto"]) < int(b["minuto"]))
+	reservaciones_cambiadas.emit()
+
+func buscar_reservacion(id: String) -> Dictionary:
+	for r in reservaciones:
+		if r["id"] == id:
+			return r
+	return {}
+
+## Asigna una mesa. Devuelve "ok", "duplicada", "capacidad" o "invalida".
+func asignar_reservacion(id: String, mesa: int) -> String:
+	var reserva := buscar_reservacion(id)
+	if reserva.is_empty() or reserva["estado"] in ["llego", "atendida"] or mesa < 1 or mesa > numero_mesas():
+		return "invalida"
+	if int(reserva["personas"]) > capacidad_mesa(mesa):
+		aviso.emit("La Mesa %d es para %d personas; %s son %d." % [mesa, capacidad_mesa(mesa), reserva["nombre"], reserva["personas"]])
+		return "capacidad"
+	for otra in reservaciones:
+		if otra["id"] != id and int(otra["mesa"]) == mesa and int(otra["minuto"]) == int(reserva["minuto"]) and otra["estado"] != "atendida":
+			estadisticas["duplicados"] += 1
+			reserva["mesa"] = mesa
+			reserva["estado"] = "asignada"
+			reservaciones_cambiadas.emit()
+			cambiar_reputacion(-8.0, "¡Reservación duplicada! Mesa %d a los %d'" % [mesa, reserva["minuto"]])
+			AudioManager.sfx("cliente_perdido")
+			return "duplicada"
+	reserva["mesa"] = mesa
+	reserva["estado"] = "asignada"
+	reservaciones_cambiadas.emit()
+	return "ok"
+
+func reservacion_para_mesa(mesa: int, minuto_actual: float, ventana: float = 10.0) -> Dictionary:
+	for r in reservaciones:
+		if int(r["mesa"]) == mesa and r["estado"] == "asignada" and float(r["minuto"]) - minuto_actual <= ventana and float(r["minuto"]) + 5.0 >= minuto_actual:
+			return r
+	return {}
+
+# ---------------------------------------------------------------- Cierre de jornada
+
+func objetivo_cumplido() -> bool:
+	match nivel_actual:
+		1:
+			return estadisticas["quiebres"] == 0 and estadisticas["perdidos"] <= MAX_CLIENTES_PERDIDOS_N1
+		2:
+			return estadisticas["duplicados"] == 0 and estadisticas["ventas"] >= meta_ventas()
+		_:
+			return reputacion >= config.reputacion_minima
+
+func detalle_objetivo() -> Array[String]:
+	var lineas: Array[String] = []
+	match nivel_actual:
+		1:
+			lineas.append("%s Quiebres de stock: %d (máx. 0)" % [_marca(estadisticas["quiebres"] == 0), estadisticas["quiebres"]])
+			lineas.append("%s Clientes perdidos: %d (máx. %d)" % [_marca(estadisticas["perdidos"] <= MAX_CLIENTES_PERDIDOS_N1), estadisticas["perdidos"], MAX_CLIENTES_PERDIDOS_N1])
+		2:
+			lineas.append("%s Reservaciones duplicadas: %d (máx. 0)" % [_marca(estadisticas["duplicados"] == 0), estadisticas["duplicados"]])
+			lineas.append("%s Ventas: %s de %s" % [_marca(estadisticas["ventas"] >= meta_ventas()), UIKit.dinero(estadisticas["ventas"]), UIKit.dinero(meta_ventas())])
+		_:
+			lineas.append("%s Reputación: %d%% (meta %d%%)" % [_marca(reputacion >= config.reputacion_minima), int(reputacion), int(config.reputacion_minima)])
+	return lineas
+
+func _marca(ok: bool) -> String:
+	return "✔" if ok else "✘"
+
+## Cierra la jornada, calcula la merma nocturna y la progresión. Devuelve el informe.
+func cerrar_jornada(motivo_derrota: String = "") -> Dictionary:
+	var exito := motivo_derrota == "" and objetivo_cumplido()
+	var nivel_jugado := nivel_actual
+	var lineas_objetivo := detalle_objetivo()
+	dia += 1
+	var merma := inventario.retirar_caducados(dia, config.dias_caducidad)
+	var costo_merma := 0
+	for insumo in merma:
+		costo_merma += int(merma[insumo]) * int(Catalogo.INSUMOS[insumo]["precio"])
+	inventario_cambiado.emit()
+	ultimo_informe = {
+		"dia": dia - 1,
+		"nivel": nivel_jugado,
+		"nombre_nivel": info_nivel(nivel_jugado)["nombre"],
+		"exito": exito,
+		"motivo": motivo_derrota,
+		"objetivo": info_nivel(nivel_jugado)["objetivo"],
+		"lineas_objetivo": lineas_objetivo,
+		"estadisticas": estadisticas.duplicate(),
+		"merma": merma,
+		"costo_merma": costo_merma,
+		"reputacion": reputacion,
+		"dinero": dinero,
+		"temporada_completa": false,
+	}
+	if exito:
+		historial.append(ultimo_informe)
+		nivel_desbloqueado = maxi(nivel_desbloqueado, mini(nivel_jugado + 1, 3))
+		if nivel_jugado >= 3:
+			temporada_completada = true
+			terraza_desbloqueada = true
+			ultimo_informe["temporada_completa"] = true
+		else:
+			nivel_actual = nivel_jugado + 1
+		_guardar_datos(_capturar())
+	return ultimo_informe
+
+## Compra una mejora en el reporte de cierre.
+func comprar_mejora(id: String) -> bool:
+	if not MEJORAS.has(id):
+		return false
+	var datos: Dictionary = MEJORAS[id]
+	if int(mejoras[id]) >= int(datos["maximo"]) or dinero < int(datos["costo"]):
+		return false
+	cambiar_dinero(-int(datos["costo"]))
+	mejoras[id] = int(mejoras[id]) + 1
+	AudioManager.sfx("mejora")
+	_guardar_datos(_capturar())
+	return true
+
+func _reiniciar_estadisticas() -> void:
+	estadisticas = {
+		"ventas": 0, "propinas": 0, "pedidos": 0, "perdidos": 0, "quiebres": 0, "urgentes": 0,
+		"gasto_urgente": 0, "sustitutos": 0, "agotados": 0, "duplicados": 0, "reservas_atendidas": 0,
+		"reservas_sin_mesa": 0, "vip_atendidos": 0, "compras": 0, "goles": 0, "reputacion_inicial": reputacion,
+	}
+
+# ---------------------------------------------------------------- Guardado
+
+func _capturar() -> Dictionary:
+	return {
+		"version": 1, "dificultad": dificultad, "dia": dia, "nivel_actual": nivel_actual,
+		"nivel_desbloqueado": nivel_desbloqueado, "dinero": dinero, "reputacion": reputacion,
+		"inventario": inventario.a_datos(), "mejoras": mejoras.duplicate(),
+		"terraza": terraza_desbloqueada, "temporada_completada": temporada_completada,
+		"intro_vista": intro_vista, "historial": historial.duplicate(true),
+	}
+
+func _restaurar(datos: Dictionary) -> void:
+	dificultad = str(datos.get("dificultad", ConfiguracionDificultad.NORMAL))
+	config = ConfiguracionDificultad.obtener(dificultad)
+	dia = int(datos.get("dia", 1))
+	nivel_actual = clampi(int(datos.get("nivel_actual", 1)), 1, 3)
+	nivel_desbloqueado = clampi(int(datos.get("nivel_desbloqueado", 1)), 1, 3)
+	dinero = int(datos.get("dinero", config.dinero_inicial))
+	reputacion = float(datos.get("reputacion", REPUTACION_INICIAL))
+	inventario = Inventario.new()
+	inventario.desde_datos(datos.get("inventario", []))
+	var guardadas: Dictionary = datos.get("mejoras", {})
+	for clave in mejoras:
+		mejoras[clave] = int(guardadas.get(clave, 0))
+	terraza_desbloqueada = bool(datos.get("terraza", false))
+	temporada_completada = bool(datos.get("temporada_completada", false))
+	intro_vista = bool(datos.get("intro_vista", false))
+	historial = []
+	for informe in datos.get("historial", []):
+		if informe is Dictionary:
+			historial.append(informe)
+
+func guardar() -> void:
+	_guardar_datos(_capturar())
+
+func _guardar_datos(datos: Dictionary) -> void:
+	var archivo := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	if archivo == null:
+		push_warning("No se pudo guardar la partida: %s" % error_string(FileAccess.get_open_error()))
+		return
+	archivo.store_string(JSON.stringify(datos, "\t"))
+
+func hay_partida_guardada() -> bool:
+	return FileAccess.file_exists(SAVE_PATH)
+
+func cargar() -> bool:
+	if not hay_partida_guardada():
+		return false
+	var datos = JSON.parse_string(FileAccess.get_file_as_string(SAVE_PATH))
+	if not datos is Dictionary:
+		return false
+	_restaurar(datos)
+	partida_activa = true
+	iniciar_manana()
+	return true
+
+func borrar_guardado() -> void:
+	if hay_partida_guardada():
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE_PATH))
+
+# ---------------------------------------------------------------- Escenas y controles
+
+func cambiar_escena(ruta: String) -> void:
+	var entrada := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	entrada.tween_property(_transicion, "color:a", 1.0, 0.25)
+	await entrada.finished
+	get_tree().paused = false
+	get_tree().change_scene_to_file(ruta)
+	var salida := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	salida.tween_property(_transicion, "color:a", 0.0, 0.25)
+
+func _crear_capa_transicion() -> void:
+	var capa := CanvasLayer.new()
+	capa.layer = 100
+	add_child(capa)
+	_transicion = ColorRect.new()
+	_transicion.color = Color(0, 0, 0, 0)
+	_transicion.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_transicion.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	capa.add_child(_transicion)
+
+func _configurar_controles() -> void:
+	var acciones := {
+		"mover_izquierda": [KEY_A, KEY_LEFT],
+		"mover_derecha": [KEY_D, KEY_RIGHT],
+		"mover_arriba": [KEY_W, KEY_UP],
+		"mover_abajo": [KEY_S, KEY_DOWN],
+		"interactuar": [KEY_SPACE, KEY_ENTER],
+		"tablet": [KEY_E],
+		"pedido_urgente": [KEY_Q],
+		"reservaciones": [KEY_R],
+		"inventario": [KEY_I],
+		"pausa": [KEY_ESCAPE],
+	}
+	for accion in acciones:
+		if not InputMap.has_action(accion):
+			InputMap.add_action(accion)
+		for tecla in acciones[accion]:
+			var evento := InputEventKey.new()
+			evento.physical_keycode = tecla
+			if not InputMap.action_has_event(accion, evento):
+				InputMap.action_add_event(accion, evento)

@@ -84,7 +84,7 @@ scripts/
   ui/           Menú, tablet, tiendas, pedido urgente, diálogos, reporte, victoria
 scenes/         Escenas de cada pantalla (menu, town, restaurant, ui)
 tests/          Pruebas headless
-tools/          recortar_monster.py, componer_pueblo.py y construir_mapa_pueblo.gd
+tools/          recortar_monster.py, componer_pueblo.py, construir_mapa_pueblo.gd y generar_sprites_restaurante.py
 ```
 
 El detalle de cómo se implementó cada mecánica del documento está en `DISENO.md`.
@@ -128,6 +128,8 @@ El Mercado, la Cervecería y el restaurante se arman con tiles de **Kenney Rogue
 - `cuarto()` arma las paredes, el piso y la puerta.
 - `poner()`, `fila()` y `columna()` colocan muebles por número de tile.
 - `solido()` agrega la colisión.
+
+Las pantallas del partido y el letrero de neón son pixel art propio generado por `tools/generar_sprites_restaurante.py` (`Assets/sprites/restaurante/`): la cancha alterna dos cuadros, muestra "GOL!" en cada gol y el neón parpadea. Se pueden reemplazar desde `AssetPaths` (claves `tv_1`, `tv_2`, `tv_gol`, `neon_on` y `neon_off`).
 
 La distribución de cada tienda está en `store.gd` (`_amueblar_mercado` y `_amueblar_cerveceria`) y la del restaurante en `restaurant.gd` (`_construir_escenario`).
 

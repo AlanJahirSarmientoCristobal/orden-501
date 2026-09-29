@@ -9,6 +9,8 @@ Los gráficos temporales del proyecto usan paquetes de Kenney publicados bajo Cr
 
 Sitio del autor: https://kenney.nl/
 
+Las pantallas del partido y el letrero de neón (`Assets/sprites/restaurante/`) son originales del proyecto, generados con `tools/generar_sprites_restaurante.py`.
+
 La música y los efectos de sonido se generan por código en `scripts/autoload/audio_manager.gd`; no se usan archivos de audio de terceros.
 
 Estos recursos son provisionales: se reemplazarán por los assets propios del equipo (ver "Cambiar los assets" en `README.md`).

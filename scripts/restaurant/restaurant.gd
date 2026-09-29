@@ -48,6 +48,11 @@ var _hud_reputacion: Label
 var _hud_bandeja: Label
 var _panel_lateral: VBoxContainer
 var _pantallas: Array[Label] = []
+var _televisores: Array[Sprite2D] = []
+var _neon: Sprite2D
+var _cuadro_tv := 0.0
+var _gol_en_pantalla := 0.0
+var _parpadeo := 0.0
 
 func _ready() -> void:
 	randomize()
@@ -165,11 +170,23 @@ func _construir_escenario() -> void:
 	_pared(Rect2(0, 100, 96, 628))                 # Cocina y trastienda
 	_pared(Rect2(144, 628, 48, 48))                # Maceta
 	for i in range(2):
-		var pantalla := UIKit.etiqueta("", 12, Color("d9ffd9"), true)
-		pantalla.position = Vector2(250 + i * 380, 66)
-		pantalla.size = Vector2(200, 30)
-		add_child(pantalla)
-		_pantallas.append(pantalla)
+		var tv := Sprite2D.new()
+		tv.texture = AssetPaths.textura("tv_1")
+		tv.scale = Vector2(2.5, 2.5)
+		tv.position = Vector2(350 + i * 380, 80)
+		add_child(tv)
+		_televisores.append(tv)
+		var marcador := UIKit.etiqueta("", 10, Color("d9ffd9"), true)
+		marcador.position = Vector2(tv.position.x - 90, 57)
+		marcador.size = Vector2(180, 16)
+		marcador.add_theme_constant_override("outline_size", 0)
+		add_child(marcador)
+		_pantallas.append(marcador)
+	_neon = Sprite2D.new()
+	_neon.texture = AssetPaths.textura("neon_on")
+	_neon.scale = Vector2(2.5, 2.5)
+	_neon.position = Vector2(110, 79)
+	add_child(_neon)
 	var chef := AnimatedSprite2D.new()
 	chef.sprite_frames = AssetPaths.frames_personaje("chef")
 	chef.animation = &"side"
@@ -201,13 +218,6 @@ func _pared(rect: Rect2) -> void:
 
 func _draw() -> void:
 	# El piso, las paredes y los muebles son tiles (ver _construir_escenario).
-	# Pantallas del partido sobre la pared
-	for i in range(2):
-		draw_rect(Rect2(240 + i * 380, 60, 220, 38), Color("111111"))
-		draw_rect(Rect2(244 + i * 380, 64, 212, 30), Color("0e3b1f"))
-	# Letrero de neón
-	draw_rect(Rect2(20, 62, 180, 34), Color("1b1f2a"))
-	draw_rect(Rect2(20, 62, 180, 34), Color("ff5fa2"), false, 2.0)
 	# Separador del panel lateral
 	draw_rect(Rect2(1000, 52, 280, 668), Color("1b1f2a"))
 
@@ -219,10 +229,6 @@ func _construir_estaciones() -> void:
 	barra.configurar(Catalogo.BARRA, Vector2(170, 480))
 	add_child(barra)
 	add_child(PuntoInteraccion.crear("Teléfono: pedido urgente al proveedor", Vector2(170, 600), abrir_urgente, 40))
-	var neon := UIKit.etiqueta("LA 501", 18, Color("ff9fd0"), true)
-	neon.position = Vector2(20, 66)
-	neon.size = Vector2(180, 28)
-	add_child(neon)
 
 func _construir_mesas() -> void:
 	var posiciones: Array = POS_MESAS.duplicate()
@@ -258,6 +264,7 @@ func _process(delta: float) -> void:
 	_sentar_clientes()
 	_procesar_entregas(delta)
 	_procesar_eventos()
+	_animar_decoracion(delta)
 	_refresco_panel += delta
 	if _refresco_panel >= 0.4:
 		_refresco_panel = 0.0
@@ -376,6 +383,7 @@ func _gol() -> void:
 	marcador[equipo] += 1
 	GameState.registrar_estadistica("goles")
 	AudioManager.sfx("gol")
+	_gol_en_pantalla = 2.5
 	var rondas := 0
 	for cliente in get_tree().get_nodes_in_group("clientes"):
 		if randf() < 0.7 and cliente.pedir_extra():
@@ -390,6 +398,20 @@ func _gol() -> void:
 	var tween := destello.create_tween()
 	tween.tween_property(destello, "color:a", 0.0, 0.6)
 	tween.tween_callback(destello.queue_free)
+
+## Pantallas: la jugada alterna dos cuadros; en un gol muestran "GOL!". El neón parpadea a ratos.
+func _animar_decoracion(delta: float) -> void:
+	_cuadro_tv += delta
+	if _gol_en_pantalla > 0.0:
+		_gol_en_pantalla -= delta
+	var clave := "tv_gol" if _gol_en_pantalla > 0.0 else ("tv_1" if int(_cuadro_tv / 0.6) % 2 == 0 else "tv_2")
+	for tv in _televisores:
+		tv.texture = AssetPaths.textura(clave)
+	_parpadeo -= delta
+	if _parpadeo <= 0.0:
+		var apagado := randf() < 0.18
+		_neon.texture = AssetPaths.textura("neon_off" if apagado else "neon_on")
+		_parpadeo = randf_range(0.05, 0.15) if apagado else randf_range(0.8, 3.0)
 
 func probabilidad_bebida() -> float:
 	if minuto >= 45.0 and minuto <= 60.0:

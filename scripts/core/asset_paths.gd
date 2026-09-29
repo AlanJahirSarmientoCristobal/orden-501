@@ -41,6 +41,12 @@ const TEXTURAS := {
 	"puerta_doble": "res://Assets/sprites/rpg_urban/Tiles/tile_0284.png",
 	"refrigerador": "res://Assets/sprites/rpg_urban/Tiles/tile_0282.png",
 	"planta": "res://Assets/sprites/rpg_urban/Tiles/tile_0265.png",
+	# Restaurante (pixel art propio generado con tools/generar_sprites_restaurante.py)
+	"tv_1": "res://Assets/sprites/restaurante/tv_1.png",
+	"tv_2": "res://Assets/sprites/restaurante/tv_2.png",
+	"tv_gol": "res://Assets/sprites/restaurante/tv_gol.png",
+	"neon_on": "res://Assets/sprites/restaurante/neon_on.png",
+	"neon_off": "res://Assets/sprites/restaurante/neon_off.png",
 }
 
 ## Personajes: índice del primer tile de la columna "abajo" en el tileset RPG Urban.

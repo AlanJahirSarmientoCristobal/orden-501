@@ -7,7 +7,7 @@ Resumen de cómo se implementó cada sección de `ORDEN_501_Actividad1.docx`, y 
 | Sección del documento | Implementación |
 |---|---|
 | Ciclo del día: mañana → jornada → faltante → cierre | `town.gd` → `restaurant.gd` → `closing_report.gd` |
-| Mapa del pueblo con Mercado y Cervecería | `scripts/town/town.gd` (2×2 pantallas, minimapa, peatones y vecinos con consejos) |
+| Mapa del pueblo con Mercado y Cervecería | `scenes/town/mapa_pueblo.tscn` (TileMap estilo Kenney) + `scripts/town/town.gd` (puertas, minimapa, peatones y vecinos) |
 | Tiendas con interior | `scripts/town/store.gd`: cada insumo en su propio estante; la compra se hace en `panel_tienda.gd` |
 | Monster (7 diseños, un solo producto) | `AssetPaths.siguiente_diseno("monster")` rota el sprite cada vez que se muestra |
 | Dinero y capacidad del almacén limitados | `GameState.comprar()`, `capacidad_almacen()` |

@@ -32,7 +32,7 @@ func _run() -> void:
 	_check(pueblo != null and pueblo.name == "Town", "No se abrió el pueblo")
 
 	# Entrar a la Cervecería, comprar Monster en su exhibidor y volver al pueblo.
-	var puerta: Vector2 = Vector2(pueblo.CERVECERIA.get_center().x, pueblo.CERVECERIA.end.y + 42)
+	var puerta: Vector2 = pueblo.puerta("cerveceria") + Vector2(0, pueblo.tile * 0.6)
 	pueblo._entrar_tienda(Catalogo.CERVECERIA, puerta)
 	await _esperar_escena("Store")
 	var tienda := get_tree().current_scene

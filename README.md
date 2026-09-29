@@ -84,7 +84,7 @@ scripts/
   ui/           Menú, tablet, tiendas, pedido urgente, diálogos, reporte, victoria
 scenes/         Escenas de cada pantalla (menu, town, restaurant, ui)
 tests/          Pruebas headless
-tools/          recortar_monster.py (recorta la hoja de diseños de Monster)
+tools/          recortar_monster.py, componer_pueblo.py y construir_mapa_pueblo.gd
 ```
 
 El detalle de cómo se implementó cada mecánica del documento está en `DISENO.md`.
@@ -105,7 +105,23 @@ Todos los gráficos y sonidos se referencian desde **`scripts/core/asset_paths.g
 - `PERSONAJES`: sprites de Dani, el Chef, los clientes y los vendedores. Hoy se toman del tileset RPG Urban (tres cuadros por dirección). Para usar hojas propias, cambia `frames_personaje()` por un `SpriteFrames` que armes en el editor.
 - `AUDIO`: si guardas en `Assets/audio/` un archivo con el nombre indicado (por ejemplo `musica_jornada.ogg` o `gol.ogg`), el juego lo usa en lugar del sonido generado por código.
 
-Los escenarios del pueblo y el restaurante se dibujan con formas simples en `town.gd` y `restaurant.gd` (funciones `_draw`), y se pueden sustituir por un `TileMap` o por imágenes propias.
+### Mapa del pueblo (TileMap)
+
+El pueblo se arma con tiles de Kenney RPG Urban, en el mismo estilo que `Assets/sprites/rpg_urban/Sample.png`:
+
+- `scenes/town/mapa_pueblo.tscn`: dos `TileMapLayer` (Suelo y Objetos) con el TileSet `Assets/tilesets/rpg_urban.tres`, que ya incluye las colisiones. **Se puede abrir y pintar en el editor de Godot.**
+- `scenes/town/mapa_pueblo.json`: la ubicación de las puertas, el parque, la plaza y la cancha, que usa `town.gd`.
+
+Para regenerar el mapa desde cero (esto sobrescribe los cambios hechos a mano en la escena):
+
+```powershell
+python tools/componer_pueblo.py vista_previa.png
+godot --headless --path . --script res://tools/construir_mapa_pueblo.gd
+```
+
+Si cambias en el editor dónde están las puertas, actualiza también sus coordenadas en `mapa_pueblo.json`.
+
+El interior de las tiendas y el restaurante todavía se dibuja con formas simples (`store.gd` y `restaurant.gd`), porque el pack urbano no incluye tiles de interiores.
 
 Los gráficos temporales son de Kenney (CC0). Consulta `THIRD_PARTY_LICENSES.md`.
 

@@ -25,9 +25,24 @@ func _process(delta: float) -> void:
 	_refresco += delta
 	if _refresco >= 0.5:
 		_refresco = 0.0
-		construir()
+		# Solo se reconstruye si cambió algo visible (dinero, existencias o entregas).
+		var firma := _firma()
+		if firma != _ultima_firma:
+			construir()
+
+var _ultima_firma := ""
+
+func _firma() -> String:
+	var partes := [str(GameState.dinero)]
+	for insumo in Catalogo.INSUMOS:
+		partes.append(str(GameState.inventario.total(insumo)))
+	if restaurante:
+		for entrega in restaurante.entregas:
+			partes.append("%s%d" % [entrega["insumo"], int(ceil(entrega["restante"]))])
+	return ",".join(partes)
 
 func construir() -> void:
+	_ultima_firma = _firma()
 	UIKit.limpiar(contenido)
 	var config := GameState.config
 	var info := UIKit.etiqueta("Proveedor de emergencia: cobra ×%.1f y tarda %d s en llegar. Dinero: %s" % [config.urgente_multiplicador_costo, int(config.urgente_demora), UIKit.dinero(GameState.dinero)], 15, UIKit.ACENTO)

@@ -8,7 +8,7 @@ Videojuego 2D de gestión en vista cenital (top-down), hecho con **Godot 4.7** p
 
 Dani, el nuevo gerente de La 501, debe poner en orden el negocio durante la temporada. Cada día tiene dos fases:
 
-1. **Mañana (pueblo):** recorre el pueblo (avenidas, plaza, parque, cancha y vecinos que dan consejos, con minimapa) y entra a las tiendas. Dentro del **Mercado** cada producto está en su estante: carnicería, pollería, panadería, costales de papas y puesto de verduras. En la **Cervecería** hay refrigeradores de cerveza y de refresco, un congelador de hielo y el exhibidor de **Monster**. El dinero y el almacén son limitados, y algunos insumos caducan.
+1. **Mañana (pueblo):** recorre el pueblo (avenidas, plaza, parque, cancha y vecinos que dan consejos, con minimapa) y entra a las tiendas. Las tiendas están decoradas con sus productos y para comprar se habla con el vendedor de la caja, que abre un **menú al estilo de Pokémon Rojo Fuego** (lista con cursor, "¿Cuántos quieres?" y confirmación Sí / No). En el **Mercado** se ve cada producto en su mueble: carnicería, pollería, panadería, costales de papas y puesto de verduras. En la **Cervecería** hay refrigeradores de cerveza y de refresco, un congelador de hielo y el exhibidor de **Monster**. El dinero y el almacén son limitados, y algunos insumos caducan.
 2. **Jornada (restaurante):** atiende las mesas durante el partido. Hay que tomar pedidos, recoger en el pase de cocina o la barra, servir y limpiar mesas antes de que se agote la paciencia de los clientes. En el medio tiempo llega una ola de aficionados y cada gol provoca una ronda de bebidas.
 
 Si un insumo se acaba, eliges entre **marcar el platillo como agotado**, hacer un **pedido urgente** por teléfono (más caro y tarda en llegar) u **ofrecer un sustituto** (menos propina). Al cerrar el día aparece el **reporte de cierre**, con ventas, merma, reservaciones y reputación, y ahí se compran **mejoras**.
@@ -98,7 +98,7 @@ El detalle de cómo se implementó cada mecánica del documento está en `DISENO
 python tools/recortar_monster.py
 ```
 
-El script genera `monster_1.png` … `monster_7.png` sin el fondo. Mientras no existan esos archivos, el juego dibuja 7 latas provisionales con los mismos colores.
+El script genera `monster_1.png` … `monster_7.png` sin el fondo. La hoja debe ser un PNG real (si es JPEG, conviértelo a PNG antes de copiarla). Mientras no existan esos archivos, el juego dibuja 7 latas provisionales con los mismos colores.
 
 Todos los gráficos y sonidos se referencian desde **`scripts/core/asset_paths.gd`**:
 

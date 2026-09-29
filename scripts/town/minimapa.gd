@@ -11,8 +11,13 @@ var objetivo: Node2D
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-func _process(_delta: float) -> void:
-	queue_redraw()
+var _espera := 0.0
+
+func _process(delta: float) -> void:
+	_espera -= delta
+	if _espera <= 0.0:
+		_espera = 0.1
+		queue_redraw()
 
 func _escala() -> Vector2:
 	return size / tamano_mundo

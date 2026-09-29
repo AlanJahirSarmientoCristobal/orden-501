@@ -1,7 +1,8 @@
 extends FaseManana
 
 ## Interior del Mercado o la Cervecería, construido con tiles de Kenney (Roguelike RPG + Indoors).
-## Cada producto está en su propio mueble: Dani camina hasta él y compra ahí.
+## La tienda está decorada con los productos en sus muebles; para comprar se habla con el
+## vendedor de la caja, que abre un menú al estilo de Pokémon Rojo Fuego (MenuCompra).
 
 const ANCHO := 17
 const ALTO := 12
@@ -12,20 +13,20 @@ const ORIGEN := Vector2(232, 100)
 const R := Interior.RPG
 const I := Interior.INDOOR
 
-## Estantes: insumo, título, rect de tiles del mueble (sólido) y tile donde se compra.
+## Muebles con productos (decoración con colisión): rect de tiles.
 const ESTANTES := {
 	Catalogo.MERCADO: [
-		{"insumo": "carne", "titulo": "CARNICERÍA", "rect": [2, 3, 4, 1], "compra": [3.5, 4.2]},
-		{"insumo": "pollo", "titulo": "POLLERÍA", "rect": [7, 3, 3, 1], "compra": [8.0, 4.2]},
-		{"insumo": "pan", "titulo": "PANADERÍA", "rect": [11, 3, 4, 1], "compra": [12.5, 4.2]},
-		{"insumo": "papas", "titulo": "PAPAS", "rect": [1, 6, 2, 3], "compra": [3.3, 7.0]},
-		{"insumo": "verdura", "titulo": "VERDURAS", "rect": [6, 6, 5, 3], "compra": [8.0, 9.2]},
+		{"insumo": "carne", "titulo": "CARNICERÍA", "rect": [2, 3, 4, 1]},
+		{"insumo": "pollo", "titulo": "POLLERÍA", "rect": [7, 3, 3, 1]},
+		{"insumo": "pan", "titulo": "PANADERÍA", "rect": [11, 3, 4, 1]},
+		{"insumo": "papas", "titulo": "PAPAS", "rect": [1, 6, 2, 3]},
+		{"insumo": "verdura", "titulo": "VERDURAS", "rect": [6, 6, 5, 3]},
 	],
 	Catalogo.CERVECERIA: [
-		{"insumo": "cerveza", "titulo": "CERVEZAS", "rect": [1, 3, 6, 2], "compra": [4.0, 5.2]},
-		{"insumo": "refresco", "titulo": "REFRESCOS", "rect": [11, 3, 5, 2], "compra": [13.0, 5.2]},
-		{"insumo": "hielo", "titulo": "HIELO", "rect": [1, 8, 3, 1], "compra": [2.0, 9.2]},
-		{"insumo": "monster", "titulo": "MONSTER ENERGY", "rect": [7, 6, 3, 2], "compra": [8.0, 8.2]},
+		{"insumo": "cerveza", "titulo": "CERVEZAS", "rect": [1, 3, 6, 2]},
+		{"insumo": "refresco", "titulo": "REFRESCOS", "rect": [11, 3, 5, 2]},
+		{"insumo": "hielo", "titulo": "HIELO", "rect": [1, 8, 3, 1]},
+		{"insumo": "monster", "titulo": "MONSTER ENERGY", "rect": [7, 6, 3, 2]},
 	],
 }
 const CAJA := [12, 9, 3, 1]
@@ -34,7 +35,8 @@ var tienda := Catalogo.MERCADO
 var interior: Interior
 var _exhibidor: Sprite2D
 var _rotacion := 0.0
-var _estante: PanelTienda
+var _menu: MenuCompra
+var _nombre_vendedor := ""
 
 func nombre_lugar() -> String:
 	return "MERCADO CENTRAL" if tienda == Catalogo.MERCADO else "CERVECERÍA LA ESQUINA"
@@ -60,17 +62,16 @@ func _ready() -> void:
 	_amueblar_caja()
 
 	for estante in ESTANTES[tienda]:
-		_crear_estante(estante)
+		var r: Array = estante["rect"]
+		interior.solido(r[0], r[1], r[2], r[3])
 	etiqueta_mapa(nombre_lugar(), ORIGEN + Vector2(0, -2), ANCHO * Interior.LADO, UIKit.ACENTO, 20)
-	add_child(PuntoInteraccion.crear("Salir al pueblo", interior.a_mundo(8, ALTO - 1.6), _salir, 36))
+	_crear_puerta()
 
 	crear_dani(interior.a_mundo(8, ALTO - 2.6), false)
 	preparar_fase()
-	# Ventana compacta para comprar un solo producto desde su estante.
-	_estante = PanelTienda.new()
-	_estante._producto = "compacto"
-	add_child(_estante)
-	GameState.aviso.emit("Acércate a cada estante y presiona Espacio para comprar.")
+	_menu = MenuCompra.new()
+	add_child(_menu)
+	GameState.aviso.emit("Habla con %s en la caja para comprar." % _nombre_vendedor)
 
 func _process(delta: float) -> void:
 	super._process(delta)
@@ -148,32 +149,39 @@ func _amueblar_caja() -> void:
 	interior.poner(x + 2, y, R, 1017, 2)
 	interior.solido(x, y, CAJA[2], CAJA[3])
 	var vendedor := "vendedor_mercado" if tienda == Catalogo.MERCADO else "encargado_cerveceria"
-	var nombre_vendedor := "Don Chema" if tienda == Catalogo.MERCADO else "Lupita"
-	npc(vendedor, interior.a_mundo(x + 1, y - 0.8), nombre_vendedor, &"down")
-	add_child(PuntoInteraccion.crear("Platicar con %s" % nombre_vendedor, interior.a_mundo(x + 1, y + 1.1), _platicar, 34))
+	_nombre_vendedor = "Don Chema" if tienda == Catalogo.MERCADO else "Lupita"
+	npc(vendedor, interior.a_mundo(x + 1, y - 0.8), _nombre_vendedor, &"down")
+	add_child(PuntoInteraccion.crear("Comprar con %s" % _nombre_vendedor, interior.a_mundo(x + 1, y + 1.1), abrir_menu, 40))
 
 func _ajustar_exhibidor() -> void:
 	if _exhibidor and _exhibidor.texture:
 		var escala := 56.0 / float(_exhibidor.texture.get_height())
 		_exhibidor.scale = Vector2(escala, escala)
 
-func _crear_estante(estante: Dictionary) -> void:
-	var r: Array = estante["rect"]
-	interior.solido(r[0], r[1], r[2], r[3])
-	var insumo: String = estante["insumo"]
-	var datos: Dictionary = Catalogo.INSUMOS[insumo]
-	var zona := interior.rect_mundo(r[0], r[1], r[2], r[3])
-	var etiqueta := etiqueta_mapa("%s · %s" % [estante["titulo"], UIKit.dinero(datos["precio"])], Vector2(zona.position.x - 40, zona.position.y - 22), zona.size.x + 80, Color("fff0a6"), 12)
-	etiqueta.z_index = 20
-	var compra: Array = estante["compra"]
-	var titulo := "%s · %s" % [estante["titulo"], nombre_lugar()]
-	add_child(PuntoInteraccion.crear("Comprar %s" % datos["nombre"], interior.a_mundo(compra[0] - 0.5, compra[1] - 0.5), _comprar.bind(insumo, titulo), 34))
+func abrir_menu() -> void:
+	_menu.abrir(tienda, _nombre_vendedor)
 
-func _comprar(insumo: String, titulo: String) -> void:
-	_estante.abrir_producto(insumo, titulo)
+## La puerta: al cruzarla Dani sale al pueblo. Detrás del hueco hay un muro para no salir al vacío.
+func _crear_puerta() -> void:
+	var ancho_puerta := PUERTA_HASTA - PUERTA_DESDE + 1
+	interior.solido(PUERTA_DESDE, ALTO + 0.4, ancho_puerta, 1)
+	var salida := Area2D.new()
+	salida.collision_layer = 0
+	salida.collision_mask = 2
+	var forma := CollisionShape2D.new()
+	var caja := RectangleShape2D.new()
+	caja.size = Vector2(ancho_puerta, 0.5) * Interior.LADO
+	forma.shape = caja
+	salida.add_child(forma)
+	salida.position = interior.rect_mundo(PUERTA_DESDE, ALTO - 0.2, ancho_puerta, 0.5).get_center()
+	add_child(salida)
+	salida.body_entered.connect(_al_cruzar_puerta)
+	var letrero := etiqueta_mapa("SALIDA", interior.rect_mundo(PUERTA_DESDE, ALTO - 1, ancho_puerta, 1).position + Vector2(0, 10), ancho_puerta * Interior.LADO, UIKit.TEXTO, 12)
+	letrero.z_index = 20
 
-func _platicar() -> void:
-	GameState.aviso.emit(PanelTienda.SALUDOS.get(tienda, ""))
+func _al_cruzar_puerta(cuerpo: Node) -> void:
+	if cuerpo is Dani:
+		_salir()
 
 func _salir() -> void:
 	if terminando:

@@ -24,6 +24,9 @@ var tiempo_comiendo := 0.0
 var extras_pedidos := 0
 var quiebre_registrado := ""           # Platillo cuyo faltante ya se contó
 
+static var _estilos_barra := {}
+var _color_barra := -1
+
 var _sprite: AnimatedSprite2D
 var _barra: ProgressBar
 var _burbuja: PanelContainer
@@ -136,12 +139,14 @@ func _actualizar_barra() -> void:
 		return
 	var razon := clampf(paciencia / paciencia_max, 0.0, 1.0)
 	_barra.value = razon
-	var color := UIKit.VERDE
-	if razon <= 0.3:
-		color = UIKit.ROJO
-	elif razon <= 0.6:
-		color = Color("f2d16b")
-	_barra.add_theme_stylebox_override("fill", UIKit.estilo(color, 3, Color.TRANSPARENT, 0, 0))
+	var nivel := 0 if razon <= 0.3 else (1 if razon <= 0.6 else 2)
+	if nivel == _color_barra:
+		return
+	_color_barra = nivel
+	if not _estilos_barra.has(nivel):
+		var color: Color = [UIKit.ROJO, Color("f2d16b"), UIKit.VERDE][nivel]
+		_estilos_barra[nivel] = UIKit.estilo(color, 3, Color.TRANSPARENT, 0, 0)
+	_barra.add_theme_stylebox_override("fill", _estilos_barra[nivel])
 
 func razon_paciencia() -> float:
 	return clampf(paciencia / paciencia_max, 0.0, 1.0)

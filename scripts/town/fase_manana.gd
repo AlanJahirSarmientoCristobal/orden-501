@@ -12,7 +12,6 @@ var _hud_reputacion: Label
 var _hud_almacen: Label
 var _hud_tiempo: Label
 var _tablet: Tablet
-var _tienda: PanelTienda
 var _inventario: PanelInventario
 var _dialogo: DialogoOpciones
 var _notificaciones: Notificaciones
@@ -37,8 +36,6 @@ func preparar_fase() -> void:
 	_tablet = Tablet.new()
 	_tablet.notificaciones = _notificaciones
 	add_child(_tablet)
-	_tienda = PanelTienda.new()
-	add_child(_tienda)
 	_inventario = PanelInventario.new()
 	add_child(_inventario)
 	_dialogo = DialogoOpciones.new()

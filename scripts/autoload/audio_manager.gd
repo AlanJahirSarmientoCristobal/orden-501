@@ -12,6 +12,11 @@ var _murmullo: AudioStreamPlayer
 var _cache := {}
 var _pista_actual := ""
 var _silencio := false
+# Generación en segundo plano (evita tirones al cambiar de escena)
+var _mutex := Mutex.new()
+var _tarea := -1
+var _pregenerado := false
+var _pendiente := ""
 
 ## nombre -> [frecuencia, duración, tipo, volumen dB, clave de archivo opcional]
 const EFECTOS := {
@@ -44,6 +49,45 @@ func _ready() -> void:
 	_murmullo = AudioStreamPlayer.new()
 	_murmullo.volume_db = -60.0
 	add_child(_murmullo)
+	if not _silencio:
+		_tarea = WorkerThreadPool.add_task(_pregenerar, false, "Audio ORDEN 501")
+
+## Genera música, murmullo y efectos en un hilo aparte al iniciar el juego.
+func _pregenerar() -> void:
+	for nombre in EFECTOS:
+		var datos: Array = EFECTOS[nombre]
+		_tono(nombre, datos[0], datos[1], datos[2])
+	_generar_musica("manana")
+	_generar_musica("jornada")
+	_generar_murmullo()
+	call_deferred("_pregeneracion_lista")
+
+func _pregeneracion_lista() -> void:
+	_pregenerado = true
+	if _pendiente != "":
+		var pista := _pendiente
+		_pendiente = ""
+		_pista_actual = ""
+		musica(pista)
+
+func _exit_tree() -> void:
+	_exit_tree_audio()
+
+func _exit_tree_audio() -> void:
+	if _tarea != -1:
+		WorkerThreadPool.wait_for_task_completion(_tarea)
+		_tarea = -1
+
+func _leer(clave: String) -> AudioStreamWAV:
+	_mutex.lock()
+	var valor: AudioStreamWAV = _cache.get(clave)
+	_mutex.unlock()
+	return valor
+
+func _guardar(clave: String, valor: AudioStreamWAV) -> void:
+	_mutex.lock()
+	_cache[clave] = valor
+	_mutex.unlock()
 
 func sfx(nombre: String) -> void:
 	if _silencio or not EFECTOS.has(nombre):
@@ -68,6 +112,10 @@ func musica(pista: String) -> void:
 		return
 	var stream: AudioStream = AssetPaths.audio("musica_" + pista)
 	if stream == null:
+		if not _pregenerado and _leer("musica_" + pista) == null:
+			# Aún se está generando en segundo plano: empezará en cuanto esté lista.
+			_pendiente = pista
+			return
 		stream = _generar_musica(pista)
 	_musica.stream = stream
 	_musica.pitch_scale = 1.0
@@ -93,8 +141,9 @@ func _canal_libre() -> AudioStreamPlayer:
 	return _canales[0]
 
 func _tono(nombre: String, frecuencia: float, duracion: float, tipo: String) -> AudioStreamWAV:
-	if _cache.has(nombre):
-		return _cache[nombre]
+	var en_cache := _leer(nombre)
+	if en_cache:
+		return en_cache
 	var muestras := int(FRECUENCIA * duracion)
 	var datos := PackedFloat32Array()
 	datos.resize(muestras)
@@ -134,13 +183,14 @@ func _tono(nombre: String, frecuencia: float, duracion: float, tipo: String) -> 
 				s = sin(TAU * frecuencia * t) * exp(-t * 5.0)
 		datos[i] = s
 	var wav := _a_wav(datos, false)
-	_cache[nombre] = wav
+	_guardar(nombre, wav)
 	return wav
 
 func _generar_musica(pista: String) -> AudioStreamWAV:
 	var clave := "musica_" + pista
-	if _cache.has(clave):
-		return _cache[clave]
+	var en_cache := _leer(clave)
+	if en_cache:
+		return en_cache
 	var tranquila := pista == "manana"
 	var bpm := 84.0 if tranquila else 132.0
 	var pulso := 60.0 / bpm
@@ -169,12 +219,13 @@ func _generar_musica(pista: String) -> AudioStreamWAV:
 			bateria += (randf() * 2.0 - 1.0) * exp(-t_medio * 40.0) * 0.15
 		datos[i] = (melodia + bajo + bateria) * 0.8
 	var wav := _a_wav(datos, true)
-	_cache[clave] = wav
+	_guardar(clave, wav)
 	return wav
 
 func _generar_murmullo() -> AudioStreamWAV:
-	if _cache.has("murmullo"):
-		return _cache["murmullo"]
+	var en_cache := _leer("murmullo")
+	if en_cache:
+		return en_cache
 	var muestras := FRECUENCIA * 2
 	var datos := PackedFloat32Array()
 	datos.resize(muestras)
@@ -185,7 +236,7 @@ func _generar_murmullo() -> AudioStreamWAV:
 		previo = lerpf(previo, randf() * 2.0 - 1.0, 0.08)
 		datos[i] = previo * (0.6 + 0.4 * sin(TAU * 1.3 * t)) * 1.5
 	var wav := _a_wav(datos, true)
-	_cache["murmullo"] = wav
+	_guardar("murmullo", wav)
 	return wav
 
 func _a_wav(datos: PackedFloat32Array, bucle: bool) -> AudioStreamWAV:

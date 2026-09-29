@@ -5,6 +5,7 @@ Los gráficos temporales del proyecto usan paquetes de Kenney publicados bajo Cr
 - **RPG Urban Pack 1.0**, Kenney (pueblo, personajes y decoración). Licencia en `Assets/sprites/rpg_urban/License.txt`.
 - **Roguelike RPG Pack**, Kenney (pisos, paredes, refrigeradores, barriles, puestos de mercado y comida de los interiores). Licencia en `Assets/sprites/interiores/License_roguelike_rpg.txt`.
 - **Roguelike Indoors**, Kenney (mostradores, estufa, fregadero, mesas, sillas y plantas). Licencia en `Assets/sprites/interiores/License_roguelike_indoor.txt`.
+- **Kenney Fonts** (Kenney Pixel, usada en el menú de compra). Licencia en `Assets/fonts/License_kenney_fonts.txt`.
 - **Food Kit 2.0**, Kenney (solo las imágenes de `Previews/`, usadas como íconos de insumos y platillos). Licencia en `Assets/sprites/food_kit/License.txt`.
 
 Sitio del autor: https://kenney.nl/

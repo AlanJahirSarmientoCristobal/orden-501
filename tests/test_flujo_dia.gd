@@ -39,19 +39,35 @@ func _run() -> void:
 		cruzar.move_and_collide(Vector2(0, 8))
 	_check(cruzar.global_position.y >= 16.4 * t, "Dani no pudo cruzar la avenida (quedó en y=%d)" % int(cruzar.global_position.y))
 
-	# Entrar a la Cervecería, comprar Monster en su exhibidor y volver al pueblo.
+	# Entrar a la Cervecería, comprar 4 Monster en el menú de la caja (teclas simuladas)
+	# y salir cruzando la puerta caminando.
 	var puerta: Vector2 = pueblo.puerta("cerveceria") + Vector2(0, pueblo.tile * 0.6)
 	pueblo._entrar_tienda(Catalogo.CERVECERIA, puerta)
 	await _esperar_escena("Store")
 	var tienda := get_tree().current_scene
 	_check(tienda.tienda == Catalogo.CERVECERIA, "No se entró a la Cervecería")
-	tienda._comprar("monster", "MONSTER")
-	_check(tienda._estante.esta_abierto(), "El exhibidor no abrió la compra de Monster")
-	tienda._estante._cantidades["monster"] = 4
-	tienda._estante._comprar("monster")
-	_check(GameState.inventario.total("monster") == 4, "No se compró el Monster en la tienda")
-	tienda._estante.cerrar()
-	tienda._salir()
+	tienda.abrir_menu()
+	var menu: MenuCompra = tienda._menu
+	_check(menu.esta_abierto(), "La caja no abrió el menú de compra")
+	var indice_monster := menu.productos.find("monster")
+	for i in range(indice_monster):
+		await _tecla(KEY_DOWN)
+	await _tecla(KEY_SPACE)        # Elegir Monster → ¿Cuántos?
+	_check(menu.estado == MenuCompra.Estado.CANTIDAD, "No apareció el selector de cantidad")
+	for i in range(3):
+		await _tecla(KEY_UP)       # x04
+	await _tecla(KEY_SPACE)        # ¿Está bien?
+	await _tecla(KEY_SPACE)        # Sí
+	_check(GameState.inventario.total("monster") == 4, "El menú no compró 4 Monster (hay %d)" % GameState.inventario.total("monster"))
+	await _tecla(KEY_ESCAPE)       # Mensaje → lista
+	await _tecla(KEY_ESCAPE)       # Cerrar menú
+	_check(not menu.esta_abierto() and not tienda.dani.bloqueado, "El menú no se cerró")
+	var sale: Dani = tienda.dani
+	for i in range(120):
+		if get_tree().current_scene != tienda:
+			break
+		sale.move_and_collide(Vector2(0, 6))
+		await get_tree().physics_frame
 	await _esperar_escena("Town")
 	pueblo = get_tree().current_scene
 	_check(pueblo.dani.position == puerta, "Dani no reapareció en la puerta de la Cervecería")
@@ -93,6 +109,15 @@ func _run() -> void:
 		for f in fallos:
 			push_error("TEST_FLUJO_DIA: " + f)
 		get_tree().quit(1)
+
+func _tecla(codigo: Key) -> void:
+	for presionada in [true, false]:
+		var evento := InputEventKey.new()
+		evento.keycode = codigo
+		evento.physical_keycode = codigo
+		evento.pressed = presionada
+		Input.parse_input_event(evento)
+		await get_tree().process_frame
 
 func _check(condicion: bool, mensaje: String) -> void:
 	if not condicion:

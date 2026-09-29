@@ -29,6 +29,7 @@ var _detector: Area2D
 var _etiqueta: Label
 var _barra_mantener: ProgressBar
 var _barra_estamina: ProgressBar
+var _barra_agotada := true      # Fuerza a asignar el estilo la primera vez
 var _vista_bandeja: HBoxContainer
 var _cercanos: Array[Interactuable] = []
 var _objetivo_mantener: Interactuable
@@ -156,8 +157,9 @@ func actualizar_estamina(delta: float, quiere_correr: bool, moviendose: bool) ->
 	if _barra_estamina:
 		_barra_estamina.value = estamina
 		_barra_estamina.visible = estamina < ESTAMINA_MAX
-		var color := UIKit.ROJO if agotado else Color("7fe0ff")
-		_barra_estamina.add_theme_stylebox_override("fill", UIKit.estilo(color, 3, Color.TRANSPARENT, 0, 0))
+		if agotado != _barra_agotada:
+			_barra_agotada = agotado
+			_barra_estamina.add_theme_stylebox_override("fill", UIKit.estilo(UIKit.ROJO if agotado else Color("7fe0ff"), 3, Color.TRANSPARENT, 0, 0))
 	return corriendo
 
 func _animar(direccion: Vector2) -> void:

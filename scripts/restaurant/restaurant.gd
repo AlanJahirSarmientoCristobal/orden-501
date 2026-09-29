@@ -47,6 +47,7 @@ var _hud_dinero: Label
 var _hud_reputacion: Label
 var _hud_bandeja: Label
 var _panel_lateral: VBoxContainer
+var _lateral := {}
 var _pantallas: Array[Label] = []
 var _televisores: Array[Sprite2D] = []
 var _neon: Sprite2D
@@ -614,19 +615,20 @@ func _construir_hud() -> void:
 func _actualizar_hud() -> void:
 	if _hud_reloj == null:
 		return
-	_hud_reloj.text = "%d' · %s %d - %d %s" % [int(minuto), _equipos[0].left(10), marcador[0], marcador[1], _equipos[1].left(10)]
-	_hud_dinero.text = "Dinero %s" % UIKit.dinero(GameState.dinero)
-	_hud_reputacion.text = "%s %d%%" % [UIKit.estrellas(GameState.reputacion), int(GameState.reputacion)]
-	_hud_bandeja.text = "Bandeja %d/%d" % [dani.bandeja.size() if dani else 0, GameState.capacidad_bandeja()]
+	_fijar(_hud_reloj, "%d' · %s %d - %d %s" % [int(minuto), _equipos[0].left(10), marcador[0], marcador[1], _equipos[1].left(10)], Color("d9ffd9"))
+	_fijar(_hud_dinero, "Dinero %s" % UIKit.dinero(GameState.dinero), UIKit.TEXTO)
+	_fijar(_hud_reputacion, "%s %d%%" % [UIKit.estrellas(GameState.reputacion), int(GameState.reputacion)], UIKit.TEXTO)
+	_fijar(_hud_bandeja, "Bandeja %d/%d" % [dani.bandeja.size() if dani else 0, GameState.capacidad_bandeja()], UIKit.TEXTO)
 	var texto_pantalla := "%s %d-%d %s  %d'" % [_equipos[0].left(8), marcador[0], marcador[1], _equipos[1].left(8), int(minuto)]
 	for p in _pantallas:
 		p.text = texto_pantalla
 
+## El panel se construye una sola vez; después solo se actualizan textos y colores.
 func _actualizar_panel_lateral() -> void:
 	if _panel_lateral == null:
 		return
-	UIKit.limpiar(_panel_lateral)
-	_panel_lateral.add_child(UIKit.etiqueta("STOCK", 14, UIKit.ACENTO))
+	if _lateral.is_empty():
+		_construir_panel_lateral()
 	var inv := GameState.inventario
 	for insumo in Catalogo.INSUMOS:
 		var cantidad := inv.total(insumo)
@@ -634,30 +636,65 @@ func _actualizar_panel_lateral() -> void:
 		for e in entregas:
 			if e["insumo"] == insumo:
 				en_camino += int(e["cantidad"])
-		var texto := "%s: %d%s" % [Catalogo.nombre_insumo(insumo), cantidad, "  (+%d en camino)" % en_camino if en_camino > 0 else ""]
-		_panel_lateral.add_child(UIKit.etiqueta(texto, 12, UIKit.ROJO if cantidad <= 2 else UIKit.TEXTO))
-	if not agotados.is_empty():
-		_panel_lateral.add_child(UIKit.etiqueta("Agotado: " + ", ".join(agotados), 11, UIKit.ROJO))
-	_panel_lateral.add_child(HSeparator.new())
-	_panel_lateral.add_child(UIKit.etiqueta("COLA DE COCINA", 14, UIKit.ACENTO))
-	_panel_lateral.add_child(UIKit.etiqueta("Cocina: %d en cola · %d listos" % [cocina.pendientes(), cocina.listos.size()], 12))
-	_panel_lateral.add_child(UIKit.etiqueta("Barra: %d en cola · %d listos" % [barra.pendientes(), barra.listos.size()], 12))
-	_panel_lateral.add_child(UIKit.etiqueta("Fila en la entrada: %d" % fila.size(), 12, UIKit.ROJO if fila.size() >= 4 else UIKit.TEXTO))
-	_panel_lateral.add_child(HSeparator.new())
-	_panel_lateral.add_child(UIKit.etiqueta("RESERVACIONES", 14, UIKit.ACENTO))
-	if GameState.reservaciones.is_empty():
-		_panel_lateral.add_child(UIKit.etiqueta("Sin reservaciones hoy", 12, UIKit.TEXTO_TENUE))
-	for r in GameState.reservaciones:
+		_fijar(_lateral["stock"][insumo], "%s: %d%s" % [Catalogo.nombre_insumo(insumo), cantidad, "  (+%d en camino)" % en_camino if en_camino > 0 else ""], UIKit.ROJO if cantidad <= 2 else UIKit.TEXTO)
+	_lateral["agotados"].visible = not agotados.is_empty()
+	_fijar(_lateral["agotados"], "Agotado: " + ", ".join(agotados), UIKit.ROJO)
+	_fijar(_lateral["cocina"], "Cocina: %d en cola · %d listos" % [cocina.pendientes(), cocina.listos.size()], UIKit.TEXTO)
+	_fijar(_lateral["barra"], "Barra: %d en cola · %d listos" % [barra.pendientes(), barra.listos.size()], UIKit.TEXTO)
+	_fijar(_lateral["fila"], "Fila en la entrada: %d" % fila.size(), UIKit.ROJO if fila.size() >= 4 else UIKit.TEXTO)
+	var etiquetas_reserva: Array = _lateral["reservas"]
+	for i in range(etiquetas_reserva.size()):
+		var r: Dictionary = GameState.reservaciones[i]
 		var estado: String = {"pendiente": "SIN MESA", "asignada": "Mesa %d" % r["mesa"], "llego": "Llegó", "atendida": "Atendida"}.get(r["estado"], "")
 		var color := UIKit.ROJO if r["estado"] == "pendiente" else (UIKit.VERDE if r["estado"] == "atendida" else UIKit.TEXTO)
-		_panel_lateral.add_child(UIKit.etiqueta("%d' %s (%d) · %s" % [r["minuto"], r["id"], r["personas"], estado], 12, color))
-	_panel_lateral.add_child(HSeparator.new())
-	_panel_lateral.add_child(UIKit.etiqueta("Objetivo:", 13, UIKit.ACENTO))
-	for linea in GameState.detalle_objetivo():
-		var l := UIKit.etiqueta(linea, 11)
+		_fijar(etiquetas_reserva[i], "%d' %s (%d) · %s" % [r["minuto"], r["id"], r["personas"], estado], color)
+	var lineas := GameState.detalle_objetivo()
+	var etiquetas_objetivo: Array = _lateral["objetivo"]
+	for i in range(mini(lineas.size(), etiquetas_objetivo.size())):
+		_fijar(etiquetas_objetivo[i], lineas[i], UIKit.TEXTO)
+
+func _construir_panel_lateral() -> void:
+	var p := _panel_lateral
+	p.add_child(UIKit.etiqueta("STOCK", 14, UIKit.ACENTO))
+	var stock := {}
+	for insumo in Catalogo.INSUMOS:
+		stock[insumo] = UIKit.etiqueta("", 12)
+		p.add_child(stock[insumo])
+	var agotado := UIKit.etiqueta("", 11, UIKit.ROJO)
+	p.add_child(agotado)
+	p.add_child(HSeparator.new())
+	p.add_child(UIKit.etiqueta("COLA DE COCINA", 14, UIKit.ACENTO))
+	var etiqueta_cocina := UIKit.etiqueta("", 12)
+	var etiqueta_barra := UIKit.etiqueta("", 12)
+	var etiqueta_fila := UIKit.etiqueta("", 12)
+	for l in [etiqueta_cocina, etiqueta_barra, etiqueta_fila]:
+		p.add_child(l)
+	p.add_child(HSeparator.new())
+	p.add_child(UIKit.etiqueta("RESERVACIONES", 14, UIKit.ACENTO))
+	var reservas: Array[Label] = []
+	if GameState.reservaciones.is_empty():
+		p.add_child(UIKit.etiqueta("Sin reservaciones hoy", 12, UIKit.TEXTO_TENUE))
+	for i in range(GameState.reservaciones.size()):
+		var l := UIKit.etiqueta("", 12)
+		p.add_child(l)
+		reservas.append(l)
+	p.add_child(HSeparator.new())
+	p.add_child(UIKit.etiqueta("Objetivo:", 13, UIKit.ACENTO))
+	var objetivo: Array[Label] = []
+	for i in range(GameState.detalle_objetivo().size()):
+		var l := UIKit.etiqueta("", 11)
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		l.custom_minimum_size.x = 244
-		_panel_lateral.add_child(l)
+		p.add_child(l)
+		objetivo.append(l)
+	_lateral = {"stock": stock, "agotados": agotado, "cocina": etiqueta_cocina, "barra": etiqueta_barra, "fila": etiqueta_fila, "reservas": reservas, "objetivo": objetivo}
+
+## Cambia texto y color solo si son distintos (evita recalcular el diseño de la interfaz).
+func _fijar(etiqueta: Label, texto: String, color: Color) -> void:
+	if etiqueta.text != texto:
+		etiqueta.text = texto
+	if etiqueta.get_theme_color("font_color") != color:
+		etiqueta.add_theme_color_override("font_color", color)
 
 func _cola_cocina_texto() -> Array:
 	var lineas: Array = []

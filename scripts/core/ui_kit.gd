@@ -38,6 +38,19 @@ static func etiqueta(texto: String, tam: int = 16, color: Color = TEXTO, centrad
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	return l
 
+static var _estilos_boton := {}
+
+static func _estilos() -> Dictionary:
+	if _estilos_boton.is_empty():
+		_estilos_boton = {
+			"normal": estilo(FONDO_CLARO, 6, Color(BORDE, 0.5), 1, 8),
+			"hover": estilo(Color("34405a"), 6, BORDE, 2, 8),
+			"pressed": estilo(Color("46547a"), 6, BORDE, 2, 8),
+			"focus": estilo(Color("34405a"), 6, BORDE, 2, 8),
+			"disabled": estilo(Color(FONDO_CLARO, 0.5), 6, Color.TRANSPARENT, 0, 8),
+		}
+	return _estilos_boton
+
 static func boton(texto: String, accion: Callable, tam: int = 16, ancho_min: float = 0.0) -> Button:
 	var b := Button.new()
 	b.text = texto
@@ -46,11 +59,9 @@ static func boton(texto: String, accion: Callable, tam: int = 16, ancho_min: flo
 	b.add_theme_color_override("font_color", TEXTO)
 	b.add_theme_color_override("font_hover_color", Color.WHITE)
 	b.add_theme_color_override("font_disabled_color", Color(TEXTO_TENUE, 0.6))
-	b.add_theme_stylebox_override("normal", estilo(FONDO_CLARO, 6, Color(BORDE, 0.5), 1, 8))
-	b.add_theme_stylebox_override("hover", estilo(Color("34405a"), 6, BORDE, 2, 8))
-	b.add_theme_stylebox_override("pressed", estilo(Color("46547a"), 6, BORDE, 2, 8))
-	b.add_theme_stylebox_override("focus", estilo(Color("34405a"), 6, BORDE, 2, 8))
-	b.add_theme_stylebox_override("disabled", estilo(Color(FONDO_CLARO, 0.5), 6, Color.TRANSPARENT, 0, 8))
+	var estilos := _estilos()
+	for estado in estilos:
+		b.add_theme_stylebox_override(estado, estilos[estado])
 	if ancho_min > 0.0:
 		b.custom_minimum_size.x = ancho_min
 	b.pressed.connect(func():

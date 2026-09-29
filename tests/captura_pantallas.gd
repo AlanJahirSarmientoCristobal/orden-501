@@ -59,17 +59,28 @@ func _run() -> void:
 	GameState.tienda_actual = Catalogo.MERCADO
 	var mercado := await _abrir("res://scenes/town/store.tscn")
 	await _capturar("05a_interior_mercado")
-	mercado._comprar("carne", "CARNICERÍA · MERCADO CENTRAL")
-	await _capturar("05b_estante_carne")
-	mercado._estante.cerrar()
+	mercado.abrir_menu()
+	await _esperar(0.3)
+	await _capturar("05b_menu_mercado")
+	mercado._menu.indice = 1
+	mercado._menu._elegir_producto()
+	mercado._menu.cantidad = 5
+	mercado._menu._actualizar()
+	await _capturar("05b2_menu_cantidad")
+	mercado._menu.confirmar_si = true
+	mercado._menu._ir_a(MenuCompra.Estado.CONFIRMAR)
+	await _capturar("05b3_menu_confirmar")
+	mercado._menu.cerrar()
 	GameState.tienda_actual = Catalogo.CERVECERIA
 	var cerveceria := await _abrir("res://scenes/town/store.tscn")
-	cerveceria.dani.position = Vector2(640, 470)
+	cerveceria.dani.position = cerveceria.interior.a_mundo(12.5, 10.3)
 	await _esperar(1.5)
 	await _capturar("05c_interior_cerveceria")
-	cerveceria._comprar("monster", "MONSTER ENERGY · CERVECERÍA")
-	await _capturar("05d_estante_monster")
-	cerveceria._estante.cerrar()
+	cerveceria.abrir_menu()
+	cerveceria._menu.indice = cerveceria._menu.productos.find("monster")
+	cerveceria._menu._actualizar()
+	await _capturar("05d_menu_monster")
+	cerveceria._menu.cerrar()
 	pueblo = await _abrir("res://scenes/town/town.tscn")
 	for insumo in Catalogo.INSUMOS:
 		GameState.comprar(insumo, 8)

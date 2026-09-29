@@ -6,7 +6,9 @@ class_name ConfiguracionDificultad
 const FACIL := "facil"
 const NORMAL := "normal"
 const DIFICIL := "dificil"
-const TODAS := [FACIL, NORMAL, DIFICIL]
+## Reto Imposible: Difícil con el balance original (antes de ajustarlo). Solo desde Selección de nivel.
+const IMPOSIBLE := "imposible"
+const TODAS := [FACIL, NORMAL, DIFICIL]      # Dificultades de la campaña
 
 var id: String
 var nombre: String
@@ -24,6 +26,12 @@ var tiempo_pueblo: float            # segundos; 0 = sin límite
 var reputacion_minima: float        # porcentaje
 var probabilidad_pareja: float      # 0..1 (grupos de 2)
 var probabilidad_familia: float     # 0..1 (grupos de 4)
+var familias_desde_nivel: int       # Nivel a partir del cual llegan familias
+var precio_insumos: float           # Multiplicador de los precios del catálogo
+var paciencia_vip: float            # Fracción de la paciencia normal que tiene un VIP
+var paciencia_fila: float           # Ritmo al que baja la paciencia en la fila de la entrada
+var duracion_extra: float           # Segundos extra de cada partido
+var piso_reputacion: bool           # Cada mañana la reputación arranca en al menos 75 %
 
 const _TABLA := {
 	FACIL: {
@@ -43,6 +51,13 @@ const _TABLA := {
 		"limpieza": 2.5, "suciedad": "Rápido", "dinero": 700, "urg_costo": 3.0, "urg_demora": 40.0,
 		"caducidad": 1, "pueblo": 120.0, "reputacion": 85.0,
 		"pareja": 0.30, "familia": 0.15
+	},
+	IMPOSIBLE: {
+		"nombre": "Imposible", "paciencia": 25.0, "cocina": 1.3, "llegada": 5.0, "vip": 0.40,
+		"limpieza": 2.5, "suciedad": "Rápido", "dinero": 700, "urg_costo": 3.0, "urg_demora": 40.0,
+		"caducidad": 1, "pueblo": 120.0, "reputacion": 85.0,
+		"pareja": 0.35, "familia": 0.30, "familias_desde": 1, "precio_insumos": 1.67,
+		"paciencia_vip": 0.6, "paciencia_fila": 0.5, "duracion_extra": 30.0, "piso_reputacion": false
 	}
 }
 
@@ -66,6 +81,12 @@ static func obtener(dificultad: String) -> ConfiguracionDificultad:
 	config.reputacion_minima = datos["reputacion"]
 	config.probabilidad_pareja = datos["pareja"]
 	config.probabilidad_familia = datos["familia"]
+	config.familias_desde_nivel = int(datos.get("familias_desde", 2))
+	config.precio_insumos = float(datos.get("precio_insumos", 1.0))
+	config.paciencia_vip = float(datos.get("paciencia_vip", 0.7))
+	config.paciencia_fila = float(datos.get("paciencia_fila", 0.35))
+	config.duracion_extra = float(datos.get("duracion_extra", 0.0))
+	config.piso_reputacion = bool(datos.get("piso_reputacion", true))
 	return config
 
 ## Texto de resumen para el menú de dificultad.

@@ -19,6 +19,8 @@ func _run() -> void:
 	_probar_reservaciones()
 	_probar_condiciones_y_cierre()
 	_probar_reinicio_y_guardado()
+	_probar_mejoras()
+	_probar_reto_imposible()
 	_restaurar()
 	if fallos.is_empty():
 		print("TEST_NUCLEO: PASS")
@@ -173,6 +175,53 @@ func _probar_reinicio_y_guardado() -> void:
 	_check(GameState.cargar(), "No se pudo cargar la partida")
 	_check(GameState.dificultad == "normal" and GameState.capacidad_bandeja() == 4, "La carga no restauró los datos")
 	_check(GameState.inventario.total("carne") == 5, "La carga no restauró el inventario")
+
+func _probar_mejoras() -> void:
+	GameState.nueva_partida("normal")
+	GameState.dinero = 10000
+	# Costos escalonados: el segundo nivel cuesta más
+	var primero := GameState.costo_mejora("velocidad")
+	_check(GameState.comprar_mejora("velocidad"), "No se compró el primer nivel de Tenis")
+	var segundo := GameState.costo_mejora("velocidad")
+	_check(segundo > primero, "El segundo nivel debe costar más que el primero")
+	_check(GameState.comprar_mejora("velocidad"), "No se compró el segundo nivel de Tenis")
+	_check(GameState.costo_mejora("velocidad") == -1 and not GameState.comprar_mejora("velocidad"), "Tenis no debe pasar de 2 niveles")
+	# Trapeador industrial
+	var limpieza := GameState.tiempo_limpieza()
+	GameState.comprar_mejora("limpieza")
+	_check(is_equal_approx(GameState.tiempo_limpieza(), limpieza * 0.6), "El trapeador debe reducir la limpieza 40%")
+	# Proveedor preferente
+	var costo := GameState.costo_urgente("carne", 6)
+	var demora := GameState.demora_urgente()
+	GameState.comprar_mejora("proveedor")
+	_check(GameState.costo_urgente("carne", 6) < costo and GameState.demora_urgente() < demora, "El proveedor preferente debe abaratar y acelerar lo urgente")
+	# Promoción 2x1: más clientes y bono por pedido
+	GameState.comprar_mejora("promo")
+	GameState.iniciar_jornada()
+	_check(GameState.promo_activa and GameState.intervalo_llegada() < GameState.config.intervalo_llegada, "La promoción debe traer más clientes")
+	var dinero := GameState.dinero
+	var rep := GameState.reputacion
+	GameState.reputacion = 50.0
+	GameState.registrar_venta(Catalogo.PAPAS, 0)
+	_check(GameState.dinero == dinero + Catalogo.precio(Catalogo.PAPAS) + GameState.BONO_PROMO_DINERO, "La promoción debe dar bono de dinero")
+	_check(GameState.reputacion > 50.0, "La promoción debe dar reputación por pedido")
+	GameState.reputacion = rep
+
+func _probar_reto_imposible() -> void:
+	GameState.nueva_partida("normal")
+	GameState.nivel_desbloqueado = 2
+	GameState.guardar()
+	var guardado_antes := FileAccess.get_file_as_string(GameState.SAVE_PATH)
+	_check(GameState.nivel_superado(1) and not GameState.nivel_superado(2), "Solo el nivel 1 debe contar como superado")
+	GameState.iniciar_reto_imposible()
+	_check(GameState.modo_reto and GameState.nivel_actual == 3 and GameState.dificultad == "imposible", "El reto debe ser una Gran Final en Imposible")
+	_check(GameState.precio_insumo("carne") > int(Catalogo.INSUMOS["carne"]["precio"]), "En Imposible los insumos deben costar más")
+	GameState.iniciar_jornada()
+	GameState.reputacion = 100.0
+	var informe := GameState.cerrar_jornada()
+	_check(informe["reto"] and not GameState.temporada_completada, "Ganar el reto no debe completar la campaña")
+	_check(FileAccess.get_file_as_string(GameState.SAVE_PATH) == guardado_antes, "El reto no debe modificar la partida guardada")
+	_check(GameState.cargar() and not GameState.modo_reto and GameState.dificultad == "normal", "Continuar debe volver a la campaña")
 
 func _respaldar() -> void:
 	_habia_guardado = FileAccess.file_exists(GameState.SAVE_PATH)

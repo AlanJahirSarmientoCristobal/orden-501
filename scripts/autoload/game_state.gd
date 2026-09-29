@@ -37,13 +37,18 @@ const MAX_CLIENTES_PERDIDOS_N1 := 3
 ## Unidades a partir de las cuales se avisa de stock bajo (alcanza para una familia mientras llega el proveedor).
 const STOCK_BAJO := 6
 
+## Mejoras del reporte de cierre. "costos" tiene un precio por nivel (el segundo cuesta más).
 const MEJORAS := {
-	"velocidad": {"nombre": "Tenis nuevos", "descripcion": "Dani camina 15% más rápido.", "costo": 350, "maximo": 2},
-	"bandeja": {"nombre": "Bandeja grande", "descripcion": "Cuarto espacio en la bandeja.", "costo": 450, "maximo": 1},
-	"cocina": {"nombre": "Parrilla industrial", "descripcion": "La cocina prepara 25% más rápido.", "costo": 500, "maximo": 1},
-	"almacen": {"nombre": "Estantes extra", "descripcion": "+30 espacios de almacén.", "costo": 300, "maximo": 2},
-	"promo": {"nombre": "Promoción 2x1", "descripcion": "Llegan 40% más clientes la siguiente jornada.", "costo": 250, "maximo": 1},
+	"velocidad": {"nombre": "Tenis nuevos", "descripcion": "Dani camina 15% más rápido por nivel.", "costos": [400, 800]},
+	"bandeja": {"nombre": "Bandeja grande", "descripcion": "Cuarto espacio en la bandeja.", "costos": [600]},
+	"cocina": {"nombre": "Parrilla industrial", "descripcion": "La cocina prepara 25% más rápido.", "costos": [650]},
+	"almacen": {"nombre": "Estantes extra", "descripcion": "+30 espacios de almacén por nivel.", "costos": [350, 700]},
+	"limpieza": {"nombre": "Trapeador industrial", "descripcion": "Limpiar una mesa toma 40% menos tiempo.", "costos": [500]},
+	"proveedor": {"nombre": "Proveedor preferente", "descripcion": "Pedidos urgentes 30% más baratos y 30% más rápidos.", "costos": [550]},
+	"promo": {"nombre": "Promoción 2x1", "descripcion": "Siguiente jornada: ~40% más clientes y cada pedido entregado da +$15 y +1% de reputación.", "costos": [300], "consumible": true},
 }
+const BONO_PROMO_DINERO := 15
+const BONO_PROMO_REPUTACION := 1.0
 
 const NOMBRES_RESERVA := ["Familia Hernández", "Grupo Sarmiento", "Los Cruz", "Peña Tuzos", "Oficina Castelán", "Amigos del barrio", "Familia Bautista", "Club Huasteco"]
 const MINUTOS_RESERVA := [10, 20, 30, 45, 55, 65, 75]
@@ -57,11 +62,12 @@ var nivel_desbloqueado := 1
 var dinero := 0
 var reputacion := REPUTACION_INICIAL
 var inventario := Inventario.new()
-var mejoras := {"velocidad": 0, "bandeja": 0, "cocina": 0, "almacen": 0, "promo": 0}
+var mejoras := {"velocidad": 0, "bandeja": 0, "cocina": 0, "almacen": 0, "limpieza": 0, "proveedor": 0, "promo": 0}
 var promo_activa := false
 var terraza_desbloqueada := false
 var temporada_completada := false
 var intro_vista := false
+var modo_reto := false       # Reto Imposible: no guarda ni avanza la campaña
 var reservaciones: Array[Dictionary] = []
 var estadisticas := {}
 var historial: Array[Dictionary] = []
@@ -87,6 +93,7 @@ func _exit_tree() -> void:
 # ---------------------------------------------------------------- Partida
 
 func nueva_partida(nueva_dificultad: String) -> void:
+	modo_reto = false
 	dificultad = nueva_dificultad if nueva_dificultad in ConfiguracionDificultad.TODAS else ConfiguracionDificultad.NORMAL
 	config = ConfiguracionDificultad.obtener(dificultad)
 	partida_activa = true
@@ -96,7 +103,7 @@ func nueva_partida(nueva_dificultad: String) -> void:
 	dinero = config.dinero_inicial
 	reputacion = REPUTACION_INICIAL
 	inventario = Inventario.new()
-	mejoras = {"velocidad": 0, "bandeja": 0, "cocina": 0, "almacen": 0, "promo": 0}
+	mejoras = {"velocidad": 0, "bandeja": 0, "cocina": 0, "almacen": 0, "limpieza": 0, "proveedor": 0, "promo": 0}
 	promo_activa = false
 	terraza_desbloqueada = false
 	temporada_completada = false
@@ -109,7 +116,8 @@ func nueva_partida(nueva_dificultad: String) -> void:
 func iniciar_manana() -> void:
 	# La afición vuelve cada día: la reputación arranca en al menos 75 % (si traes más, se
 	# conserva). Evita que un mal día deje la siguiente jornada imposible de ganar.
-	reputacion = maxf(reputacion, REPUTACION_INICIAL)
+	if config.piso_reputacion:
+		reputacion = maxf(reputacion, REPUTACION_INICIAL)
 	_reiniciar_estadisticas()
 	_generar_reservaciones()
 	promo_activa = false
@@ -121,6 +129,27 @@ func iniciar_manana() -> void:
 	dinero_cambiado.emit(dinero)
 	reputacion_cambiada.emit(reputacion)
 	inventario_cambiado.emit()
+
+## Reto Imposible: una Gran Final con el balance original de Difícil. No toca la partida guardada.
+func iniciar_reto_imposible() -> void:
+	modo_reto = true
+	dificultad = ConfiguracionDificultad.IMPOSIBLE
+	config = ConfiguracionDificultad.obtener(dificultad)
+	partida_activa = true
+	dia = 1
+	nivel_actual = 3
+	dinero = config.dinero_inicial
+	reputacion = REPUTACION_INICIAL
+	inventario = Inventario.new()
+	mejoras = {"velocidad": 0, "bandeja": 0, "cocina": 0, "almacen": 0, "limpieza": 0, "proveedor": 0, "promo": 0}
+	promo_activa = false
+	intro_vista = true
+	ultimo_informe = {}
+	iniciar_manana()
+
+## Un nivel se puede repetir desde Selección de nivel cuando ya se superó en la campaña.
+func nivel_superado(nivel: int) -> bool:
+	return nivel < nivel_desbloqueado or (nivel == 3 and temporada_completada)
 
 func seleccionar_nivel(nivel: int) -> void:
 	nivel_actual = clampi(nivel, 1, nivel_desbloqueado)
@@ -149,6 +178,23 @@ func meta_ventas() -> int:
 
 # ---------------------------------------------------------------- Valores derivados
 
+func duracion_partido() -> float:
+	return float(info_nivel()["duracion"]) + config.duracion_extra
+
+func precio_insumo(insumo: String) -> int:
+	return int(round(float(Catalogo.INSUMOS[insumo]["precio"]) * config.precio_insumos))
+
+func demora_urgente() -> float:
+	return config.urgente_demora * (0.7 if int(mejoras["proveedor"]) > 0 else 1.0)
+
+func costo_mejora(id: String) -> int:
+	var costos: Array = MEJORAS[id]["costos"]
+	var nivel := int(mejoras[id])
+	return int(costos[nivel]) if nivel < costos.size() else -1
+
+func maximo_mejora(id: String) -> int:
+	return (MEJORAS[id]["costos"] as Array).size()
+
 func capacidad_almacen() -> int:
 	return CAPACIDAD_ALMACEN_BASE + CAPACIDAD_ALMACEN_MEJORA * int(mejoras["almacen"])
 
@@ -175,13 +221,13 @@ func probabilidad_vip() -> float:
 	return 0.0 if nivel_actual == 1 else config.probabilidad_vip
 
 func tiempo_limpieza() -> float:
-	return config.tiempo_limpieza * (1.3 if nivel_actual == 3 else 1.0)
+	return config.tiempo_limpieza * (1.3 if nivel_actual == 3 else 1.0) * (0.6 if int(mejoras["limpieza"]) > 0 else 1.0)
 
 ## Tamaño del grupo que llega (1, 2 o 4), según la dificultad.
 ## En la Jornada Regular (nivel 1) llegan parejas, pero las familias empiezan en la Liguilla.
 func tamano_grupo() -> int:
 	var tirada := randf()
-	var familia := config.probabilidad_familia if nivel_actual >= 2 else 0.0
+	var familia := config.probabilidad_familia if nivel_actual >= config.familias_desde_nivel else 0.0
 	if tirada < familia:
 		return 4
 	if tirada < familia + config.probabilidad_pareja:
@@ -217,7 +263,7 @@ func cambiar_reputacion(delta: float, motivo: String = "") -> void:
 func comprar(insumo: String, cantidad: int) -> String:
 	if not Catalogo.INSUMOS.has(insumo) or cantidad <= 0:
 		return "Producto no válido."
-	var costo := int(Catalogo.INSUMOS[insumo]["precio"]) * cantidad
+	var costo := precio_insumo(insumo) * cantidad
 	if costo > dinero:
 		return "No te alcanza el dinero."
 	if cantidad > espacio_libre():
@@ -229,7 +275,8 @@ func comprar(insumo: String, cantidad: int) -> String:
 	return ""
 
 func costo_urgente(insumo: String, cantidad: int) -> int:
-	return int(ceil(float(Catalogo.INSUMOS[insumo]["precio"] * cantidad) * config.urgente_multiplicador_costo))
+	var descuento := 0.7 if int(mejoras["proveedor"]) > 0 else 1.0
+	return int(ceil(float(precio_insumo(insumo) * cantidad) * config.urgente_multiplicador_costo * descuento))
 
 ## Paga un pedido urgente por teléfono. La entrega la programa el restaurante.
 func pagar_urgente(insumo: String, cantidad: int) -> bool:
@@ -270,6 +317,11 @@ func _revisar_stock_bajo(platillo: String) -> void:
 
 func registrar_venta(platillo: String, propina: int, porciones: int = 1) -> void:
 	var total := Catalogo.precio(platillo) * porciones + propina
+	if promo_activa:
+		# Promoción 2x1: los clientes atraídos dejan un bono y una buena reseña.
+		total += BONO_PROMO_DINERO
+		estadisticas["bono_promo"] = int(estadisticas.get("bono_promo", 0)) + BONO_PROMO_DINERO
+		cambiar_reputacion(BONO_PROMO_REPUTACION)
 	cambiar_dinero(total)
 	estadisticas["ventas"] += total
 	estadisticas["propinas"] += propina
@@ -373,7 +425,7 @@ func cerrar_jornada(motivo_derrota: String = "") -> Dictionary:
 	var merma := inventario.retirar_caducados(dia, config.dias_caducidad)
 	var costo_merma := 0
 	for insumo in merma:
-		costo_merma += int(merma[insumo]) * int(Catalogo.INSUMOS[insumo]["precio"])
+		costo_merma += int(merma[insumo]) * precio_insumo(insumo)
 	inventario_cambiado.emit()
 	ultimo_informe = {
 		"dia": dia - 1,
@@ -389,8 +441,9 @@ func cerrar_jornada(motivo_derrota: String = "") -> Dictionary:
 		"reputacion": reputacion,
 		"dinero": dinero,
 		"temporada_completa": false,
+		"reto": modo_reto,
 	}
-	if exito:
+	if exito and not modo_reto:
 		historial.append(ultimo_informe)
 		nivel_desbloqueado = maxi(nivel_desbloqueado, mini(nivel_jugado + 1, 3))
 		if nivel_jugado >= 3:
@@ -406,10 +459,10 @@ func cerrar_jornada(motivo_derrota: String = "") -> Dictionary:
 func comprar_mejora(id: String) -> bool:
 	if not MEJORAS.has(id):
 		return false
-	var datos: Dictionary = MEJORAS[id]
-	if int(mejoras[id]) >= int(datos["maximo"]) or dinero < int(datos["costo"]):
+	var costo := costo_mejora(id)
+	if costo < 0 or dinero < costo:
 		return false
-	cambiar_dinero(-int(datos["costo"]))
+	cambiar_dinero(-costo)
 	mejoras[id] = int(mejoras[id]) + 1
 	AudioManager.sfx("mejora")
 	_guardar_datos(_capturar())
@@ -458,6 +511,8 @@ func guardar() -> void:
 	_guardar_datos(_capturar())
 
 func _guardar_datos(datos: Dictionary) -> void:
+	if modo_reto:
+		return
 	var archivo := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if archivo == null:
 		push_warning("No se pudo guardar la partida: %s" % error_string(FileAccess.get_open_error()))
@@ -473,6 +528,7 @@ func cargar() -> bool:
 	var datos = JSON.parse_string(FileAccess.get_file_as_string(SAVE_PATH))
 	if not datos is Dictionary:
 		return false
+	modo_reto = false
 	_restaurar(datos)
 	partida_activa = true
 	iniciar_manana()

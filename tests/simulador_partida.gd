@@ -39,6 +39,9 @@ func _run() -> void:
 	get_tree().root.add_child(marcador)
 	get_tree().current_scene = marcador
 
+	if dificultad == ConfiguracionDificultad.IMPOSIBLE:
+		await _jugar_reto()
+		return
 	GameState.nueva_partida(dificultad)
 	GameState.intro_vista = true
 	var nivel_maximo := 0
@@ -78,14 +81,33 @@ func _run() -> void:
 		GameState.borrar_guardado()
 	get_tree().quit(0)
 
+## Reto Imposible: una sola Gran Final, con reintentos.
+func _jugar_reto() -> void:
+	GameState.iniciar_reto_imposible()
+	for intento in range(intentos_por_nivel):
+		if intento > 0:
+			GameState.iniciar_reto_imposible()
+		_compras_de_la_manana()
+		_asignar_reservaciones()
+		GameState.iniciar_jornada()
+		var informe: Dictionary = await _jugar_jornada()
+		var e: Dictionary = informe["estadisticas"]
+		var fila := {"nivel": "RETO", "intento": intento + 1, "exito": informe["exito"], "ventas": e["ventas"],
+			"pedidos": e["pedidos"], "perdidos": e["perdidos"], "quiebres": e["quiebres"], "rep": int(informe["reputacion"])}
+		print("RESULTADO ", JSON.stringify(fila))
+	print("RESUMEN dificultad=imposible")
+	if _habia_guardado:
+		var f := FileAccess.open(GameState.SAVE_PATH, FileAccess.WRITE)
+		f.store_string(_respaldo)
+	get_tree().quit(0)
+
 # ---------------------------------------------------------------- Mañana
 
 ## Compra razonable: estima la demanda del partido y reparte dinero y almacén,
 ## guardando una reserva para pedidos urgentes.
 func _compras_de_la_manana() -> void:
-	var info := GameState.info_nivel()
 	var config := GameState.config
-	var llegadas := float(info["duracion"]) * (85.0 / 90.0) / GameState.intervalo_llegada() + 2 + GameState.nivel_actual
+	var llegadas := GameState.duracion_partido() * (85.0 / 90.0) / GameState.intervalo_llegada() + 2 + GameState.nivel_actual
 	var personas_promedio := 1.0 + config.probabilidad_pareja * 1.0 + config.probabilidad_familia * 3.0
 	var porciones := llegadas * personas_promedio * 1.15      # rondas extra por goles
 	var bebida := GameState.probabilidad_bebida() + 0.1
@@ -106,7 +128,7 @@ func _compras_de_la_manana() -> void:
 	var costo_total := 0.0
 	for insumo in demanda:
 		total_unidades += demanda[insumo]
-		costo_total += demanda[insumo] * int(Catalogo.INSUMOS[insumo]["precio"])
+		costo_total += demanda[insumo] * GameState.precio_insumo(insumo)
 	var factor := minf(1.0, minf(float(GameState.espacio_libre()) / maxf(1.0, total_unidades), float(presupuesto) / maxf(1.0, costo_total)))
 	for insumo in demanda:
 		var cantidad := int(floor(demanda[insumo] * factor))
@@ -133,8 +155,9 @@ func _sumar_receta(demanda: Dictionary, platillo: String, veces: float) -> void:
 		demanda[insumo] = float(demanda.get(insumo, 0.0)) + float(receta[insumo]) * veces
 
 func _comprar_mejoras() -> void:
-	for id in ["bandeja", "velocidad", "cocina"]:
-		if GameState.dinero - int(GameState.MEJORAS[id]["costo"]) >= GameState.config.dinero_inicial * 0.7:
+	for id in ["limpieza", "bandeja", "proveedor", "velocidad", "almacen", "cocina"]:
+		var costo := GameState.costo_mejora(id)
+		if costo > 0 and GameState.dinero - costo >= GameState.config.dinero_inicial * 0.7:
 			GameState.comprar_mejora(id)
 
 # ---------------------------------------------------------------- Jornada
@@ -284,7 +307,7 @@ func _pedidos_urgentes(resto: Node) -> void:
 		# Umbral pensado para que alcance a una familia de 4 mientras llega el proveedor.
 		# No tiene caso pedir si el partido termina antes de que llegue.
 		var queda: float = (1.0 - resto.minuto / 90.0) * resto.duracion
-		if en_camino or GameState.inventario.total(insumo) > 8 or queda < GameState.config.urgente_demora + 10.0:
+		if en_camino or GameState.inventario.total(insumo) > 8 or queda < GameState.demora_urgente() + 10.0:
 			continue
 		var cantidad := 6 if GameState.dinero < 800 else 12
 		var costo := GameState.costo_urgente(insumo, cantidad)

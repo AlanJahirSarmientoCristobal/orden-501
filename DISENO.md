@@ -71,6 +71,24 @@ El documento no fijaba estos valores:
 ```powershell
 godot --headless --path . res://tests/simulador_partida.tscn -- dificil 3
 ```
-- **Promoción 2x1:** mejora de un solo uso. En la siguiente jornada llegan alrededor de 40 % más clientes (el intervalo entre llegadas se divide entre 1.4).
+- **Mejoras** (reporte de cierre, al superar la jornada). El segundo nivel cuesta más que el primero:
+
+  | Mejora | Efecto | Costo por nivel |
+  |---|---|---|
+  | Tenis nuevos | +15 % de velocidad por nivel | $400 / $800 |
+  | Bandeja grande | Cuarto espacio en la bandeja | $600 |
+  | Parrilla industrial | La cocina prepara 25 % más rápido | $650 |
+  | Estantes extra | +30 de almacén por nivel | $350 / $700 |
+  | Trapeador industrial | Limpiar toma 40 % menos | $500 |
+  | Proveedor preferente | Urgentes 30 % más baratos y más rápidos | $550 |
+  | Promoción 2x1 (consumible) | Siguiente jornada: ~40 % más clientes y cada pedido da +$15 y +1 % de reputación | $300 |
+
+- **Eventos del partido:** 1 evento en el Nivel 1, 1–2 en la Liguilla y 2 en la Gran Final, sin repetirse:
+  - **Retraso del proveedor:** los urgentes tardan 50 % más durante 20 minutos del partido.
+  - **Crítico gastronómico:** entra primero a la fila. Si se le atiende, da +10 % de reputación; si se va, quita 15 %.
+  - **Apagón:** la cocina y la barra se detienen 10 s.
+  - **Penales:** si al 90' el marcador va empatado, hay 20 s más de partido y otra ronda de bebidas.
+- **Reto Imposible** (solo en Selección de nivel, siempre disponible): una Gran Final con el balance original de Difícil. Usa los insumos anteriores (×1.67), partidos 30 s más largos, VIP con 60 % de paciencia, la fila al 50 %, parejas 35 % y familias 30 % desde el inicio, sin piso de reputación y sin mejoras. No guarda ni afecta la campaña.
+- **Selección de nivel:** los niveles 1–3 se desbloquean al superarlos en la campaña.
 
 Los precios y las recetas están en `scripts/core/catalogo.gd`, y los valores de progresión en `scripts/autoload/game_state.gd`.

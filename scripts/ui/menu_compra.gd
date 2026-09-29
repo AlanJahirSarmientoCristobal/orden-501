@@ -269,7 +269,7 @@ func _llenar_lista() -> void:
 		var nombre := _texto(Catalogo.nombre_insumo(insumo).to_upper() if insumo != "" else "SALIR")
 		nombre.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		fila.add_child(nombre)
-		var precio := _texto(UIKit.dinero(int(Catalogo.INSUMOS[insumo]["precio"])) if insumo != "" else "")
+		var precio := _texto(UIKit.dinero(GameState.precio_insumo(insumo)) if insumo != "" else "")
 		fila.add_child(precio)
 		_lista.add_child(fila)
 		_filas.append({"cursor": cursor, "nombre": nombre, "precio": precio})
@@ -319,7 +319,7 @@ func _seleccionado() -> String:
 	return productos[indice] if indice < productos.size() else ""
 
 func _precio(insumo: String) -> int:
-	return int(Catalogo.INSUMOS[insumo]["precio"])
+	return GameState.precio_insumo(insumo)
 
 func _maximo(insumo: String) -> int:
 	return clampi(mini(GameState.dinero / maxi(1, _precio(insumo)), GameState.espacio_libre()), 1, 99)

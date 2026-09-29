@@ -52,20 +52,16 @@ func _decorar() -> void:
 		s.sprite_frames = AssetPaths.frames_personaje(claves[i])
 		s.animation = &"down"
 		s.scale = Vector2(4, 4)
-		s.position = Vector2(110 + i * 64, 600)
+		s.position = Vector2(110 + i * 64, 646)
 		s.play()
 		add_child(s)
-	for i in range(5):
-		var t := UIKit.icono(Catalogo.icono_platillo(Catalogo.PLATILLOS.keys()[i]), 40)
-		t.position = Vector2(100 + i * 70, 520)
-		add_child(t)
 
 func _construir_principal() -> void:
 	UIKit.limpiar(_principal)
 	_principal.add_child(UIKit.boton("Nueva partida", _mostrar_dificultad, 20, 320))
 	if GameState.hay_partida_guardada():
 		_principal.add_child(UIKit.boton("Continuar", _continuar, 20, 320))
-		_principal.add_child(UIKit.boton("Seleccionar nivel", _mostrar_niveles, 20, 320))
+	_principal.add_child(UIKit.boton("Seleccionar nivel", _mostrar_niveles, 20, 320))
 	_principal.add_child(UIKit.boton("Cómo jugar", _mostrar_controles, 20, 320))
 	_principal.add_child(UIKit.boton("Pantalla completa", _pantalla_completa, 20, 320))
 	_principal.add_child(UIKit.boton("Salir", func(): get_tree().quit(), 20, 320))
@@ -99,20 +95,36 @@ func _continuar() -> void:
 	else:
 		GameState.cambiar_escena(GameState.ESCENA_PUEBLO)
 
+## Los tres niveles se desbloquean al superarlos en la campaña; el Reto Imposible
+## siempre está disponible, pero solo desde aquí.
 func _mostrar_niveles() -> void:
-	if not GameState.cargar():
-		return
-	_abrir_secundario("SELECCIONAR NIVEL · %s" % GameState.config.nombre)
+	var hay_partida := GameState.cargar()
+	var titulo := "SELECCIONAR NIVEL · %s" % GameState.config.nombre if hay_partida else "SELECCIONAR NIVEL"
+	_abrir_secundario(titulo)
 	for nivel in [1, 2, 3]:
 		var info := GameState.info_nivel(nivel)
-		var desbloqueado: bool = nivel <= GameState.nivel_desbloqueado
-		var boton := UIKit.boton("%d. %s%s" % [nivel, info["nombre"], "" if desbloqueado else "  (bloqueado)"], _jugar_nivel.bind(nivel), 18, 600)
-		boton.disabled = not desbloqueado
+		var superado: bool = hay_partida and GameState.nivel_superado(nivel)
+		var boton := UIKit.boton("%d. %s%s" % [nivel, info["nombre"], "" if superado else "  (supéralo en la campaña)"], _jugar_nivel.bind(nivel), 18, 600)
+		boton.disabled = not superado
 		_secundario.add_child(boton)
 		var objetivo := UIKit.etiqueta(info["objetivo"], 13, UIKit.TEXTO_TENUE)
 		objetivo.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		objetivo.custom_minimum_size.x = 600
 		_secundario.add_child(objetivo)
+	_secundario.add_child(HSeparator.new())
+	var reto := UIKit.panel(Color("2a1420"), UIKit.ROJO, 10)
+	var caja := UIKit.vbox(4)
+	caja.add_child(UIKit.boton("RETO IMPOSIBLE", _jugar_reto, 20, 600))
+	var texto := UIKit.etiqueta("Una Gran Final con el balance original de Difícil: insumos caros, VIP muy impacientes, familias desde el inicio y sin mejoras. No afecta tu partida guardada.", 13, Color("ffb3c1"))
+	texto.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	texto.custom_minimum_size.x = 600
+	caja.add_child(texto)
+	reto.add_child(caja)
+	_secundario.add_child(reto)
+
+func _jugar_reto() -> void:
+	GameState.iniciar_reto_imposible()
+	GameState.cambiar_escena(GameState.ESCENA_PUEBLO)
 
 func _jugar_nivel(nivel: int) -> void:
 	GameState.seleccionar_nivel(nivel)

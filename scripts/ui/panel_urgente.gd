@@ -45,7 +45,9 @@ func construir() -> void:
 	_ultima_firma = _firma()
 	UIKit.limpiar(contenido)
 	var config := GameState.config
-	var info := UIKit.etiqueta("Proveedor de emergencia: cobra ×%.1f y tarda %d s en llegar. Dinero: %s" % [config.urgente_multiplicador_costo, int(config.urgente_demora), UIKit.dinero(GameState.dinero)], 15, UIKit.ACENTO)
+	var preferente := " (proveedor preferente)" if int(GameState.mejoras["proveedor"]) > 0 else ""
+	var multiplicador := config.urgente_multiplicador_costo * (0.7 if preferente != "" else 1.0)
+	var info := UIKit.etiqueta("Proveedor de emergencia%s: cobra ×%.1f y tarda %d s en llegar. Dinero: %s" % [preferente, multiplicador, int(GameState.demora_urgente()), UIKit.dinero(GameState.dinero)], 15, UIKit.ACENTO)
 	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	info.custom_minimum_size.x = 640
 	contenido.add_child(info)

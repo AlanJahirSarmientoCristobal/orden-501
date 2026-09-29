@@ -34,6 +34,14 @@ var _acumulado_llegada := 0.0
 var _medio_tiempo := false
 var _final_cerca := false
 var _goles: Array[float] = []
+# Eventos del partido
+var _eventos: Array[Dictionary] = []      # {"minuto": float, "tipo": String}
+var _retraso_hasta := -1.0                # Minuto hasta el que el proveedor viene retrasado
+var _apagon := 0.0                        # Segundos restantes de apagón
+var _velo_apagon: ColorRect
+var penales := false
+var _penales_restante := 0.0
+const DURACION_PENALES := 20.0
 var _equipos := ["LOCAL", "VISITA"]
 var _refresco_panel := 0.0
 
@@ -58,7 +66,7 @@ var _parpadeo := 0.0
 func _ready() -> void:
 	randomize()
 	var info := GameState.info_nivel()
-	duracion = float(info["duracion"])
+	duracion = GameState.duracion_partido()
 	var partido: String = info["partido"]
 	if ":" in partido:
 		partido = partido.split(":")[1].strip_edges()
@@ -66,6 +74,7 @@ func _ready() -> void:
 	if partes.size() == 2:
 		_equipos = [partes[0].strip_edges(), partes[1].strip_edges()]
 	_generar_goles()
+	_generar_eventos()
 	_construir_escenario()
 	_construir_estaciones()
 	_construir_mesas()
@@ -265,6 +274,7 @@ func _process(delta: float) -> void:
 	_sentar_clientes()
 	_procesar_entregas(delta)
 	_procesar_eventos()
+	_procesar_eventos_especiales(delta)
 	_animar_decoracion(delta)
 	_refresco_panel += delta
 	if _refresco_panel >= 0.4:
@@ -274,7 +284,7 @@ func _process(delta: float) -> void:
 		_actualizar_carteles()
 		AudioManager.murmullo(float(_clientes_sentados()) / float(mesas.size()))
 	if minuto >= MINUTOS_PARTIDO:
-		terminar_jornada("")
+		_final_del_partido(delta)
 
 func _procesar_llegadas(delta: float) -> void:
 	if minuto >= 85.0:
@@ -388,6 +398,93 @@ func _procesar_eventos() -> void:
 		_goles.pop_front()
 		_gol()
 
+# ---------------------------------------------------------------- Eventos del partido
+
+## Nivel 1: un evento; Liguilla: uno o dos; Gran Final: dos. Nunca se repite el mismo.
+func _generar_eventos() -> void:
+	var cantidad: int = {1: 1, 2: randi_range(1, 2), 3: 2}.get(GameState.nivel_actual, 1)
+	var tipos := ["retraso", "critico", "apagon"]
+	tipos.shuffle()
+	var minutos := [randf_range(15.0, 38.0), randf_range(52.0, 75.0)]
+	for i in range(mini(cantidad, tipos.size())):
+		_eventos.append({"minuto": minutos[i % minutos.size()], "tipo": tipos[i]})
+	_eventos.sort_custom(func(a, b): return a["minuto"] < b["minuto"])
+
+func _procesar_eventos_especiales(delta: float) -> void:
+	if not _eventos.is_empty() and minuto >= float(_eventos[0]["minuto"]):
+		_evento(_eventos.pop_front()["tipo"])
+	if _apagon > 0.0:
+		_apagon -= delta
+		if _apagon <= 0.0:
+			_fin_apagon()
+
+func _evento(tipo: String) -> void:
+	match tipo:
+		"retraso":
+			_retraso_hasta = minuto + 20.0
+			for entrega in entregas:
+				entrega["restante"] = float(entrega["restante"]) + GameState.demora_urgente() * 0.5
+			AudioManager.sfx("telefono")
+			GameState.aviso.emit("EVENTO: el proveedor avisa que viene retrasado. Los pedidos urgentes tardarán 50% más un rato.")
+		"critico":
+			var critico := ClienteCritico.new()
+			_agregar_a_fila(critico, true)
+			AudioManager.sfx("pedido")
+			GameState.aviso.emit("EVENTO: ¡llegó un crítico gastronómico! Atiéndelo rápido: una buena reseña da +10% de reputación.")
+		"apagon":
+			_apagon = 10.0
+			cocina.pausada = true
+			barra.pausada = true
+			if _velo_apagon == null:
+				_velo_apagon = ColorRect.new()
+				_velo_apagon.color = Color(0.02, 0.02, 0.08, 0.5)
+				_velo_apagon.size = Vector2(1000, 620)
+				_velo_apagon.position = Vector2(0, 100)
+				_velo_apagon.z_index = 70
+				_velo_apagon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				add_child(_velo_apagon)
+			_velo_apagon.visible = true
+			for tv in _televisores:
+				tv.visible = false
+			AudioManager.sfx("error")
+			GameState.aviso.emit("EVENTO: ¡se fue la luz! La cocina y la barra se detienen 10 segundos.")
+
+func _fin_apagon() -> void:
+	cocina.pausada = false
+	barra.pausada = false
+	if _velo_apagon:
+		_velo_apagon.visible = false
+	for tv in _televisores:
+		tv.visible = true
+	GameState.aviso.emit("Regresó la luz. ¡A seguir!")
+
+func _demora_actual() -> float:
+	return GameState.demora_urgente() * (1.5 if minuto < _retraso_hasta else 1.0)
+
+## Al llegar al 90': si el partido va empatado hay penales (20 s más y otra ronda de bebidas).
+func _final_del_partido(delta: float) -> void:
+	if not penales and marcador[0] == marcador[1] and _penales_restante == 0.0:
+		penales = true
+		_penales_restante = DURACION_PENALES
+		AudioManager.sfx("silbato")
+		AudioManager.intensidad(1.35)
+		var rondas := 0
+		for cliente in get_tree().get_nodes_in_group("clientes"):
+			if randf() < 0.7 and cliente.pedir_extra():
+				rondas += 1
+		GameState.aviso.emit("¡EMPATE! Se va a penales: 20 s más de partido y %d mesa(s) piden otra ronda." % rondas)
+		return
+	if penales:
+		_penales_restante -= delta
+		if _penales_restante > 0.0:
+			return
+		penales = false
+		_penales_restante = -1.0
+		var ganador := 0 if randf() < 0.6 else 1
+		marcador[ganador] += 1
+		GameState.aviso.emit("¡%s gana en penales!" % _equipos[ganador])
+	terminar_jornada("")
+
 func _gol() -> void:
 	var equipo := 0 if randf() < 0.6 else 1
 	marcador[equipo] += 1
@@ -472,7 +569,7 @@ func _mostrar_faltante(cliente: Cliente, platillo: String) -> void:
 	var sustituto := _sustituto_disponible(platillo, cliente.personas)
 	if sustituto != "":
 		opciones.append(["Ofrecer sustituto: %s (menos propina)" % sustituto, _usar_sustituto.bind(cliente, sustituto)])
-	opciones.append(["Pedido urgente al proveedor (más caro, tarda %d s)" % int(GameState.config.urgente_demora), _faltante_urgente.bind(cliente)])
+	opciones.append(["Pedido urgente al proveedor (más caro, tarda %d s)" % int(_demora_actual()), _faltante_urgente.bind(cliente)])
 	opciones.append(["Marcar %s como agotado" % platillo, _marcar_agotado.bind(cliente, platillo)])
 	_dialogo.mostrar("¡INSUMO AGOTADO!", mensaje, opciones)
 
@@ -536,8 +633,9 @@ func pedir_urgente(insumo: String, cantidad: int) -> bool:
 		AudioManager.sfx("error")
 		return false
 	AudioManager.sfx("telefono")
-	entregas.append({"insumo": insumo, "cantidad": cantidad, "restante": GameState.config.urgente_demora})
-	GameState.aviso.emit("Pedido urgente: %d %s llegará en %d s." % [cantidad, Catalogo.nombre_insumo(insumo), int(GameState.config.urgente_demora)])
+	var demora := _demora_actual()
+	entregas.append({"insumo": insumo, "cantidad": cantidad, "restante": demora})
+	GameState.aviso.emit("Pedido urgente: %d %s llegará en %d s." % [cantidad, Catalogo.nombre_insumo(insumo), int(demora)])
 	return true
 
 func posicion_puerta() -> Vector2:
@@ -625,7 +723,8 @@ func _construir_hud() -> void:
 func _actualizar_hud() -> void:
 	if _hud_reloj == null:
 		return
-	_fijar(_hud_reloj, "%d' · %s %d - %d %s" % [int(minuto), _equipos[0].left(10), marcador[0], marcador[1], _equipos[1].left(10)], Color("d9ffd9"))
+	var reloj := "PENALES" if penales else "%d'" % int(minuto)
+	_fijar(_hud_reloj, "%s · %s %d - %d %s" % [reloj, _equipos[0].left(10), marcador[0], marcador[1], _equipos[1].left(10)], Color("d9ffd9"))
 	_fijar(_hud_dinero, "Dinero %s" % UIKit.dinero(GameState.dinero), UIKit.TEXTO)
 	_fijar(_hud_reputacion, "%s %d%%" % [UIKit.estrellas(GameState.reputacion), int(GameState.reputacion)], UIKit.TEXTO)
 	_fijar(_hud_bandeja, "Bandeja %d/%d" % [dani.bandeja.size() if dani else 0, GameState.capacidad_bandeja()], UIKit.TEXTO)

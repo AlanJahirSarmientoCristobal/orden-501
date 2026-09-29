@@ -164,8 +164,8 @@ func _construir() -> void:
 func _process(delta: float) -> void:
 	match estado:
 		Estado.EN_FILA:
-			# En la fila la paciencia baja más despacio (35 % del ritmo normal).
-			_gastar_paciencia(delta * 0.35)
+			# En la fila la paciencia baja más despacio (35 % del ritmo normal en la campaña).
+			_gastar_paciencia(delta * GameState.config.paciencia_fila)
 		Estado.ORDENANDO, Estado.ESPERANDO_COMIDA:
 			_gastar_paciencia(delta)
 		Estado.COMIENDO:

@@ -21,6 +21,10 @@ Si un insumo se acaba, eliges entre **marcar el platillo como agotado**, hacer u
 | 2. Liguilla | Cero reservaciones duplicadas y alcanzar la meta de ventas. Llegan clientes VIP. |
 | 3. Gran Final | Terminar con la reputación igual o mayor a la meta de la dificultad. |
 
+Durante el partido ocurren **eventos**: se retrasa el proveedor, llega un crítico gastronómico, se va la luz, o hay penales si el marcador va empatado.
+
+En **Seleccionar nivel** se repiten los niveles ya superados en la campaña. Ahí también está el **Reto Imposible**, siempre disponible: una Gran Final con el balance original de Difícil, pensada como reto para la presentación. No afecta la partida guardada.
+
 Al ganar la Gran Final se desbloquea la **terraza** (2 mesas más) y se muestra el reporte de la temporada. Si la reputación llega a 0 % se pierde la jornada. "Reiniciar jornada" repite el día desde la mañana con el dinero e inventario que tenías al inicio.
 
 ### Dificultad

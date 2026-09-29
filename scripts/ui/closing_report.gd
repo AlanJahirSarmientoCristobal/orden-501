@@ -97,6 +97,11 @@ func _construir_informe() -> void:
 	_contenido.add_child(grid)
 	_contenido.add_child(HSeparator.new())
 
+	if bool(inf.get("reto", false)):
+		_acciones.add_child(UIKit.etiqueta("RETO IMPOSIBLE: %s" % ("¡SUPERADO!" if exito else "no superado"), 18, UIKit.VERDE if exito else UIKit.ROJO))
+		_acciones.add_child(UIKit.boton("Reintentar el reto", _reintentar_reto, 17, 400))
+		_acciones.add_child(UIKit.boton("Menú principal", func(): GameState.cambiar_escena(GameState.ESCENA_MENU), 17, 400))
+		return
 	if exito and bool(inf.get("temporada_completa", false)):
 		_acciones.add_child(UIKit.boton("Ver final de temporada", func(): GameState.cambiar_escena(GameState.ESCENA_VICTORIA), 17, 400))
 	elif exito:
@@ -128,33 +133,55 @@ func _construir_mejoras() -> void:
 	var exito := bool(GameState.ultimo_informe.get("exito", false))
 	_mejoras.add_child(UIKit.etiqueta("MEJORAS DEL RESTAURANTE", 20, UIKit.ACENTO))
 	_mejoras.add_child(UIKit.etiqueta("Dinero: %s" % UIKit.dinero(GameState.dinero), 16))
+	if GameState.modo_reto:
+		_mejoras.add_child(UIKit.etiqueta("En el Reto Imposible no hay mejoras.", 14, UIKit.TEXTO_TENUE))
+		return
 	if not exito:
 		var l := UIKit.etiqueta("Supera la jornada para comprar mejoras.", 14, UIKit.TEXTO_TENUE)
 		_mejoras.add_child(l)
 		return
+	var desplazable := ScrollContainer.new()
+	desplazable.custom_minimum_size = Vector2(400, 380)
+	desplazable.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	var lista := UIKit.vbox(6)
+	lista.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	desplazable.add_child(lista)
+	_mejoras.add_child(desplazable)
 	for id in GameState.MEJORAS:
 		var datos: Dictionary = GameState.MEJORAS[id]
 		var nivel := int(GameState.mejoras[id])
-		var maximo := int(datos["maximo"])
+		var maximo := GameState.maximo_mejora(id)
+		var costo := GameState.costo_mejora(id)
+		var consumible := bool(datos.get("consumible", false))
 		var tarjeta := UIKit.panel(UIKit.FONDO_CLARO, Color(UIKit.BORDE, 0.35), 6)
 		var fila := UIKit.hbox(8)
 		var caja := UIKit.vbox(0)
 		caja.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		caja.add_child(UIKit.etiqueta("%s  (%d/%d)" % [datos["nombre"], nivel, maximo], 14, UIKit.TEXTO))
-		caja.add_child(UIKit.etiqueta(datos["descripcion"], 11, UIKit.TEXTO_TENUE))
+		var titulo: String = datos["nombre"] if consumible else "%s  (nivel %d/%d)" % [datos["nombre"], nivel, maximo]
+		caja.add_child(UIKit.etiqueta(titulo, 14, UIKit.TEXTO))
+		var descripcion := UIKit.etiqueta(datos["descripcion"], 11, UIKit.TEXTO_TENUE)
+		descripcion.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		descripcion.custom_minimum_size.x = 250
+		caja.add_child(descripcion)
 		fila.add_child(caja)
-		var texto_boton := "Comprado" if nivel >= maximo else UIKit.dinero(datos["costo"])
-		var boton := UIKit.boton(texto_boton, _comprar.bind(id), 13, 100)
-		boton.disabled = nivel >= maximo or GameState.dinero < int(datos["costo"])
+		var texto_boton := UIKit.dinero(costo)
+		if costo < 0:
+			texto_boton = "Lista para mañana" if consumible else "Máximo"
+		var boton := UIKit.boton(texto_boton, _comprar.bind(id), 13, 110)
+		boton.disabled = costo < 0 or GameState.dinero < costo
 		fila.add_child(boton)
 		tarjeta.add_child(fila)
-		_mejoras.add_child(tarjeta)
+		lista.add_child(tarjeta)
 	_mejoras.add_child(UIKit.etiqueta("Recuerda guardar dinero para las compras de mañana.", 12, UIKit.TEXTO_TENUE))
 
 func _comprar(id: String) -> void:
 	if GameState.comprar_mejora(id):
 		GameState.aviso.emit("Mejora comprada: %s" % GameState.MEJORAS[id]["nombre"])
 	_construir_mejoras()
+
+func _reintentar_reto() -> void:
+	GameState.iniciar_reto_imposible()
+	GameState.cambiar_escena(GameState.ESCENA_PUEBLO)
 
 func _siguiente_dia() -> void:
 	GameState.iniciar_manana()

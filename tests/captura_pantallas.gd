@@ -159,6 +159,9 @@ func _run() -> void:
 	GameState.dinero = 1500
 	await _abrir("res://scenes/ui/closing_report.tscn")
 	await _capturar("11b_reporte_exito")
+	var menu := await _abrir("res://scenes/menu/main_menu.tscn")
+	menu._mostrar_niveles()
+	await _capturar("11c_seleccion_nivel")
 	GameState.historial = [GameState.ultimo_informe]
 	GameState.terraza_desbloqueada = true
 	await _abrir("res://scenes/ui/victory.tscn")

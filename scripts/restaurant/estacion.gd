@@ -11,6 +11,7 @@ var simultaneos := 1
 var cola: Array[Dictionary] = []          # {"platillo", "cliente"}
 var preparando: Array[Dictionary] = []    # {"platillo", "cliente", "restante", "total"}
 var listos: Array[Dictionary] = []        # {"platillo", "cliente"}
+var pausada := false                      # Apagón: no se prepara nada
 
 var _vista_listos: HBoxContainer
 var _barra: ProgressBar
@@ -50,6 +51,8 @@ func agregar_pedido(platillo: String, cliente: Cliente) -> void:
 	_actualizar_vista()
 
 func _process(delta: float) -> void:
+	if pausada:
+		return
 	while preparando.size() < simultaneos and not cola.is_empty():
 		var orden: Dictionary = cola.pop_front()
 		var total := float(Catalogo.PLATILLOS[orden["platillo"]]["tiempo"])

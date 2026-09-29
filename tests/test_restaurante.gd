@@ -36,6 +36,7 @@ func _run() -> void:
 	_probar_grupos()
 	_probar_reservacion()
 	_probar_gol()
+	_probar_eventos()
 	await _probar_fin()
 
 	_restaurar()
@@ -227,6 +228,36 @@ func _probar_gol() -> void:
 	cliente.tiempo_comiendo = 10.0
 	_check(cliente.pedir_extra(), "Un cliente comiendo debe poder pedir otra ronda")
 	_check(Catalogo.BEBIDAS.has(cliente.pedido) and cliente.estado == Cliente.Estado.ORDENANDO, "La ronda extra debe ser una bebida")
+
+func _probar_eventos() -> void:
+	# Apagón: la cocina deja de avanzar y se reanuda a los 10 s
+	var cliente := ClienteHabitual.new()
+	_sentar(cliente, r.mesas[5], Catalogo.PAPAS)
+	GameState.inventario.agregar("papas", 4, GameState.dia)
+	r.mesas[5].interactuar(r.dani)
+	r._evento("apagon")
+	_check(r.cocina.pausada and r.barra.pausada, "El apagón debe detener cocina y barra")
+	var listos: int = r.cocina.listos.size()
+	_avanzar_estaciones(10.0)
+	_check(r.cocina.listos.size() == listos, "Durante el apagón no se debe preparar nada")
+	r._procesar_eventos_especiales(10.5)
+	_check(not r.cocina.pausada, "La cocina debe reanudarse al volver la luz")
+	r.cancelar_pedidos(cliente)
+	cliente.retirarse()
+	r.mesas[5].liberar(false)
+	# Crítico: entra primero a la fila
+	r._evento("critico")
+	_check(r.fila[0] is ClienteCritico, "El crítico debe entrar al frente de la fila")
+	# Retraso del proveedor: los urgentes tardan más
+	var normal: float = r._demora_actual()
+	r._evento("retraso")
+	_check(r._demora_actual() > normal, "El retraso del proveedor debe alargar los pedidos urgentes")
+	# Penales: solo si el partido va empatado
+	r.marcador = [1, 1]
+	r._final_del_partido(0.1)
+	_check(r.penales and not r.terminado, "Con empate debe haber penales antes de terminar")
+	r.penales = false
+	r._penales_restante = -1.0
 
 func _probar_fin() -> void:
 	r.minuto = 90.0

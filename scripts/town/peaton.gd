@@ -22,7 +22,7 @@ func _ready() -> void:
 	z_index = 4
 	_sprite = AnimatedSprite2D.new()
 	_sprite.sprite_frames = AssetPaths.frames_personaje(_clave)
-	_sprite.scale = Vector2(AssetPaths.ESCALA_PERSONAJE, AssetPaths.ESCALA_PERSONAJE)
+	_sprite.scale = AssetPaths.escala(_clave)
 	_sprite.position = Vector2(0, AssetPaths.ALTURA_PERSONAJE)
 	add_child(_sprite)
 	_indice = randi_range(0, ruta.size() - 1)

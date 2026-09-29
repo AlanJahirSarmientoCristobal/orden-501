@@ -201,7 +201,7 @@ func _construir_escenario() -> void:
 	chef.sprite_frames = AssetPaths.frames_personaje("chef")
 	chef.animation = &"side"
 	chef.flip_h = false
-	chef.scale = Vector2(AssetPaths.ESCALA_PERSONAJE, AssetPaths.ESCALA_PERSONAJE)
+	chef.scale = AssetPaths.escala("chef")
 	chef.position = Vector2(72, 215)
 	chef.play()
 	add_child(chef)

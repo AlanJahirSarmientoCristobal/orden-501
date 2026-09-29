@@ -47,7 +47,7 @@ func _construir() -> void:
 	_sprite = AnimatedSprite2D.new()
 	_sprite.sprite_frames = AssetPaths.frames_personaje("dani")
 	_sprite.animation = &"down"
-	_sprite.scale = Vector2(AssetPaths.ESCALA_PERSONAJE, AssetPaths.ESCALA_PERSONAJE)
+	_sprite.scale = AssetPaths.escala("dani")
 	_sprite.position = Vector2(0, AssetPaths.ALTURA_PERSONAJE)
 	add_child(_sprite)
 

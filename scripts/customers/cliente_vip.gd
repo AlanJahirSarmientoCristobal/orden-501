@@ -32,4 +32,6 @@ func elegir_pedido() -> String:
 
 func _ready() -> void:
 	super._ready()
-	_sprite.modulate = Color(1.0, 0.92, 0.6)
+	# El tono dorado solo distingue al VIP mientras usa el sprite genérico.
+	if not AssetPaths.tiene_hoja_propia(clave_sprite()):
+		_sprite.modulate = Color(1.0, 0.92, 0.6)

@@ -123,7 +123,7 @@ func npc(clave: String, pos: Vector2, nombre: String, animacion: StringName = &"
 	s.sprite_frames = AssetPaths.frames_personaje(clave)
 	s.animation = animacion
 	s.frame = 0
-	s.scale = Vector2(AssetPaths.ESCALA_PERSONAJE, AssetPaths.ESCALA_PERSONAJE)
+	s.scale = AssetPaths.escala(clave)
 	s.position = pos
 	s.z_index = 5
 	add_child(s)

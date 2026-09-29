@@ -112,15 +112,16 @@ func _construir() -> void:
 	_sprite.sprite_frames = AssetPaths.frames_personaje(clave_sprite())
 	_sprite.animation = &"down"
 	_sprite.frame = 0
-	_sprite.scale = Vector2(AssetPaths.ESCALA_PERSONAJE, AssetPaths.ESCALA_PERSONAJE)
+	_sprite.scale = AssetPaths.escala(clave_sprite())
 	_sprite.position = Vector2(0, AssetPaths.ALTURA_PERSONAJE)
 	add_child(_sprite)
 	for i in range(personas - 1):
 		var acompanante := AnimatedSprite2D.new()
-		acompanante.sprite_frames = AssetPaths.frames_personaje(["cliente_1", "cliente_2", "cliente_3"][randi() % 3])
+		var clave_acompanante: String = ["cliente_1", "cliente_2", "cliente_3"][randi() % 3]
+		acompanante.sprite_frames = AssetPaths.frames_personaje(clave_acompanante)
 		acompanante.animation = &"down"
 		acompanante.frame = 0
-		acompanante.scale = _sprite.scale
+		acompanante.scale = AssetPaths.escala(clave_acompanante)
 		acompanante.z_index = -1
 		add_child(acompanante)
 		_acompanantes.append(acompanante)

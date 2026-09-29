@@ -5,7 +5,7 @@ class_name ClienteCritico
 ## reseña sube mucho la reputación; si se va molesto, la baja mucho.
 
 func clave_sprite() -> String:
-	return "cliente_3"
+	return "critico"
 
 func nombre_tipo() -> String:
 	return "Crítico"
@@ -30,4 +30,5 @@ func bonificacion_reputacion() -> float:
 
 func _ready() -> void:
 	super._ready()
-	_sprite.modulate = Color(0.85, 0.8, 1.1)
+	if not AssetPaths.tiene_hoja_propia(clave_sprite()):
+		_sprite.modulate = Color(0.85, 0.8, 1.1)

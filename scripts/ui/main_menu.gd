@@ -51,7 +51,7 @@ func _decorar() -> void:
 		var s := AnimatedSprite2D.new()
 		s.sprite_frames = AssetPaths.frames_personaje(claves[i])
 		s.animation = &"down"
-		s.scale = Vector2(4, 4)
+		s.scale = AssetPaths.escala(claves[i])
 		s.position = Vector2(110 + i * 64, 646)
 		s.play()
 		add_child(s)

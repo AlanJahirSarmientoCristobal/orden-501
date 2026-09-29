@@ -56,6 +56,7 @@ const TEXTURAS := {
 
 ## Personajes: índice del primer tile de la columna "abajo" en el tileset RPG Urban.
 ## Cada personaje usa 3 filas de animación y columnas abajo / arriba / lado.
+## Si existe una hoja propia en HOJAS_PROPIAS (por ejemplo personajes/dani.png) se usa esa.
 const PERSONAJES := {
 	"dani": 429,
 	"chef": 267,
@@ -63,9 +64,23 @@ const PERSONAJES := {
 	"cliente_2": 105,
 	"cliente_3": 186,
 	"cliente_vip": 348,
+	"critico": 186,
 	"vendedor_mercado": 186,        # Don Chema (señor canoso)
 	"encargado_cerveceria": 105,    # Lupita (muchacha pelirroja)
+	"dona_mari": 105,
+	"profe_juve": 24,
+	"capitan": 348,
 }
+
+## Hojas de sprites del equipo: 4 columnas (de pie, paso A, de pie 2, paso B) y 3 filas
+## (abajo, arriba, lado mirando a la derecha). Cualquier tamaño de cuadro sirve: el juego
+## calcula la escala para que el personaje mida 64 px en pantalla.
+const HOJAS_PROPIAS := "res://Assets/sprites/personajes/%s.png"
+const RETRATOS_PROPIOS := "res://Assets/sprites/personajes/retrato_%s.png"
+const COLUMNAS_HOJA := 4
+const FILAS_HOJA := 3
+## Altura en pantalla de un personaje (16 px del tileset × ESCALA_PERSONAJE).
+const ALTO_EN_PANTALLA := 16.0 * ESCALA_PERSONAJE
 
 ## Sonidos y música opcionales. Si el archivo existe se usa; si no, AudioManager
 ## genera un tono procedural equivalente.
@@ -173,10 +188,30 @@ static func tile(indice: int) -> Texture2D:
 	var ruta := TILES % indice
 	return load(ruta) if ResourceLoader.exists(ruta) else null
 
+## Hoja propia del personaje, o null si todavía se usa el tileset de Kenney.
+static func hoja_propia(clave: String) -> Texture2D:
+	var ruta := HOJAS_PROPIAS % clave
+	return load(ruta) if ResourceLoader.exists(ruta) else null
+
+static func tiene_hoja_propia(clave: String) -> bool:
+	return ResourceLoader.exists(HOJAS_PROPIAS % clave)
+
+## Escala del sprite: 4 con los tiles de 16 px; con una hoja propia se ajusta a su tamaño.
+static func escala(clave: String) -> Vector2:
+	var hoja := hoja_propia(clave)
+	if hoja == null:
+		return Vector2(ESCALA_PERSONAJE, ESCALA_PERSONAJE)
+	var e := ALTO_EN_PANTALLA / (hoja.get_height() / float(FILAS_HOJA))
+	return Vector2(e, e)
+
 ## Construye las animaciones "down", "up" y "side" de un personaje.
 static func frames_personaje(clave: String) -> SpriteFrames:
 	var cache_clave := "frames_" + clave
 	if _cache.has(cache_clave):
+		return _cache[cache_clave]
+	var hoja := hoja_propia(clave)
+	if hoja:
+		_cache[cache_clave] = _frames_de_hoja(hoja)
 		return _cache[cache_clave]
 	var base: int = PERSONAJES.get(clave, PERSONAJES["cliente_1"])
 	var frames := SpriteFrames.new()
@@ -195,12 +230,38 @@ static func frames_personaje(clave: String) -> SpriteFrames:
 	_cache[cache_clave] = frames
 	return frames
 
+static func _frames_de_hoja(hoja: Texture2D) -> SpriteFrames:
+	var ancho := hoja.get_width() / COLUMNAS_HOJA
+	var alto := hoja.get_height() / FILAS_HOJA
+	var frames := SpriteFrames.new()
+	frames.remove_animation(&"default")
+	var filas := [&"down", &"up", &"side"]
+	for fila in range(FILAS_HOJA):
+		var anim: StringName = filas[fila]
+		frames.add_animation(anim)
+		frames.set_animation_speed(anim, 8.0)
+		frames.set_animation_loop(anim, true)
+		for columna in range(COLUMNAS_HOJA):
+			var cuadro := AtlasTexture.new()
+			cuadro.atlas = hoja
+			cuadro.region = Rect2(columna * ancho, fila * alto, ancho, alto)
+			frames.add_frame(anim, cuadro)
+	return frames
+
 ## Retrato para diálogos y menús. Si existe "retrato_<clave>" en TEXTURAS (un busto dibujado
 ## por el equipo) se usa ese; si no, el personaje de pie visto de frente.
 static func retrato(clave: String) -> Texture2D:
 	var propio := textura("retrato_" + clave)
 	if propio:
 		return propio
+	if ResourceLoader.exists(RETRATOS_PROPIOS % clave):
+		return load(RETRATOS_PROPIOS % clave)
+	var hoja := hoja_propia(clave)
+	if hoja:
+		var cuadro := AtlasTexture.new()
+		cuadro.atlas = hoja
+		cuadro.region = Rect2(0, 0, hoja.get_width() / COLUMNAS_HOJA, hoja.get_height() / FILAS_HOJA)
+		return cuadro
 	return tile(int(PERSONAJES.get(clave, PERSONAJES["cliente_1"])))
 
 static func audio(clave: String) -> AudioStream:

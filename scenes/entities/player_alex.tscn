@@ -1,0 +1,94 @@
+[gd_scene format=3 uid="uid://c8p1a7x40av2m"]
+
+[ext_resource type="Script" path="res://scripts/entities/player_alex.gd" id="1_alex_script"]
+[ext_resource type="Texture2D" path="res://Assets/sprites/rpg_urban/Tiles/tile_0429.png" id="2_down_1"]
+[ext_resource type="Texture2D" path="res://Assets/sprites/rpg_urban/Tiles/tile_0456.png" id="3_down_2"]
+[ext_resource type="Texture2D" path="res://Assets/sprites/rpg_urban/Tiles/tile_0483.png" id="4_down_3"]
+[ext_resource type="Texture2D" path="res://Assets/sprites/rpg_urban/Tiles/tile_0430.png" id="5_up_1"]
+[ext_resource type="Texture2D" path="res://Assets/sprites/rpg_urban/Tiles/tile_0457.png" id="6_up_2"]
+[ext_resource type="Texture2D" path="res://Assets/sprites/rpg_urban/Tiles/tile_0484.png" id="7_up_3"]
+[ext_resource type="Texture2D" path="res://Assets/sprites/rpg_urban/Tiles/tile_0431.png" id="8_side_1"]
+[ext_resource type="Texture2D" path="res://Assets/sprites/rpg_urban/Tiles/tile_0458.png" id="9_side_2"]
+[ext_resource type="Texture2D" path="res://Assets/sprites/rpg_urban/Tiles/tile_0485.png" id="10_side_3"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(34, 42)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_reach"]
+radius = 85.0
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_alex"]
+animations = [{
+"frames": [{"duration": 1.0, "texture": ExtResource("2_down_1")}, {"duration": 1.0, "texture": ExtResource("3_down_2")}, {"duration": 1.0, "texture": ExtResource("4_down_3")}, {"duration": 1.0, "texture": ExtResource("3_down_2")}],
+"loop": true,
+"name": &"down",
+"speed": 8.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("8_side_1")}, {"duration": 1.0, "texture": ExtResource("9_side_2")}, {"duration": 1.0, "texture": ExtResource("10_side_3")}, {"duration": 1.0, "texture": ExtResource("9_side_2")}],
+"loop": true,
+"name": &"side",
+"speed": 8.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("5_up_1")}, {"duration": 1.0, "texture": ExtResource("6_up_2")}, {"duration": 1.0, "texture": ExtResource("7_up_3")}, {"duration": 1.0, "texture": ExtResource("6_up_2")}],
+"loop": true,
+"name": &"up",
+"speed": 8.0
+}]
+
+[node name="PlayerAlex" type="CharacterBody2D" groups=["player"]]
+z_index = 10
+collision_layer = 2
+collision_mask = 5
+script = ExtResource("1_alex_script")
+
+[node name="Sprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -5)
+scale = Vector2(4, 4)
+sprite_frames = SubResource("SpriteFrames_alex")
+animation = &"down"
+frame = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(1, -2)
+shape = SubResource("RectangleShape2D_body")
+
+[node name="InteractionDetector" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 8
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionDetector"]
+shape = SubResource("CircleShape2D_reach")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(1.0, 1.0)
+position_smoothing_enabled = true
+position_smoothing_speed = 9.0
+
+[node name="TrayDisplay" type="HBoxContainer" parent="."]
+offset_left = -60.0
+offset_top = -65.0
+offset_right = 60.0
+offset_bottom = -35.0
+alignment = 1
+
+[node name="StaminaBar" type="ProgressBar" parent="."]
+offset_left = -30.0
+offset_top = 34.0
+offset_right = 30.0
+offset_bottom = 40.0
+value = 100.0
+show_percentage = false
+
+[node name="PromptLabel" type="Label" parent="."]
+z_index = 25
+offset_left = -110.0
+offset_top = -95.0
+offset_right = 110.0
+offset_bottom = -70.0
+theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 12
+text = "[Espacio] Atender Mesa"
+horizontal_alignment = 1
+vertical_alignment = 1

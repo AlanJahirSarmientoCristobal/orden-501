@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://s8n2v4q9x1p3y"]
+
+[ext_resource type="Script" path="res://scripts/restaurant/sports_screen.gd" id="1_tv_script"]
+
+[node name="SportsScreen" type="Node2D"]
+script = ExtResource("1_tv_script")
+
+[node name="ScreenFrame" type="PanelContainer" parent="."]
+offset_left = -110.0
+offset_top = -45.0
+offset_right = 110.0
+offset_bottom = 45.0
+
+[node name="ScreenGlass" type="ColorRect" parent="ScreenFrame"]
+layout_mode = 2
+color = Color(0.04, 0.12, 0.22, 0.98)
+
+[node name="NeonBorder" type="ReferenceRect" parent="ScreenFrame"]
+layout_mode = 2
+border_color = Color(0.2, 0.75, 1, 0.9)
+border_width = 3.0
+editor_only = false
+
+[node name="Margin" type="MarginContainer" parent="ScreenFrame"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBox" type="VBoxContainer" parent="ScreenFrame/Margin"]
+layout_mode = 2
+alignment = 1
+
+[node name="ScoreLabel" type="Label" parent="ScreenFrame/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+theme_override_font_sizes/font_size = 14
+text = "⚽ ÁME 2 - 1 PAC"
+horizontal_alignment = 1
+
+[node name="ClockLabel" type="Label" parent="ScreenFrame/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "LIGA MX | 45' EN VIVO"
+horizontal_alignment = 1

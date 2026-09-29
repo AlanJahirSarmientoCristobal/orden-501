@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cpkb66akqd063"
+path="res://.godot/imported/burger-double.obj-3290d7efcf95128f09ca11e3a79656dc.mesh"
+
+[deps]
+
+files=["res://.godot/imported/burger-double.obj-3290d7efcf95128f09ca11e3a79656dc.mesh"]
+
+source_file="res://Assets/sprites/food_kit/Models/OBJ format/burger-double.obj"
+dest_files=["res://.godot/imported/burger-double.obj-3290d7efcf95128f09ca11e3a79656dc.mesh", "res://.godot/imported/burger-double.obj-3290d7efcf95128f09ca11e3a79656dc.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

@@ -1,0 +1,115 @@
+[gd_scene format=3 uid="uid://k8m2v4q7x1p9y"]
+
+[ext_resource type="Script" path="res://scripts/restaurant/kitchen_station.gd" id="1_kitchen_script"]
+[ext_resource type="Texture2D" path="res://Assets/sprites/rpg_urban/Tiles/tile_0276.png" id="2_counter_tex"]
+[ext_resource type="Texture2D" path="res://Assets/sprites/rpg_urban/Tiles/tile_0024.png" id="3_chef_tex"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kitchen_col"]
+size = Vector2(280, 80)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_counter_reach"]
+radius = 95.0
+
+[node name="KitchenStation" type="StaticBody2D"]
+z_index = 4
+collision_layer = 1
+collision_mask = 2
+script = ExtResource("1_kitchen_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_kitchen_col")
+
+[node name="Visuals" type="Node2D" parent="."]
+
+[node name="CounterSprite" type="Sprite2D" parent="Visuals"]
+position = Vector2(-80, 0)
+scale = Vector2(4.5, 4.5)
+texture = ExtResource("2_counter_tex")
+
+[node name="CounterSprite2" type="Sprite2D" parent="Visuals"]
+scale = Vector2(4.5, 4.5)
+texture = ExtResource("2_counter_tex")
+
+[node name="CounterSprite3" type="Sprite2D" parent="Visuals"]
+position = Vector2(80, 0)
+scale = Vector2(4.5, 4.5)
+texture = ExtResource("2_counter_tex")
+
+[node name="Title" type="Label" parent="Visuals"]
+offset_left = -120.0
+offset_top = -12.0
+offset_right = 120.0
+offset_bottom = 12.0
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 13
+text = "COCINA - CHEF MAESTRO"
+horizontal_alignment = 1
+
+[node name="ChefSprite" type="Sprite2D" parent="Visuals"]
+position = Vector2(0, -55)
+scale = Vector2(4, 4)
+texture = ExtResource("3_chef_tex")
+
+[node name="ChefBadge" type="Label" parent="Visuals"]
+offset_left = -40.0
+offset_top = -88.0
+offset_right = 40.0
+offset_bottom = -68.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 11
+text = "👨‍🍳 Chef"
+horizontal_alignment = 1
+
+[node name="InteractArea" type="Area2D" parent="."]
+collision_layer = 8
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractArea"]
+shape = SubResource("CircleShape2D_counter_reach")
+
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_top = 45.0
+offset_bottom = 45.0
+
+[node name="CookingBar" type="ProgressBar" parent="UI"]
+layout_mode = 0
+offset_left = -70.0
+offset_top = 5.0
+offset_right = 70.0
+offset_bottom = 14.0
+max_value = 4.5
+show_percentage = false
+
+[node name="ReadyContainer" type="PanelContainer" parent="UI"]
+layout_mode = 0
+offset_left = -90.0
+offset_top = 20.0
+offset_right = 90.0
+offset_bottom = 52.0
+
+[node name="Margin" type="MarginContainer" parent="UI/ReadyContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_right = 6
+
+[node name="HBox" type="HBoxContainer" parent="UI/ReadyContainer/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="QueueLabel" type="Label" parent="UI"]
+layout_mode = 0
+offset_left = -80.0
+offset_top = 54.0
+offset_right = 80.0
+offset_bottom = 72.0
+theme_override_colors/font_color = Color(0.8, 0.85, 0.9, 1)
+theme_override_font_sizes/font_size = 10
+text = "Cocina Libre"
+horizontal_alignment = 1

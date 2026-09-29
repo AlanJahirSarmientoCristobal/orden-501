@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://ddh2da8ovqxm3"
+path="res://.godot/imported/cookie.obj-a3cbb830788e89ae2d0f41dbc80d512c.mesh"
+
+[deps]
+
+files=["res://.godot/imported/cookie.obj-a3cbb830788e89ae2d0f41dbc80d512c.mesh"]
+
+source_file="res://Assets/sprites/food_kit/Models/OBJ format/cookie.obj"
+dest_files=["res://.godot/imported/cookie.obj-a3cbb830788e89ae2d0f41dbc80d512c.mesh", "res://.godot/imported/cookie.obj-a3cbb830788e89ae2d0f41dbc80d512c.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

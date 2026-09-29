@@ -1,0 +1,25 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dcuex4p7r5jhl"
+path="res://.godot/imported/pepper.obj-cb048f4403214855c6cb78a9229f931a.mesh"
+
+[deps]
+
+files=["res://.godot/imported/pepper.obj-cb048f4403214855c6cb78a9229f931a.mesh"]
+
+source_file="res://Assets/sprites/food_kit/Models/OBJ format/pepper.obj"
+dest_files=["res://.godot/imported/pepper.obj-cb048f4403214855c6cb78a9229f931a.mesh", "res://.godot/imported/pepper.obj-cb048f4403214855c6cb78a9229f931a.mesh"]
+
+[params]
+
+generate_tangents=true
+generate_lods=true
+generate_shadow_mesh=true
+generate_lightmap_uv2=false
+generate_lightmap_uv2_texel_size=0.2
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+force_disable_mesh_compression=false

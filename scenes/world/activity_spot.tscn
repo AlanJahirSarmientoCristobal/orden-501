@@ -1,0 +1,48 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/activity_spot.gd" id="1_script"]
+
+[sub_resource type="CircleShape2D" id="InteractShape"]
+radius = 56.0
+
+[node name="ActivitySpot" type="Area2D"]
+z_index = 12
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+script = ExtResource("1_script")
+
+[node name="Glow" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-34, -12, -20, -30, 20, -30, 34, -12, 34, 20, 20, 32, -20, 32, -34, 20)
+color = Color(0.05, 0.8, 0.7, 0.25)
+
+[node name="Icon" type="Sprite2D" parent="."]
+position = Vector2(0, -5)
+scale = Vector2(4, 4)
+
+[node name="Marker" type="Label" parent="."]
+offset_left = -18.0
+offset_top = -76.0
+offset_right = 18.0
+offset_bottom = -38.0
+theme_override_colors/font_color = Color(1, 0.86, 0.2, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.04, 0.08, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 24
+text = "!"
+horizontal_alignment = 1
+
+[node name="Name" type="Label" parent="."]
+offset_left = -100.0
+offset_top = 42.0
+offset_right = 100.0
+offset_bottom = 68.0
+theme_override_colors/font_color = Color(0.9, 0.96, 1, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.04, 0.08, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 12
+text = "Objetivo"
+horizontal_alignment = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("InteractShape")

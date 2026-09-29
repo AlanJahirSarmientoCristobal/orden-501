@@ -1,0 +1,376 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/world/main_hub.gd" id="1_hub"]
+[ext_resource type="Script" path="res://scripts/world/hub_world.gd" id="2_world"]
+[ext_resource type="PackedScene" path="res://scenes/world/world_player.tscn" id="3_player"]
+[ext_resource type="PackedScene" path="res://scenes/world/activity_spot.tscn" id="4_spot"]
+[ext_resource type="Script" path="res://scripts/world/minimap.gd" id="5_minimap"]
+
+[node name="MainHub" type="Node2D"]
+script = ExtResource("1_hub")
+
+[node name="WorldVisual" type="Node2D" parent="."]
+script = ExtResource("2_world")
+
+[node name="ObjectiveMarkers" type="Node2D" parent="."]
+
+[node name="WarpMarket" parent="." instance=ExtResource("4_spot")]
+position = Vector2(1120, 715)
+action = "warp"
+display_name = "Viajar al Mercado Central"
+details = "Portal al distrito comercial."
+icon_type = 6
+target_scene = "res://scenes/world/market_district.tscn"
+target_map = "market"
+target_position = Vector2(1280, 1180)
+
+[node name="WarpStadium" parent="." instance=ExtResource("4_spot")]
+position = Vector2(1430, 715)
+action = "warp"
+display_name = "Viajar al Estadio 501"
+details = "Portal al distrito deportivo."
+icon_type = 6
+target_scene = "res://scenes/world/stadium_district.tscn"
+target_map = "stadium"
+target_position = Vector2(1280, 1180)
+
+[node name="WarpPark" parent="." instance=ExtResource("4_spot")]
+position = Vector2(1120, 855)
+action = "warp"
+display_name = "Viajar al Parque y Ribera"
+details = "Portal al distrito natural."
+icon_type = 6
+target_scene = "res://scenes/world/park_district.tscn"
+target_map = "park"
+target_position = Vector2(1280, 1180)
+
+[node name="WarpIndustrial" parent="." instance=ExtResource("4_spot")]
+position = Vector2(1430, 855)
+action = "warp"
+display_name = "Viajar a la Zona Industrial"
+details = "Portal al distrito de talleres."
+icon_type = 6
+target_scene = "res://scenes/world/industrial_district.tscn"
+target_map = "industrial"
+target_position = Vector2(1280, 1180)
+
+[node name="RestaurantEntrance" parent="." instance=ExtResource("4_spot")]
+position = Vector2(380, 475)
+action = "restaurant"
+display_name = "Entrar a La 501"
+details = "Inicia un turno del minijuego de restaurante."
+icon_type = 5
+
+[node name="MarketJob" parent="." instance=ExtResource("4_spot")]
+position = Vector2(1010, 430)
+action = "repeatable"
+event_id = "market_job"
+display_name = "Ayudar en el mercado"
+details = "Trabajo diario del mercado."
+icon_type = 1
+repeatable_reward = 35
+
+[node name="StadiumJob" parent="." instance=ExtResource("4_spot")]
+position = Vector2(2370, 500)
+action = "trivia"
+event_id = "stadium_trivia"
+display_name = "Trivia deportiva"
+details = "Responde una pregunta de fútbol."
+icon_type = 0
+
+[node name="ParkJob" parent="." instance=ExtResource("4_spot")]
+position = Vector2(780, 1280)
+action = "repeatable"
+event_id = "park_job"
+display_name = "Rutina de entrenamiento"
+details = "Actividad diaria del parque."
+icon_type = 2
+repeatable_reward = 30
+
+[node name="WorkshopJob" parent="." instance=ExtResource("4_spot")]
+position = Vector2(1585, 1260)
+action = "repeatable"
+event_id = "workshop_job"
+display_name = "Reparar equipamiento"
+details = "Trabajo diario del taller."
+icon_type = 4
+repeatable_reward = 45
+
+[node name="DeliveryJob" parent="." instance=ExtResource("4_spot")]
+position = Vector2(2350, 1260)
+action = "repeatable"
+event_id = "delivery_job"
+display_name = "Ruta libre de reparto"
+details = "Trabajo diario del distrito residencial."
+icon_type = 5
+repeatable_reward = 50
+
+[node name="WorldPlayer" parent="." instance=ExtResource("3_player")]
+position = Vector2(1275, 760)
+
+[node name="DayLayer" type="CanvasLayer" parent="."]
+layer = 5
+
+[node name="DayOverlay" type="ColorRect" parent="DayLayer"]
+mouse_filter = 2
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="TopBar" type="PanelContainer" parent="HUD"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 16.0
+offset_top = 12.0
+offset_right = -16.0
+offset_bottom = 58.0
+grow_horizontal = 2
+
+[node name="Margin" type="MarginContainer" parent="HUD/TopBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_right = 16
+
+[node name="HBox" type="HBoxContainer" parent="HUD/TopBar/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Brand" type="Label" parent="HUD/TopBar/Margin/HBox"]
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.25, 1)
+theme_override_font_sizes/font_size = 15
+text = "🏙 BARRIO 501"
+
+[node name="Coins" type="Label" parent="HUD/TopBar/Margin/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 1, 0.55, 1)
+text = "💰 $0"
+
+[node name="Reputation" type="Label" parent="HUD/TopBar/Margin/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
+text = "★ REP 0"
+
+[node name="Level" type="Label" parent="HUD/TopBar/Margin/HBox"]
+layout_mode = 2
+text = "NIVEL 1 · XP 0/100"
+
+[node name="Time" type="Label" parent="HUD/TopBar/Margin/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.85, 1, 1)
+text = "DÍA 1 · 08:00"
+
+[node name="MissionPanel" type="PanelContainer" parent="HUD"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -390.0
+offset_top = 76.0
+offset_right = -16.0
+offset_bottom = 210.0
+grow_horizontal = 0
+
+[node name="Margin" type="MarginContainer" parent="HUD/MissionPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="HUD/MissionPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Title" type="Label" parent="HUD/MissionPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.25, 1)
+theme_override_font_sizes/font_size = 14
+text = "MISIÓN"
+
+[node name="Description" type="Label" parent="HUD/MissionPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.94, 1, 1)
+text = "Descripción"
+autowrap_mode = 2
+
+[node name="Progress" type="Label" parent="HUD/MissionPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 1, 0.7, 1)
+text = "Progreso 0/1"
+
+[node name="Notification" type="PanelContainer" parent="HUD"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 260.0
+offset_top = 235.0
+offset_right = -260.0
+offset_bottom = 292.0
+grow_horizontal = 2
+
+[node name="Margin" type="MarginContainer" parent="HUD/Notification"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_right = 15
+
+[node name="Label" type="Label" parent="HUD/Notification/Margin"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.35, 1)
+theme_override_font_sizes/font_size = 15
+text = "Notificación"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TriviaPanel" type="PanelContainer" parent="HUD"]
+process_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -310.0
+offset_top = -185.0
+offset_right = 310.0
+offset_bottom = 185.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="HUD/TriviaPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="HUD/TriviaPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="Label" parent="HUD/TriviaPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.25, 1)
+theme_override_font_sizes/font_size = 22
+text = "⚽ TRIVIA DEL ESTADIO"
+horizontal_alignment = 1
+
+[node name="Question" type="Label" parent="HUD/TriviaPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.96, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "Pregunta"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Option0" type="Button" parent="HUD/TriviaPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Opción A"
+
+[node name="Option1" type="Button" parent="HUD/TriviaPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Opción B"
+
+[node name="Option2" type="Button" parent="HUD/TriviaPanel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Opción C"
+
+[node name="Reward" type="Label" parent="HUD/TriviaPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.35, 1, 0.65, 1)
+text = "Recompensa diaria: $60"
+horizontal_alignment = 1
+
+[node name="Help" type="Label" parent="HUD"]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 18.0
+offset_top = -38.0
+offset_right = -18.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.78, 0.85, 0.92, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.04, 0.08, 1)
+theme_override_constants/outline_size = 4
+text = "[WASD] Explorar · [Espacio] Interactuar · [Esc] Pausa · Guardado automático"
+
+[node name="Minimap" type="Control" parent="HUD"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -246.0
+offset_top = -166.0
+offset_right = -16.0
+offset_bottom = -36.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+script = ExtResource("5_minimap")
+
+[node name="PauseLayer" type="CanvasLayer" parent="."]
+process_mode = 3
+layer = 30
+
+[node name="PauseOverlay" type="Control" parent="PauseLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="PauseLayer/PauseOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.01, 0.03, 0.06, 0.88)
+
+[node name="Label" type="Label" parent="PauseLayer/PauseOverlay"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -230.0
+offset_top = -75.0
+offset_right = 230.0
+offset_bottom = 75.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
+theme_override_font_sizes/font_size = 22
+text = "⏸ BARRIO EN PAUSA\n\n[Esc] Continuar"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BtnMenu" type="Button" parent="PauseLayer/PauseOverlay"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = 92.0
+offset_right = 120.0
+offset_bottom = 136.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Guardar y volver al menú"

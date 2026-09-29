@@ -1,0 +1,158 @@
+[gd_scene format=3 uid="uid://cax3v7q1m4p8y"]
+
+[ext_resource type="Script" path="res://scripts/ui/hud_rush.gd" id="1_hud_script"]
+
+[node name="HudRush" type="CanvasLayer"]
+layer = 10
+script = ExtResource("1_hud_script")
+
+[node name="TopBar" type="PanelContainer" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 16.0
+offset_top = 12.0
+offset_right = -16.0
+offset_bottom = 56.0
+grow_horizontal = 2
+
+[node name="Bg" type="ColorRect" parent="TopBar"]
+layout_mode = 2
+color = Color(0.08, 0.1, 0.16, 0.94)
+
+[node name="Border" type="ReferenceRect" parent="TopBar"]
+layout_mode = 2
+border_color = Color(0.8, 0.5, 0.2, 0.6)
+border_width = 2.0
+editor_only = false
+
+[node name="Margin" type="MarginContainer" parent="TopBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="TopBar/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="Brand" type="Label" parent="TopBar/Margin/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.75, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "🏟️ LA 501 · SPORTS BISTRO"
+
+[node name="MatchClock" type="Label" parent="TopBar/Margin/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "⏱️ Partido: 90 seg"
+
+[node name="Coins" type="Label" parent="TopBar/Margin/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.4, 1)
+theme_override_font_sizes/font_size = 14
+text = "💰 Caja: $0 | Jornada: $0/$220"
+
+[node name="Reputation" type="Label" parent="TopBar/Margin/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+theme_override_font_sizes/font_size = 14
+text = "Reputación: ⭐⭐⭐⭐⭐ (100%)"
+
+[node name="BottomBar" type="PanelContainer" parent="."]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -54.0
+offset_right = -16.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Bg" type="ColorRect" parent="BottomBar"]
+layout_mode = 2
+color = Color(0.08, 0.1, 0.16, 0.94)
+
+[node name="Margin" type="MarginContainer" parent="BottomBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 4
+
+[node name="HBox" type="HBoxContainer" parent="BottomBar/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="ControlsReminder" type="Label" parent="BottomBar/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 11
+text = "[WASD] Mover | [Shift] Correr | [Espacio] Interactuar | [E] Escáner | [Q] Desechar plato"
+
+[node name="DatapadButton" type="Button" parent="BottomBar/Margin/HBox"]
+custom_minimum_size = Vector2(260, 32)
+layout_mode = 2
+text = "📡 [E] ESCÁNER DE DEMANDA (LISTO)"
+
+[node name="DatapadCooldown" type="ProgressBar" parent="BottomBar/Margin/HBox"]
+visible = false
+custom_minimum_size = Vector2(80, 20)
+layout_mode = 2
+size_flags_vertical = 4
+show_percentage = false
+
+[node name="CenterBanner" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -60.0
+offset_right = 260.0
+offset_bottom = 60.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(260, 60)
+
+[node name="Bg" type="ColorRect" parent="CenterBanner"]
+layout_mode = 2
+color = Color(0.1, 0.12, 0.2, 0.96)
+
+[node name="Border" type="ReferenceRect" parent="CenterBanner"]
+layout_mode = 2
+border_color = Color(1, 0.8, 0.2, 1)
+border_width = 3.0
+editor_only = false
+
+[node name="Margin" type="MarginContainer" parent="CenterBanner"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 10
+
+[node name="VBox" type="VBoxContainer" parent="CenterBanner/Margin"]
+layout_mode = 2
+alignment = 1
+
+[node name="Title" type="Label" parent="CenterBanner/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 17
+text = "⚽ ¡MEDIO TIEMPO - PICO DE DEMANDA!"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="CenterBanner/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "¡Llegada masiva de hinchas hambrientos!"
+horizontal_alignment = 1

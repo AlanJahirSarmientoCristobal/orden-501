@@ -151,7 +151,8 @@ func multiplicador_cocina() -> float:
 	return config.multiplicador_cocina * (0.75 if int(mejoras["cocina"]) > 0 else 1.0)
 
 func intervalo_llegada() -> float:
-	return config.intervalo_llegada * (0.6 if promo_activa else 1.0)
+	# Promoción 2x1: ~40% más clientes (intervalo ÷ 1.4).
+	return config.intervalo_llegada / (1.4 if promo_activa else 1.0)
 
 func paciencia_base() -> float:
 	return config.paciencia_cliente * (1.2 if nivel_actual == 1 else 1.0)

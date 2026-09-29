@@ -11,16 +11,14 @@ config_version=5
 [application]
 
 config/name="ORDEN 501"
-run/main_scene="res://scenes/menu/main_menu_rush.tscn"
+run/main_scene="res://scenes/menu/main_menu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
 AudioManager="*res://scripts/autoload/audio_manager.gd"
-GameManager="*res://scripts/autoload/game_manager.gd"
-MissionManager="*res://scripts/autoload/mission_manager.gd"
-BusinessManager="*res://scripts/autoload/business_manager.gd"
+GameState="*res://scripts/autoload/game_state.gd"
 
 [display]
 
@@ -29,13 +27,8 @@ window/size/viewport_height=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
-[dotnet]
-
-project/assembly_name="ORDEN 501"
-
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
-rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"

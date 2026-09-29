@@ -81,6 +81,10 @@ static func textura(clave: String) -> Texture2D:
 	_cache[clave] = tex
 	return tex
 
+## Libera las texturas en caché (se llama al cerrar el juego).
+static func limpiar_cache() -> void:
+	_cache.clear()
+
 static func tile(indice: int) -> Texture2D:
 	var ruta := TILES % indice
 	return load(ruta) if ResourceLoader.exists(ruta) else null

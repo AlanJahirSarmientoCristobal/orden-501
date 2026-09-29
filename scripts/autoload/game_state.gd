@@ -73,6 +73,9 @@ func _ready() -> void:
 	_configurar_controles()
 	_reiniciar_estadisticas()
 
+func _exit_tree() -> void:
+	AssetPaths.limpiar_cache()
+
 # ---------------------------------------------------------------- Partida
 
 func nueva_partida(nueva_dificultad: String) -> void:
@@ -218,14 +221,18 @@ func recibir_urgente(insumo: String, cantidad: int) -> void:
 	inventario_cambiado.emit()
 	aviso.emit("Llegó el proveedor: +%d %s" % [cantidad, Catalogo.nombre_insumo(insumo)])
 
-## Consume los insumos de un platillo. Si faltan, registra el quiebre de stock.
+## Consume los insumos de un platillo. Devuelve false si faltan.
 func preparar(platillo: String) -> bool:
 	if inventario.consumir_receta(platillo):
 		inventario_cambiado.emit()
 		_revisar_stock_bajo(platillo)
 		return true
-	estadisticas["quiebres"] += 1
 	return false
+
+## Un pedido no se pudo preparar por falta de insumos (cuenta para el Nivel 1).
+func registrar_quiebre(platillo: String) -> void:
+	estadisticas["quiebres"] += 1
+	aviso.emit("Quiebre de stock: no alcanza para %s." % platillo)
 
 func _revisar_stock_bajo(platillo: String) -> void:
 	for insumo in Catalogo.receta(platillo):

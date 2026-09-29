@@ -7,10 +7,10 @@ class_name AssetPaths
 
 const TILES := "res://Assets/sprites/rpg_urban/Tiles/tile_%04d.png"
 
-## Escala de todos los personajes (sprites de 16 px). 3.5 = 56 px, un poco más grandes que un tile.
-const ESCALA_PERSONAJE := 3.5
+## Escala de todos los personajes (sprites de 16 px). 4 = 64 px: píxeles exactos, algo más grandes que un tile (48 px).
+const ESCALA_PERSONAJE := 4.0
 ## Desplazamiento vertical del sprite para que los pies queden en la posición del nodo.
-const ALTURA_PERSONAJE := -12.0
+const ALTURA_PERSONAJE := -14.0
 const COMIDA := "res://Assets/sprites/food_kit/Previews/%s.png"
 
 ## Texturas sueltas.

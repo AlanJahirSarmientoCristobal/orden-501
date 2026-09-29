@@ -96,8 +96,21 @@ func _tile(fuente: String, id: int, desfase: Vector2) -> Sprite2D:
 	_muebles.append(s)
 	return s
 
+## Sillas en coordenadas locales: primero las de arriba (el cliente principal usa la primera).
+func asientos_locales() -> Array[Vector2]:
+	if capacidad <= 2:
+		return [Vector2(0, -44), Vector2(0, 44)]
+	return [Vector2(-24, -44), Vector2(24, -44), Vector2(-24, 44), Vector2(24, 44)]
+
+## Dónde se para cada persona sentada (los pies quedan sobre la silla).
+func asientos_globales() -> Array[Vector2]:
+	var lista: Array[Vector2] = []
+	for asiento in asientos_locales():
+		lista.append(global_position + asiento + Vector2(0, 10))
+	return lista
+
 func posicion_asiento() -> Vector2:
-	return position + Vector2(0, -_tamano_mesa().y * 0.5 - 14)
+	return position + asientos_locales()[0] + Vector2(0, 10)
 
 func esta_libre() -> bool:
 	return estado == EstadoMesa.LIMPIA and cliente == null

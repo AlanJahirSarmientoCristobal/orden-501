@@ -44,7 +44,7 @@ El documento no fijaba estos valores:
 - **Reputación inicial:** 75 %, y se conserva de un día a otro.
   - Sube: +1.5 por pedido entregado y +3 por pedido VIP.
   - Baja: −8 si se va un cliente, −12 si se va un VIP, −8 por reservación duplicada y −5 si una reservación llega sin mesa asignada.
-- **Almacén:** 80 unidades. La mejora "Estantes extra" agrega 30, hasta dos veces.
+- **Almacén:** 100 unidades. La mejora "Estantes extra" agrega 30, hasta dos veces.
 - **Duración del partido** (tiempo real para 90'): 3 min en el Nivel 1, 3.5 min en el Nivel 2 y 4 min en el Nivel 3.
 - **Meta de ventas del Nivel 2:** $1,000 en Fácil, $1,200 en Normal y $1,400 en Difícil.
 - **"Mesas se ensucian":** se interpretó como el tiempo que hay que mantener Espacio para limpiar (0.8 / 1.5 / 2.5 s). En la Gran Final ese tiempo se multiplica por 1.3.
@@ -55,6 +55,10 @@ El documento no fijaba estos valores:
 - **Goles:** 1 o 2 goles al azar (3 en la Gran Final). Cada mesa que está comiendo tiene 70 % de probabilidad de pedir otra ronda de bebidas.
 - **Reservaciones:** 4 en la Liguilla y 6 en la Gran Final, en horarios que a veces coinciden. Una mesa reservada se aparta 10 minutos antes de la llegada.
 - **Mesas:** la 1 a la 3 son para 2 personas; la 4 a la 8 son para 4.
+- **Grupos de clientes** (pedido del equipo): en Fácil solo llegan personas solas. En Normal, 25 % de parejas y 15 % de familias de 4; en Difícil, 35 % y 30 %.
+  - Las familias solo caben en mesas de 4; las parejas y las personas solas prefieren las de 2.
+  - El grupo hace una sola comanda por persona (×2 o ×4): gasta y paga ese múltiplo, y la cocina tarda 35 % más por cada persona adicional.
+  - Los VIP siempre llegan solos. Las reservaciones llegan con su número de personas.
 - **Quiebre de stock:** cuenta una vez por pedido que no se pudo preparar.
 - **Promoción 2x1:** mejora de un solo uso. En la siguiente jornada llegan alrededor de 40 % más clientes (el intervalo entre llegadas se divide entre 1.4).
 

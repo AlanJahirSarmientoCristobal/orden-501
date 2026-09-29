@@ -45,7 +45,8 @@ func _ready() -> void:
 	_actualizar_vista()
 
 func agregar_pedido(platillo: String, cliente: Cliente) -> void:
-	cola.append({"platillo": platillo, "cliente": cliente})
+	var porciones: int = cliente.personas if cliente else 1
+	cola.append({"platillo": platillo, "cliente": cliente, "porciones": porciones})
 	_actualizar_vista()
 
 func _process(delta: float) -> void:
@@ -54,6 +55,8 @@ func _process(delta: float) -> void:
 		var total := float(Catalogo.PLATILLOS[orden["platillo"]]["tiempo"])
 		if tipo == Catalogo.COCINA:
 			total *= GameState.multiplicador_cocina()
+		# Un pedido para varias personas tarda más (35 % extra por persona adicional).
+		total *= 1.0 + 0.35 * float(int(orden.get("porciones", 1)) - 1)
 		orden["restante"] = total
 		orden["total"] = total
 		preparando.append(orden)
@@ -89,9 +92,9 @@ func pendientes() -> int:
 func descripcion_cola() -> Array[String]:
 	var lineas: Array[String] = []
 	for o in preparando:
-		lineas.append("Preparando: %s (Mesa %s)" % [o["platillo"], _mesa_de(o)])
+		lineas.append("Preparando: %s x%d (Mesa %s)" % [o["platillo"], int(o.get("porciones", 1)), _mesa_de(o)])
 	for o in cola:
-		lineas.append("En cola: %s (Mesa %s)" % [o["platillo"], _mesa_de(o)])
+		lineas.append("En cola: %s x%d (Mesa %s)" % [o["platillo"], int(o.get("porciones", 1)), _mesa_de(o)])
 	for o in listos:
 		lineas.append("LISTO: %s (Mesa %s)" % [o["platillo"], _mesa_de(o)])
 	return lineas

@@ -8,6 +8,9 @@ var reserva: Dictionary = {}
 func nombre_tipo() -> String:
 	return "Reserva %s" % reserva.get("id", "")
 
+func texto_grupo() -> String:
+	return "%s (%d)" % [nombre_tipo(), personas]
+
 func color_insignia() -> Color:
 	return UIKit.AZUL
 

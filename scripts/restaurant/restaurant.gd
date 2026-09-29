@@ -288,7 +288,12 @@ func _procesar_llegadas(delta: float) -> void:
 func _llegar_cliente() -> Cliente:
 	if fila.size() >= MAX_FILA:
 		return null
-	var cliente: Cliente = ClienteVIP.new() if randf() < GameState.probabilidad_vip() else ClienteHabitual.new()
+	var cliente: Cliente
+	if randf() < GameState.probabilidad_vip():
+		cliente = ClienteVIP.new()
+	else:
+		cliente = ClienteHabitual.new()
+		cliente.personas = GameState.tamano_grupo()
 	_agregar_a_fila(cliente, false)
 	return cliente
 
@@ -314,6 +319,7 @@ func _procesar_reservaciones() -> void:
 			reserva["estado"] = "llego"
 			var cliente := ClienteReservacion.new()
 			cliente.reserva = reserva
+			cliente.personas = int(reserva["personas"])
 			if sin_mesa:
 				reserva["mesa"] = 0
 				GameState.registrar_estadistica("reservas_sin_mesa")
@@ -339,10 +345,13 @@ func _mesa_para(cliente: Cliente) -> Mesa:
 	if cliente is ClienteReservacion and cliente.mesa_reservada() > 0:
 		var propia := _mesa_numero(cliente.mesa_reservada())
 		return propia if propia and propia.esta_libre() else null
+	# La mesa libre más chica en la que quepa el grupo (las de 4 quedan para familias).
+	var mejor: Mesa = null
 	for mesa in mesas:
-		if mesa.esta_libre() and GameState.reservacion_para_mesa(mesa.numero, minuto).is_empty():
-			return mesa
-	return null
+		if mesa.esta_libre() and mesa.capacidad >= cliente.personas and GameState.reservacion_para_mesa(mesa.numero, minuto).is_empty():
+			if mejor == null or mesa.capacidad < mejor.capacidad:
+				mejor = mesa
+	return mejor
 
 func _mesa_numero(numero: int) -> Mesa:
 	for mesa in mesas:
@@ -436,7 +445,7 @@ func procesar_pedido(cliente: Cliente) -> void:
 		if alternativa != "":
 			cliente.cambiar_pedido(alternativa)
 			platillo = alternativa
-	if GameState.preparar(platillo):
+	if GameState.preparar(platillo, cliente.personas):
 		_enviar(cliente, platillo, false)
 		return
 	# Cada pedido cuenta como un solo quiebre aunque Dani vuelva a intentarlo.
@@ -453,22 +462,23 @@ func _enviar(cliente: Cliente, platillo: String, sustituto: bool) -> void:
 
 func _mostrar_faltante(cliente: Cliente, platillo: String) -> void:
 	AudioManager.sfx("stock_bajo")
-	var faltan := GameState.inventario.faltantes(platillo)
+	var faltan := GameState.inventario.faltantes(platillo, cliente.personas)
 	var partes := []
 	for insumo in faltan:
 		partes.append("%d %s" % [faltan[insumo], Catalogo.nombre_insumo(insumo)])
-	var mensaje := "Mesa %d pidió %s, pero falta: %s.\n¿Qué hacemos?" % [cliente.mesa.numero, platillo, ", ".join(partes)]
+	var para := " para %d personas" % cliente.personas if cliente.personas > 1 else ""
+	var mensaje := "Mesa %d pidió %s%s, pero falta: %s.\n¿Qué hacemos?" % [cliente.mesa.numero, platillo, para, ", ".join(partes)]
 	var opciones := []
-	var sustituto := _sustituto_disponible(platillo)
+	var sustituto := _sustituto_disponible(platillo, cliente.personas)
 	if sustituto != "":
 		opciones.append(["Ofrecer sustituto: %s (menos propina)" % sustituto, _usar_sustituto.bind(cliente, sustituto)])
 	opciones.append(["Pedido urgente al proveedor (más caro, tarda %d s)" % int(GameState.config.urgente_demora), _faltante_urgente.bind(cliente)])
 	opciones.append(["Marcar %s como agotado" % platillo, _marcar_agotado.bind(cliente, platillo)])
 	_dialogo.mostrar("¡INSUMO AGOTADO!", mensaje, opciones)
 
-func _sustituto_disponible(platillo: String) -> String:
+func _sustituto_disponible(platillo: String, porciones: int = 1) -> String:
 	for opcion in Catalogo.SUSTITUTOS.get(platillo, []):
-		if not agotados.has(opcion) and GameState.inventario.puede_preparar(opcion):
+		if not agotados.has(opcion) and GameState.inventario.puede_preparar(opcion, porciones):
 			return opcion
 	return ""
 
@@ -479,14 +489,14 @@ func _alternativa(cliente: Cliente, platillo: String) -> String:
 			if not candidatos.has(p):
 				candidatos.append(p)
 	for opcion in candidatos:
-		if opcion != platillo and not agotados.has(opcion) and GameState.inventario.puede_preparar(opcion):
+		if opcion != platillo and not agotados.has(opcion) and GameState.inventario.puede_preparar(opcion, cliente.personas):
 			return opcion
 	return ""
 
 func _usar_sustituto(cliente: Cliente, sustituto: String) -> void:
 	if not is_instance_valid(cliente) or cliente.estado != Cliente.Estado.ORDENANDO:
 		return
-	if GameState.preparar(sustituto):
+	if GameState.preparar(sustituto, cliente.personas):
 		GameState.registrar_estadistica("sustitutos")
 		_enviar(cliente, sustituto, true)
 

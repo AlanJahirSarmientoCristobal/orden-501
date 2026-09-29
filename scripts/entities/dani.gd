@@ -138,7 +138,7 @@ func _physics_process(delta: float) -> void:
 		_cancelar_mantener()
 	else:
 		_sprite.stop()
-		_sprite.frame = 1
+		_sprite.frame = 0
 	move_and_slide()
 	_procesar_mantener(delta)
 	_actualizar_prompt()

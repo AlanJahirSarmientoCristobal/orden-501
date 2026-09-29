@@ -50,4 +50,4 @@ func _siguiente() -> void:
 
 func _detenerse() -> void:
 	_sprite.stop()
-	_sprite.frame = 1
+	_sprite.frame = 0

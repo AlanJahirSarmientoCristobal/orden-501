@@ -108,6 +108,22 @@ func _run() -> void:
 			break
 	await _esperar(0.5)
 	await _capturar("07_restaurante")
+	# Una familia de 4 y una pareja sentadas
+	for grupo in [4, 2]:
+		for m in resto.mesas:
+			if m.esta_libre() and m.capacidad >= grupo and (grupo == 4 or m.capacidad == 2):
+				var c := ClienteHabitual.new()
+				c.personas = grupo
+				c.restaurante = resto
+				c.position = m.posicion_asiento()
+				resto.add_child(c)
+				m.ocupar(c)
+				c.mesa = m
+				c.estado = Cliente.Estado.CAMINANDO
+				c._sentarse()
+				break
+	await _esperar(0.3)
+	await _capturar("07b_grupos")
 	resto._tablet.abrir_seccion("reservaciones")
 	await _capturar("08_tablet_reservaciones")
 	resto._tablet.cerrar()

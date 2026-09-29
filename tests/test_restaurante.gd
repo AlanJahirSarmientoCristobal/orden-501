@@ -33,6 +33,7 @@ func _run() -> void:
 	_probar_urgente()
 	_probar_paciencia()
 	_probar_vip()
+	_probar_grupos()
 	_probar_reservacion()
 	_probar_gol()
 	await _probar_fin()
@@ -171,6 +172,37 @@ func _probar_vip() -> void:
 		c.retirarse()
 	r.mesas[4].liberar(false)
 	r.mesas[5].liberar(false)
+
+func _probar_grupos() -> void:
+	# Mesa según el tamaño del grupo
+	var familia := ClienteHabitual.new()
+	familia.personas = 4
+	var mesa_familia: Mesa = r._mesa_para(familia)
+	_check(mesa_familia != null and mesa_familia.capacidad == 4, "La familia de 4 debe ir a una mesa de 4")
+	var pareja := ClienteHabitual.new()
+	pareja.personas = 2
+	var mesa_pareja: Mesa = r._mesa_para(pareja)
+	_check(mesa_pareja != null and mesa_pareja.capacidad == 2, "La pareja debe preferir una mesa de 2")
+	# Un pedido para 4 consume 4 porciones y cobra 4 platillos
+	GameState.inventario.agregar("papas", 10, GameState.dia)
+	_sentar(familia, mesa_familia, Catalogo.PAPAS)
+	_check(familia._acompanantes.size() == 3, "La familia debe mostrar 3 acompañantes")
+	var papas := GameState.inventario.total("papas")
+	mesa_familia.interactuar(r.dani)
+	_check(GameState.inventario.total("papas") == papas - 8, "El pedido de la familia debía usar 8 papas (4 porciones)")
+	var dinero := GameState.dinero
+	r.dani.vaciar_bandeja()
+	r.dani.agregar_platillo(Catalogo.PAPAS)
+	mesa_familia.interactuar(r.dani)
+	_check(GameState.dinero >= dinero + Catalogo.precio(Catalogo.PAPAS) * 4, "La familia debía pagar 4 platillos")
+	r.cancelar_pedidos(familia)
+	familia.retirarse()
+	mesa_familia.liberar(false)
+	for c in [pareja]:
+		c.free()
+	# Probabilidades por dificultad
+	_check(ConfiguracionDificultad.obtener("facil").probabilidad_familia == 0.0, "En Fácil no llegan familias")
+	_check(ConfiguracionDificultad.obtener("dificil").probabilidad_familia > ConfiguracionDificultad.obtener("normal").probabilidad_familia, "En Difícil llegan más familias que en Normal")
 
 func _probar_reservacion() -> void:
 	var reserva: Dictionary = GameState.reservaciones[0]

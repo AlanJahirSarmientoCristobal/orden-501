@@ -28,24 +28,25 @@ func total_unidades() -> int:
 		suma += int(lote["cantidad"])
 	return suma
 
-func faltantes(platillo: String) -> Dictionary:
+## porciones: cuántas veces se prepara la receta (un grupo de 4 pide 4 porciones).
+func faltantes(platillo: String, porciones: int = 1) -> Dictionary:
 	var resultado := {}
 	var receta := Catalogo.receta(platillo)
 	for insumo in receta:
-		var falta := int(receta[insumo]) - total(insumo)
+		var falta := int(receta[insumo]) * porciones - total(insumo)
 		if falta > 0:
 			resultado[insumo] = falta
 	return resultado
 
-func puede_preparar(platillo: String) -> bool:
-	return faltantes(platillo).is_empty()
+func puede_preparar(platillo: String, porciones: int = 1) -> bool:
+	return faltantes(platillo, porciones).is_empty()
 
-func consumir_receta(platillo: String) -> bool:
-	if not puede_preparar(platillo):
+func consumir_receta(platillo: String, porciones: int = 1) -> bool:
+	if not puede_preparar(platillo, porciones):
 		return false
 	var receta := Catalogo.receta(platillo)
 	for insumo in receta:
-		_retirar(insumo, int(receta[insumo]))
+		_retirar(insumo, int(receta[insumo]) * porciones)
 	return true
 
 func _retirar(insumo: String, cantidad: int) -> void:

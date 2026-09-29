@@ -37,6 +37,7 @@ var _exhibidor: Sprite2D
 var _rotacion := 0.0
 var _menu: MenuCompra
 var _nombre_vendedor := ""
+var _clave_vendedor := ""
 
 func nombre_lugar() -> String:
 	return "MERCADO CENTRAL" if tienda == Catalogo.MERCADO else "CERVECERÍA LA ESQUINA"
@@ -149,6 +150,7 @@ func _amueblar_caja() -> void:
 	interior.poner(x + 2, y, R, 1017, 2)
 	interior.solido(x, y, CAJA[2], CAJA[3])
 	var vendedor := "vendedor_mercado" if tienda == Catalogo.MERCADO else "encargado_cerveceria"
+	_clave_vendedor = vendedor
 	_nombre_vendedor = "Don Chema" if tienda == Catalogo.MERCADO else "Lupita"
 	npc(vendedor, interior.a_mundo(x + 1, y - 0.8), _nombre_vendedor, &"down")
 	add_child(PuntoInteraccion.crear("Comprar con %s" % _nombre_vendedor, interior.a_mundo(x + 1, y + 1.1), abrir_menu, 40))
@@ -159,7 +161,7 @@ func _ajustar_exhibidor() -> void:
 		_exhibidor.scale = Vector2(escala, escala)
 
 func abrir_menu() -> void:
-	_menu.abrir(tienda, _nombre_vendedor)
+	_menu.abrir(tienda, _nombre_vendedor, _clave_vendedor)
 
 ## La puerta: al cruzarla Dani sale al pueblo. Detrás del hueco hay un muro para no salir al vacío.
 func _crear_puerta() -> void:

@@ -63,8 +63,8 @@ const PERSONAJES := {
 	"cliente_2": 105,
 	"cliente_3": 186,
 	"cliente_vip": 348,
-	"vendedor_mercado": 105,
-	"encargado_cerveceria": 186,
+	"vendedor_mercado": 186,        # Don Chema (señor canoso)
+	"encargado_cerveceria": 105,    # Lupita (muchacha pelirroja)
 }
 
 ## Sonidos y música opcionales. Si el archivo existe se usa; si no, AudioManager
@@ -187,12 +187,21 @@ static func frames_personaje(clave: String) -> SpriteFrames:
 		frames.set_animation_speed(anim, 8.0)
 		frames.set_animation_loop(anim, true)
 		var columna: int = direcciones[anim]
-		for fila in [0, 1, 2, 1]:
+		# Fila 0 = de pie; filas 1 y 2 = pasos. Ciclo: de pie, paso, de pie, paso.
+		for fila in [0, 1, 0, 2]:
 			var tex := tile(base + columna + fila * 27)
 			if tex:
 				frames.add_frame(anim, tex)
 	_cache[cache_clave] = frames
 	return frames
+
+## Retrato para diálogos y menús. Si existe "retrato_<clave>" en TEXTURAS (un busto dibujado
+## por el equipo) se usa ese; si no, el personaje de pie visto de frente.
+static func retrato(clave: String) -> Texture2D:
+	var propio := textura("retrato_" + clave)
+	if propio:
+		return propio
+	return tile(int(PERSONAJES.get(clave, PERSONAJES["cliente_1"])))
 
 static func audio(clave: String) -> AudioStream:
 	var ruta: String = AUDIO.get(clave, "")

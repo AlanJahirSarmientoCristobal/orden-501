@@ -12,11 +12,11 @@ var tamano := Vector2(2592, 1440)
 var datos := {}
 
 const CONSEJOS := [
-	{"nombre": "Doña Mari", "lugar": "plaza", "desfase": Vector2(0, 2.5), "sprite": "cliente_3",
+	{"nombre": "Doña Mari", "lugar": "plaza", "desfase": Vector2(0, 2.5), "sprite": "cliente_2",
 		"texto": "\"Dicen que en el medio tiempo todos piden bebidas. ¡Que no te falte hielo!\""},
-	{"nombre": "Profe Juve", "lugar": "parque", "desfase": Vector2(0, 4.0), "sprite": "cliente_2",
+	{"nombre": "Profe Juve", "lugar": "parque", "desfase": Vector2(0, 4.0), "sprite": "cliente_1",
 		"texto": "\"La carne, el pollo, la verdura, el pan y el hielo caducan. Compra lo que vayas a usar.\""},
-	{"nombre": "Capitán del equipo", "lugar": "cancha", "desfase": Vector2(0, 0.5), "sprite": "cliente_1",
+	{"nombre": "Capitán del equipo", "lugar": "cancha", "desfase": Vector2(0, 0.5), "sprite": "cliente_vip",
 		"texto": "\"Cuando metemos gol, la banda pide otra ronda. ¡Ten cerveza, refresco y Monster!\""},
 ]
 

@@ -20,7 +20,7 @@ const ESCENA_REPORTE := "res://scenes/ui/closing_report.tscn"
 const ESCENA_VICTORIA := "res://scenes/ui/victory.tscn"
 
 const REPUTACION_INICIAL := 75.0
-const CAPACIDAD_ALMACEN_BASE := 80
+const CAPACIDAD_ALMACEN_BASE := 100
 const CAPACIDAD_ALMACEN_MEJORA := 30
 
 const NIVELES := {
@@ -172,6 +172,15 @@ func probabilidad_vip() -> float:
 func tiempo_limpieza() -> float:
 	return config.tiempo_limpieza * (1.3 if nivel_actual == 3 else 1.0)
 
+## Tamaño del grupo que llega (1, 2 o 4), según la dificultad.
+func tamano_grupo() -> int:
+	var tirada := randf()
+	if tirada < config.probabilidad_familia:
+		return 4
+	if tirada < config.probabilidad_familia + config.probabilidad_pareja:
+		return 2
+	return 1
+
 func probabilidad_bebida() -> float:
 	return 0.55 if nivel_actual == 3 else 0.4
 
@@ -232,8 +241,8 @@ func recibir_urgente(insumo: String, cantidad: int) -> void:
 	aviso.emit("Llegó el proveedor: +%d %s" % [cantidad, Catalogo.nombre_insumo(insumo)])
 
 ## Consume los insumos de un platillo. Devuelve false si faltan.
-func preparar(platillo: String) -> bool:
-	if inventario.consumir_receta(platillo):
+func preparar(platillo: String, porciones: int = 1) -> bool:
+	if inventario.consumir_receta(platillo, porciones):
 		inventario_cambiado.emit()
 		_revisar_stock_bajo(platillo)
 		return true
@@ -252,8 +261,8 @@ func _revisar_stock_bajo(platillo: String) -> void:
 			aviso.emit("Stock bajo: %s (%d)" % [Catalogo.nombre_insumo(insumo), restante])
 			return
 
-func registrar_venta(platillo: String, propina: int) -> void:
-	var total := Catalogo.precio(platillo) + propina
+func registrar_venta(platillo: String, propina: int, porciones: int = 1) -> void:
+	var total := Catalogo.precio(platillo) * porciones + propina
 	cambiar_dinero(total)
 	estadisticas["ventas"] += total
 	estadisticas["propinas"] += propina

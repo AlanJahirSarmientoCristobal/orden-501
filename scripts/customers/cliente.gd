@@ -23,6 +23,11 @@ var paciencia := 40.0
 var tiempo_comiendo := 0.0
 var extras_pedidos := 0
 var quiebre_registrado := ""           # Platillo cuyo faltante ya se contó
+var personas := 1                      # 1, 2 (pareja) o 4 (familia); se fija antes de agregarlo
+
+# Posición de los acompañantes mientras caminan o esperan en la fila.
+const FORMACION := [Vector2(-22, 8), Vector2(22, 8), Vector2(0, 16)]
+var _acompanantes: Array[AnimatedSprite2D] = []
 
 static var _estilos_barra := {}
 var _color_barra := -1
@@ -71,18 +76,57 @@ func elegir_pedido() -> String:
 func es_vip() -> bool:
 	return false
 
+## Texto de la insignia: tipo de cliente y tamaño del grupo.
+func texto_grupo() -> String:
+	match personas:
+		2:
+			return "Pareja"
+		4:
+			return "Familia de 4"
+	return nombre_tipo()
+
+func _sufijo() -> String:
+	return " x%d" % personas if personas > 1 else ""
+
+func _formar_grupo() -> void:
+	for i in range(_acompanantes.size()):
+		_acompanantes[i].position = FORMACION[i % FORMACION.size()] + Vector2(0, AssetPaths.ALTURA_PERSONAJE)
+
+## Acomoda a los acompañantes en las demás sillas de la mesa.
+func _sentar_grupo() -> void:
+	if mesa == null:
+		return
+	var asientos: Array[Vector2] = mesa.asientos_globales()
+	for i in range(_acompanantes.size()):
+		var a := _acompanantes[i]
+		a.stop()
+		a.frame = 0
+		if i + 1 < asientos.size():
+			a.position = asientos[i + 1] - global_position + Vector2(0, AssetPaths.ALTURA_PERSONAJE)
+			a.animation = &"up" if asientos[i + 1].y > mesa.global_position.y else &"down"
+
 # ---------------------------------------------------------------- Construcción visual
 
 func _construir() -> void:
 	_sprite = AnimatedSprite2D.new()
 	_sprite.sprite_frames = AssetPaths.frames_personaje(clave_sprite())
 	_sprite.animation = &"down"
-	_sprite.frame = 1
+	_sprite.frame = 0
 	_sprite.scale = Vector2(AssetPaths.ESCALA_PERSONAJE, AssetPaths.ESCALA_PERSONAJE)
 	_sprite.position = Vector2(0, AssetPaths.ALTURA_PERSONAJE)
 	add_child(_sprite)
+	for i in range(personas - 1):
+		var acompanante := AnimatedSprite2D.new()
+		acompanante.sprite_frames = AssetPaths.frames_personaje(["cliente_1", "cliente_2", "cliente_3"][randi() % 3])
+		acompanante.animation = &"down"
+		acompanante.frame = 0
+		acompanante.scale = _sprite.scale
+		acompanante.z_index = -1
+		add_child(acompanante)
+		_acompanantes.append(acompanante)
+	_formar_grupo()
 
-	_insignia = UIKit.etiqueta(nombre_tipo(), 10, color_insignia(), true)
+	_insignia = UIKit.etiqueta(texto_grupo(), 10, color_insignia(), true)
 	_insignia.position = Vector2(-50, 19)
 	_insignia.size = Vector2(100, 14)
 	add_child(_insignia)
@@ -164,6 +208,7 @@ func _sentarse() -> void:
 	if estado != Estado.CAMINANDO:
 		return
 	pedido = elegir_pedido()
+	_sentar_grupo()
 	estado = Estado.ORDENANDO
 	paciencia = maxf(paciencia, paciencia_max * 0.85)
 	_barra.visible = true
@@ -183,7 +228,7 @@ func pedido_confirmado(platillo: String, sustituto: bool = false) -> void:
 	if sustituto:
 		factor_propina = 0.4
 	estado = Estado.ESPERANDO_COMIDA
-	_mostrar_burbuja(Catalogo.icono_platillo(pedido), _abreviar(pedido))
+	_mostrar_burbuja(Catalogo.icono_platillo(pedido), _abreviar(pedido) + _sufijo())
 
 ## El pedido espera insumos (pedido urgente en camino).
 func esperar_insumo() -> void:
@@ -192,13 +237,13 @@ func esperar_insumo() -> void:
 func servir(dani: Dani) -> bool:
 	if estado != Estado.ESPERANDO_COMIDA or not dani.quitar_platillo(pedido):
 		return false
-	var propina := int(round(Catalogo.precio(pedido) * propina_base() * razon_paciencia() * factor_propina))
-	GameState.registrar_venta(pedido, propina)
+	var propina := int(round(Catalogo.precio(pedido) * personas * propina_base() * razon_paciencia() * factor_propina))
+	GameState.registrar_venta(pedido, propina, personas)
 	if es_vip():
 		GameState.registrar_estadistica("vip_atendidos")
 	GameState.cambiar_reputacion(bonificacion_reputacion() * (0.5 if factor_propina < 1.0 else 1.0))
 	AudioManager.sfx("caja")
-	restaurante.mostrar_ganancia(global_position, Catalogo.precio(pedido) + propina)
+	restaurante.mostrar_ganancia(global_position, Catalogo.precio(pedido) * personas + propina)
 	estado = Estado.COMIENDO
 	tiempo_comiendo = randf_range(6.0, 9.0)
 	pedido_enviado = false
@@ -222,7 +267,7 @@ func pedir_extra() -> bool:
 ## El platillo pedido está agotado: el cliente elige otro disponible o se va.
 func cambiar_pedido(nuevo: String) -> void:
 	pedido = nuevo
-	_mostrar_burbuja(Catalogo.icono_platillo(pedido), _abreviar(pedido))
+	_mostrar_burbuja(Catalogo.icono_platillo(pedido), _abreviar(pedido) + _sufijo())
 
 func terminar() -> void:
 	if estado == Estado.SALIENDO:
@@ -260,6 +305,7 @@ func retirarse() -> void:
 	_salir()
 
 func _salir() -> void:
+	_formar_grupo()
 	var puerta: Vector2 = restaurante.posicion_puerta() if restaurante else position + Vector2(0, 200)
 	_caminar(puerta, queue_free)
 
@@ -271,13 +317,21 @@ func _caminar(destino: Vector2, al_llegar: Callable) -> void:
 	else:
 		_sprite.animation = &"up" if direccion.y < 0 else &"down"
 	_sprite.play()
+	for a in _acompanantes:
+		a.animation = _sprite.animation
+		a.flip_h = _sprite.flip_h
+		a.play()
 	var duracion := maxf(0.2, direccion.length() / VELOCIDAD_CAMINAR)
 	var tween := create_tween()
 	tween.tween_property(self, "position", destino, duracion)
 	tween.tween_callback(func():
 		_sprite.animation = &"down"
 		_sprite.stop()
-		_sprite.frame = 1
+		_sprite.frame = 0
+		for a in _acompanantes:
+			a.animation = &"down"
+			a.stop()
+			a.frame = 0
 		al_llegar.call()
 	)
 
@@ -301,8 +355,8 @@ func texto_interaccion(dani: Dani) -> String:
 			return "Tomar pedido (%s)" % nombre_tipo()
 		Estado.ESPERANDO_COMIDA:
 			if dani.tiene_platillo(pedido):
-				return "Servir %s" % pedido
-			return "Espera: %s" % pedido
+				return "Servir %s%s" % [pedido, _sufijo()]
+			return "Espera: %s%s" % [pedido, _sufijo()]
 		Estado.COMIENDO:
 			return "Comiendo..."
 	return nombre_tipo()

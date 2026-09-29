@@ -46,6 +46,8 @@ var _filas: Array[Dictionary] = []   # {"cursor": Control, "nombre": Label, "pre
 var _lista: VBoxContainer
 var _icono: TextureRect
 var _descripcion: Label
+var _retrato: TextureRect
+var _nombre_retrato: Label
 var _caja_cantidad: PanelContainer
 var _en_almacen: Label
 var _texto_cantidad: Label
@@ -132,6 +134,28 @@ func _construir() -> void:
 	columna.add_child(_almacen)
 	caja_dinero.add_child(columna)
 
+	# Retrato del vendedor (debajo del dinero)
+	var caja_retrato := _caja(Vector2(32, 236), Vector2(420, 272))
+	var col_retrato := VBoxContainer.new()
+	col_retrato.alignment = BoxContainer.ALIGNMENT_CENTER
+	var fondo := PanelContainer.new()
+	var estilo_fondo := StyleBoxFlat.new()
+	estilo_fondo.bg_color = Color("d8e8f8")
+	estilo_fondo.set_corner_radius_all(6)
+	fondo.add_theme_stylebox_override("panel", estilo_fondo)
+	fondo.custom_minimum_size = Vector2(0, 180)
+	_retrato = TextureRect.new()
+	_retrato.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_retrato.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_retrato.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_retrato.custom_minimum_size = Vector2(176, 176)
+	fondo.add_child(_retrato)
+	col_retrato.add_child(fondo)
+	_nombre_retrato = _texto("")
+	_nombre_retrato.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	col_retrato.add_child(_nombre_retrato)
+	caja_retrato.add_child(col_retrato)
+
 	# Lista de productos (derecha)
 	var caja_lista := _caja(Vector2(560, 64), Vector2(688, 444))
 	_lista = VBoxContainer.new()
@@ -193,9 +217,11 @@ class Cursor extends Control:
 
 # ---------------------------------------------------------------- Abrir / cerrar
 
-func abrir(nueva_tienda: String, nombre_vendedor: String) -> void:
+func abrir(nueva_tienda: String, nombre_vendedor: String, clave_retrato: String = "") -> void:
 	tienda = nueva_tienda
 	vendedor = nombre_vendedor
+	_retrato.texture = AssetPaths.retrato(clave_retrato) if clave_retrato != "" else null
+	_nombre_retrato.text = nombre_vendedor
 	productos = Catalogo.insumos_de_tienda(tienda)
 	indice = 0
 	_llenar_lista()

@@ -27,6 +27,10 @@ window/size/viewport_height=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
+[dotnet]
+
+project/assembly_name="ORDEN 501"
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0

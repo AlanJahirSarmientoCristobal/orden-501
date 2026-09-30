@@ -258,6 +258,9 @@ func _jugar_jornada() -> Dictionary:
 	# terminar_jornada cambia de escena tras una pausa: se espera y se limpia.
 	await get_tree().create_timer(2.2).timeout
 	if ver:
+		# El restaurante es hijo del bot (no la escena actual): se quita para que solo se vea el reporte.
+		if is_instance_valid(resto):
+			resto.queue_free()
 		var motivo := str(informe["motivo"])
 		if motivo == "" and GameState.nivel_actual != 3:
 			motivo = str(GameState.info_nivel()["objetivo"])

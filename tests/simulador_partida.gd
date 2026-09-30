@@ -6,8 +6,11 @@ extends Node
 ## No es una prueba de pasa/falla: imprime las estadísticas de cada jornada.
 ##
 ## Uso: godot --headless --path . res://tests/simulador_partida.tscn -- <dificultad> [intentos]
+## Para verlo jugar (con ventana): godot --path . res://tests/simulador_partida.tscn -- dificil 3 ver
+## En modo "ver" muestra la mañana (pueblo y compras), la jornada a x2 y el reporte de cierre.
 
 const VELOCIDAD_SIM := 12.0          # Engine.time_scale durante la jornada
+const VELOCIDAD_VER := 2.0           # Engine.time_scale en modo "ver"
 const ALCANCE := 70.0                # distancia a la que Dani puede interactuar
 const REACCION := 0.35               # segundos que tarda el jugador entre acciones
 const DECISION_DIALOGO := 1.2        # segundos para leer y elegir en el diálogo de faltantes
@@ -23,13 +26,37 @@ var _accion := {}
 var _espera := 0.0
 var _urgentes_recientes := {}
 
+# Modo "ver"
+var ver := false
+var _estado: Label
+var _compras: Dictionary = {}
+
 func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
 	if args.size() > 0:
 		dificultad = args[0]
 	if args.size() > 1:
 		intentos_por_nivel = int(args[1])
+	ver = args.size() > 2 and args[2] == "ver"
+	if ver:
+		_crear_estado()
 	_run.call_deferred()
+
+func _crear_estado() -> void:
+	var capa := CanvasLayer.new()
+	capa.layer = 90
+	add_child(capa)
+	var panel := UIKit.panel(Color(0.05, 0.07, 0.1, 0.88), UIKit.ACENTO, 8)
+	panel.position = Vector2(340, 664)
+	panel.size = Vector2(600, 44)
+	_estado = UIKit.etiqueta("", 16, UIKit.ACENTO, true)
+	panel.add_child(_estado)
+	capa.add_child(panel)
+
+func _mostrar_estado(texto: String) -> void:
+	if _estado:
+		_estado.text = texto
+		print("BOT ", texto)
 
 func _run() -> void:
 	_habia_guardado = FileAccess.file_exists(GameState.SAVE_PATH)
@@ -51,8 +78,11 @@ func _run() -> void:
 		for intento in range(intentos_por_nivel):
 			if intento > 0:
 				GameState.reiniciar_jornada()
+			_mostrar_estado("BOT · %s · Nivel %d: %s · intento %d · MAÑANA" % [GameState.config.nombre.to_upper(), nivel, GameState.info_nivel()["nombre"], intento + 1])
 			_compras_de_la_manana()
 			_asignar_reservaciones()
+			await _ver_manana()
+			_mostrar_estado("BOT · %s · Nivel %d: %s · intento %d · JORNADA x%d" % [GameState.config.nombre.to_upper(), nivel, GameState.info_nivel()["nombre"], intento + 1, int(VELOCIDAD_VER)])
 			GameState.iniciar_jornada()
 			var informe: Dictionary = await _jugar_jornada()
 			var e: Dictionary = informe["estadisticas"]
@@ -67,13 +97,27 @@ func _run() -> void:
 			if informe["exito"]:
 				superado = true
 				nivel_maximo = nivel
+				var antes := GameState.mejoras.duplicate()
 				_comprar_mejoras()
+				if ver:
+					var nuevas: Array[String] = []
+					for id in GameState.mejoras:
+						if GameState.mejoras[id] != antes.get(id):
+							nuevas.append(str(GameState.MEJORAS[id]["nombre"]))
+					_mostrar_estado("¡Nivel %d superado! Mejoras: %s" % [nivel, ", ".join(nuevas) if not nuevas.is_empty() else "ninguna"])
+					await get_tree().create_timer(3.0).timeout
 				if not GameState.temporada_completada:
 					GameState.iniciar_manana()
 				break
 		if not superado:
 			break
 	print("RESUMEN dificultad=%s nivel_maximo_superado=%d" % [dificultad, nivel_maximo])
+	if ver:
+		_mostrar_estado("FIN · %s · niveles superados: %d de 3" % [GameState.config.nombre.to_upper(), nivel_maximo])
+		if GameState.temporada_completada:
+			var victoria: Node = load(GameState.ESCENA_VICTORIA).instantiate()
+			add_child(victoria)
+		await get_tree().create_timer(10.0).timeout
 	if _habia_guardado:
 		var f := FileAccess.open(GameState.SAVE_PATH, FileAccess.WRITE)
 		f.store_string(_respaldo)
@@ -132,8 +176,8 @@ func _compras_de_la_manana() -> void:
 	var factor := minf(1.0, minf(float(GameState.espacio_libre()) / maxf(1.0, total_unidades), float(presupuesto) / maxf(1.0, costo_total)))
 	for insumo in demanda:
 		var cantidad := int(floor(demanda[insumo] * factor))
-		if cantidad > 0:
-			GameState.comprar(insumo, cantidad)
+		if cantidad > 0 and GameState.comprar(insumo, cantidad) == "":
+			_compras[insumo] = cantidad
 
 ## Como haría un jugador en la tablet: cada reservación a una mesa donde quepa,
 ## sin repetir mesa en el mismo horario.
@@ -148,6 +192,39 @@ func _asignar_reservaciones() -> void:
 			if GameState.asignar_reservacion(reserva["id"], mesa) == "ok":
 				ocupadas[clave] = true
 				break
+
+## Modo "ver": el pueblo de fondo con la lista de lo que compró el bot.
+func _ver_manana() -> void:
+	var compras := _compras.duplicate()
+	_compras.clear()
+	if not ver:
+		return
+	var pueblo: Node = load(GameState.ESCENA_PUEBLO).instantiate()
+	add_child(pueblo)
+	await get_tree().process_frame
+	pueblo._dialogo.cerrar()
+	pueblo._cerrar_intro()
+	var capa := CanvasLayer.new()
+	capa.layer = 80
+	pueblo.add_child(capa)
+	var panel := UIKit.panel(Color(0.05, 0.07, 0.1, 0.92), UIKit.BORDE, 14)
+	panel.position = Vector2(390, 150)
+	panel.custom_minimum_size = Vector2(500, 0)
+	var caja := UIKit.vbox(6)
+	caja.add_child(UIKit.etiqueta("COMPRAS DE LA MAÑANA", 22, UIKit.ACENTO))
+	var gasto := 0
+	for insumo in compras:
+		var costo: int = GameState.precio_insumo(insumo) * int(compras[insumo])
+		gasto += costo
+		caja.add_child(UIKit.etiqueta("%s × %d  ($%d)" % [Catalogo.nombre_insumo(insumo), compras[insumo], costo], 16))
+	caja.add_child(HSeparator.new())
+	caja.add_child(UIKit.etiqueta("Gastó $%d · Queda $%d · Almacén %d/%d" % [gasto, GameState.dinero, GameState.inventario.total_unidades(), GameState.capacidad_almacen()], 16, UIKit.TEXTO_TENUE))
+	caja.add_child(UIKit.etiqueta("Reservaciones asignadas: %d" % GameState.reservaciones.filter(func(r): return int(r.get("mesa", 0)) > 0).size(), 16, UIKit.TEXTO_TENUE))
+	panel.add_child(caja)
+	capa.add_child(panel)
+	await get_tree().create_timer(6.0).timeout
+	pueblo.queue_free()
+	await get_tree().process_frame
 
 func _sumar_receta(demanda: Dictionary, platillo: String, veces: float) -> void:
 	var receta := Catalogo.receta(platillo)
@@ -169,7 +246,10 @@ func _jugar_jornada() -> Dictionary:
 	_accion = {}
 	_espera = 0.0
 	_urgentes_recientes = {}
-	Engine.time_scale = VELOCIDAD_SIM
+	Engine.time_scale = VELOCIDAD_VER if ver else VELOCIDAD_SIM
+	if ver:
+		# El bot mueve a Dani directamente; se apaga su control por teclado para animarlo.
+		resto.dani.set_physics_process(false)
 	while is_instance_valid(resto) and not resto.terminado:
 		_paso(resto, get_process_delta_time())
 		await get_tree().process_frame
@@ -177,6 +257,14 @@ func _jugar_jornada() -> Dictionary:
 	var informe: Dictionary = GameState.ultimo_informe.duplicate(true)
 	# terminar_jornada cambia de escena tras una pausa: se espera y se limpia.
 	await get_tree().create_timer(2.2).timeout
+	if ver:
+		var motivo := str(informe["motivo"])
+		if motivo == "" and GameState.nivel_actual != 3:
+			motivo = str(GameState.info_nivel()["objetivo"])
+		elif motivo == "":
+			motivo = "reputación %d%% (meta %d%%)" % [int(informe["reputacion"]), int(GameState.config.reputacion_minima)]
+		_mostrar_estado("REPORTE DE CIERRE · %s" % ("¡Objetivo cumplido!" if informe["exito"] else "No se cumplió: " + motivo))
+		await get_tree().create_timer(7.0).timeout
 	if is_instance_valid(resto):
 		resto.queue_free()
 	var marcador := Node.new()
@@ -215,8 +303,14 @@ func _paso(resto: Node, delta: float) -> void:
 		# Caminar (con sprint si hay estamina). Se descuenta un 20 % por rodear muebles.
 		var corre := dani.actualizar_estamina(delta, true, true)
 		var velocidad := Dani.VELOCIDAD_BASE * GameState.multiplicador_velocidad() * (Dani.MULTIPLICADOR_SPRINT if corre else 1.0) * 0.8
+		if ver:
+			dani._animar(destino - dani.global_position)
+			dani._sprite.speed_scale = 1.6 if corre else 1.0
 		dani.global_position = dani.global_position.move_toward(destino, velocidad * delta)
 		return
+	if ver:
+		dani._sprite.stop()
+		dani._sprite.frame = 0
 	dani.actualizar_estamina(delta, false, false)
 	# Limpiar requiere mantener Espacio.
 	if _accion["tipo"] == "limpiar":

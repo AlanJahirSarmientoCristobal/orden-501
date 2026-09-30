@@ -68,6 +68,8 @@ var terraza_desbloqueada := false
 var temporada_completada := false
 var intro_vista := false
 var modo_reto := false       # Reto Imposible: no guarda ni avanza la campaña
+var tutoriales := {}         # Tutoriales de la Jornada 1 ya vistos: pueblo, tienda, regreso, restaurante
+var tutoriales_habilitados := true   # Las pruebas y el bot los desactivan
 var reservaciones: Array[Dictionary] = []
 var estadisticas := {}
 var historial: Array[Dictionary] = []
@@ -92,6 +94,23 @@ func _exit_tree() -> void:
 
 # ---------------------------------------------------------------- Partida
 
+# ---------------------------------------------------------------- Tutoriales
+
+## Los tutoriales solo aparecen en la Jornada 1 de la campaña, una vez cada uno.
+func tutorial_pendiente(clave: String) -> bool:
+	return tutoriales_habilitados and not modo_reto and nivel_actual == 1 and not tutoriales.get(clave, false)
+
+func completar_tutorial(clave: String) -> void:
+	tutoriales[clave] = true
+
+func omitir_tutoriales() -> void:
+	for clave in ["pueblo", "tienda", "regreso", "restaurante"]:
+		tutoriales[clave] = true
+
+## Mientras se aprende a moverse y a comprar, el reloj de la mañana no avanza.
+func tutorial_manana_activo() -> bool:
+	return tutorial_pendiente("pueblo") or tutorial_pendiente("tienda")
+
 func nueva_partida(nueva_dificultad: String) -> void:
 	modo_reto = false
 	dificultad = nueva_dificultad if nueva_dificultad in ConfiguracionDificultad.TODAS else ConfiguracionDificultad.NORMAL
@@ -108,6 +127,7 @@ func nueva_partida(nueva_dificultad: String) -> void:
 	terraza_desbloqueada = false
 	temporada_completada = false
 	intro_vista = false
+	tutoriales = {}
 	historial = []
 	ultimo_informe = {}
 	iniciar_manana()
@@ -484,6 +504,7 @@ func _capturar() -> Dictionary:
 		"inventario": inventario.a_datos(), "mejoras": mejoras.duplicate(),
 		"terraza": terraza_desbloqueada, "temporada_completada": temporada_completada,
 		"intro_vista": intro_vista, "historial": historial.duplicate(true),
+		"tutoriales": tutoriales.duplicate(),
 	}
 
 func _restaurar(datos: Dictionary) -> void:
@@ -502,6 +523,7 @@ func _restaurar(datos: Dictionary) -> void:
 	terraza_desbloqueada = bool(datos.get("terraza", false))
 	temporada_completada = bool(datos.get("temporada_completada", false))
 	intro_vista = bool(datos.get("intro_vista", false))
+	tutoriales = datos.get("tutoriales", {}).duplicate()
 	historial = []
 	for informe in datos.get("historial", []):
 		if informe is Dictionary:

@@ -2,7 +2,7 @@ extends SceneTree
 
 ## Convierte scenes/town/mapa_pueblo.json (generado por tools/componer_pueblo.py) en:
 ##   Assets/tilesets/rpg_urban.tres     TileSet del pack RPG Urban con colisiones
-##   scenes/town/mapa_pueblo.tscn       Escena con dos TileMapLayer (Suelo y Objetos)
+##   scenes/town/mapa_pueblo.tscn       Escena con tres TileMapLayer (Suelo, Objetos y Copas)
 ## La escena resultante se puede abrir y pintar en el editor de Godot.
 ##
 ## Uso: godot --headless --path . --script res://tools/construir_mapa_pueblo.gd
@@ -66,12 +66,18 @@ func _init() -> void:
 	var raiz := Node2D.new()
 	raiz.name = "MapaPueblo"
 	var escala := float(datos["escala"])
-	for capa in ["suelo", "objetos"]:
+	for capa in ["suelo", "objetos", "copas"]:
+		if not datos.has(capa):
+			continue
 		var layer := TileMapLayer.new()
 		layer.name = capa.capitalize()
 		layer.tile_set = tileset
 		layer.scale = Vector2(escala, escala)
-		layer.collision_enabled = true
+		layer.collision_enabled = capa != "copas"
+		if capa == "copas":
+			# Las copas de los árboles tapan a los personajes que pasan detrás.
+			layer.z_as_relative = false
+			layer.z_index = 20
 		var filas: Array = datos[capa]
 		for y in range(filas.size()):
 			for x in range(filas[y].size()):

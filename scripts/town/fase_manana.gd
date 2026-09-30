@@ -55,7 +55,7 @@ func _process(delta: float) -> void:
 	if terminando or get_tree().paused:
 		return
 	# El reloj corre en el pueblo y dentro de las tiendas; se detiene en pausa y en los diálogos.
-	if GameState.config.tiempo_pueblo > 0.0 and not _dialogo.esta_abierto():
+	if GameState.config.tiempo_pueblo > 0.0 and not _dialogo.esta_abierto() and not GameState.tutorial_manana_activo():
 		GameState.tiempo_manana -= delta
 		if GameState.tiempo_manana <= 30.0 and not _aviso_30s:
 			_aviso_30s = true

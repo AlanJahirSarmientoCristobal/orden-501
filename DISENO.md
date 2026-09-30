@@ -92,3 +92,5 @@ godot --headless --path . res://tests/simulador_partida.tscn -- dificil 3
 - **Selección de nivel:** los niveles 1–3 se desbloquean al superarlos en la campaña.
 
 Los precios y las recetas están en `scripts/core/catalogo.gd`, y los valores de progresión en `scripts/autoload/game_state.gd`.
+- **Tutorial de la Jornada 1** (`scripts/ui/tutorial.gd`): franja de objetivos sobre el HUD que avanza al cumplir cada paso. Tiene tres partes: pueblo (moverse, Shift, tablet, inventario y entrar a una tienda), tienda (menú del vendedor) y práctica en La 501 con un `ClientePractica`, que no se desespera, no gasta inventario y no cuenta en las ventas. El reloj de la mañana y el del partido no corren durante el tutorial. Se guarda cuáles ya se vieron (`GameState.tutoriales`) y **T** los omite todos.
+- **Árboles del pueblo:** los de 2 tiles ponen el tronco (sólido) en la capa Objetos y la copa en la capa Copas, que se dibuja encima de los personajes.

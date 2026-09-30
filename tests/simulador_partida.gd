@@ -32,6 +32,7 @@ var _estado: Label
 var _compras: Dictionary = {}
 
 func _ready() -> void:
+	GameState.tutoriales_habilitados = false
 	var args := OS.get_cmdline_user_args()
 	if args.size() > 0:
 		dificultad = args[0]

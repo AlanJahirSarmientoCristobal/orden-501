@@ -43,6 +43,10 @@ var penales := false
 var _penales_restante := 0.0
 const DURACION_PENALES := 20.0
 var _equipos := ["LOCAL", "VISITA"]
+# Práctica de la Jornada 1: antes del partido, un cliente de prueba y el tutorial.
+var practica := false
+var _cliente_practica: Cliente
+var _mesa_practica: Mesa
 var _refresco_panel := 0.0
 
 var _tablet: Tablet
@@ -104,10 +108,70 @@ func _ready() -> void:
 	GameState.reputacion_agotada.connect(_al_agotar_reputacion)
 
 	AudioManager.musica("jornada")
+	practica = GameState.tutorial_pendiente("restaurante")
+	if practica:
+		GameState.aviso.emit("Antes del partido: una práctica rápida con un cliente de prueba.")
+		_iniciar_practica.call_deferred()
+	else:
+		_arrancar_partido()
+	_actualizar_hud()
+
+func _arrancar_partido() -> void:
 	AudioManager.sfx("silbato")
-	GameState.aviso.emit("¡Arranca el partido! %s" % info["partido"])
+	GameState.aviso.emit("¡Arranca el partido! %s" % GameState.info_nivel()["partido"])
 	if GameState.promo_activa:
 		GameState.aviso.emit("Promoción 2x1 activa: llegarán más clientes.")
+
+# ---------------------------------------------------------------- Práctica (Jornada 1)
+
+func _iniciar_practica() -> void:
+	_cliente_practica = ClientePractica.new()
+	_agregar_a_fila(_cliente_practica, true)
+	var pasos: Array[Dictionary] = [
+		{"texto": "Llegó un cliente de práctica: cuando se siente, acércate a su mesa y presiona Espacio.",
+			"detalle": "La barra sobre cada cliente es su paciencia; si se vacía, se va molesto y baja la reputación.",
+			"hecho": func() -> bool: return _practica_en(Cliente.Estado.ESPERANDO_COMIDA)},
+		{"texto": "Recoge su refresco en la Barra de bebidas cuando esté listo (Espacio).",
+			"detalle": "La comida sale en el Pase de cocina y las bebidas en la Barra. Cargas hasta 3 platillos en la bandeja.",
+			"hecho": func() -> bool: return dani.tiene_platillo(Catalogo.REFRESCO) or _practica_en(Cliente.Estado.COMIENDO)},
+		{"texto": "Llévalo a la mesa y presiona Espacio para servir.",
+			"detalle": "Mientras más rápido sirvas, más propina deja el cliente.",
+			"hecho": func() -> bool: return _practica_en(Cliente.Estado.COMIENDO)},
+		{"texto": "Cuando se vaya, la mesa queda sucia: mantén Espacio sobre ella hasta limpiarla.",
+			"detalle": "Una mesa sucia no puede recibir clientes nuevos.",
+			"hecho": func() -> bool: return _practica_en(Cliente.Estado.SALIENDO) and _mesa_practica != null and _mesa_practica.estado == Mesa.EstadoMesa.LIMPIA},
+		{"texto": "Presiona E para abrir la tablet; ciérrala con Esc.",
+			"detalle": "Ahí ves el stock de cada insumo, la cola de cocina y los avisos del partido.",
+			"hecho": func() -> bool: return _tablet.esta_abierto()},
+		{"texto": "Si un insumo se acaba, Q hace un pedido urgente. Presiona Espacio para empezar el partido.",
+			"detalle": "El urgente cuesta más y tarda en llegar. Objetivo de hoy: no quedarte sin stock y perder máximo 3 clientes.",
+			"hecho": func() -> bool: return PanelModal.abiertos == 0 and Input.is_action_just_pressed("interactuar")},
+	]
+	var tutorial := Tutorial.new("restaurante", pasos)
+	tutorial.terminado.connect(_terminar_practica)
+	add_child(tutorial)
+
+## El cliente de práctica ya llegó (o pasó) a ese estado. Si ya se fue, cuenta como pasado.
+func _practica_en(estado: Cliente.Estado) -> bool:
+	if not is_instance_valid(_cliente_practica):
+		return true
+	if _cliente_practica.mesa:
+		_mesa_practica = _cliente_practica.mesa
+	return _cliente_practica.estado >= estado and _cliente_practica.estado != Cliente.Estado.EN_FILA
+
+func _terminar_practica() -> void:
+	if not practica:
+		return
+	practica = false
+	if is_instance_valid(_cliente_practica) and _cliente_practica.estado != Cliente.Estado.SALIENDO:
+		cancelar_pedidos(_cliente_practica)
+		fila.erase(_cliente_practica)
+		if _cliente_practica.mesa:
+			_cliente_practica.mesa.liberar(false)
+		_cliente_practica.retirarse()
+	_acumulado_llegada = 0.0
+	_siguiente_llegada = 3.0
+	_arrancar_partido()
 	_actualizar_hud()
 
 func _al_cambiar_valor(_valor) -> void:
@@ -266,6 +330,17 @@ func _generar_goles() -> void:
 
 func _process(delta: float) -> void:
 	if terminado:
+		return
+	if practica:
+		# Antes del partido: solo se mueve el cliente de práctica; el reloj no corre.
+		_sentar_clientes()
+		_animar_decoracion(delta)
+		_refresco_panel += delta
+		if _refresco_panel >= 0.4:
+			_refresco_panel = 0.0
+			_actualizar_hud()
+			_actualizar_panel_lateral()
+			_actualizar_carteles()
 		return
 	tiempo += delta
 	minuto = minf(MINUTOS_PARTIDO, tiempo / duracion * MINUTOS_PARTIDO)
@@ -536,6 +611,9 @@ func _clientes_sentados() -> int:
 
 ## Dani tomó la comanda de un cliente: se consume el inventario y se envía a cocina o barra.
 func procesar_pedido(cliente: Cliente) -> void:
+	if cliente is ClientePractica:
+		_enviar(cliente, cliente.pedido, false)
+		return
 	var platillo := cliente.pedido
 	if agotados.has(platillo):
 		var alternativa := _alternativa(cliente, platillo)
@@ -724,6 +802,8 @@ func _actualizar_hud() -> void:
 	if _hud_reloj == null:
 		return
 	var reloj := "PENALES" if penales else "%d'" % int(minuto)
+	if practica:
+		reloj = "PRÁCTICA"
 	_fijar(_hud_reloj, "%s · %s %d - %d %s" % [reloj, _equipos[0].left(10), marcador[0], marcador[1], _equipos[1].left(10)], Color("d9ffd9"))
 	_fijar(_hud_dinero, "Dinero %s" % UIKit.dinero(GameState.dinero), UIKit.TEXTO)
 	_fijar(_hud_reputacion, "%s %d%%" % [UIKit.estrellas(GameState.reputacion), int(GameState.reputacion)], UIKit.TEXTO)

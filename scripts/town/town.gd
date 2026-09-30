@@ -42,8 +42,10 @@ func _ready() -> void:
 
 	if not GameState.intro_vista:
 		_mostrar_intro.call_deferred()
-	elif GameState.posicion_pueblo == Vector2.ZERO:
-		GameState.aviso.emit("Día %d · Mañana. Recorre el pueblo y compra para: %s" % [GameState.dia, GameState.info_nivel()["nombre"]])
+	else:
+		_iniciar_tutorial.call_deferred()
+		if GameState.posicion_pueblo == Vector2.ZERO:
+			GameState.aviso.emit("Día %d · Mañana. Recorre el pueblo y compra para: %s" % [GameState.dia, GameState.info_nivel()["nombre"]])
 
 ## Convierte coordenadas en tiles (del JSON) a píxeles del mundo.
 func _a_mundo(p: Array) -> Vector2:
@@ -83,6 +85,37 @@ func _mostrar_intro() -> void:
 func _cerrar_intro() -> void:
 	GameState.intro_vista = true
 	GameState.guardar()
+	_iniciar_tutorial()
+
+## Jornada 1: primero los controles básicos; al volver de la tienda, cómo abrir el restaurante.
+func _iniciar_tutorial() -> void:
+	if GameState.tutorial_pendiente("pueblo"):
+		var inicio := dani.global_position
+		var pasos: Array[Dictionary] = [
+			{"texto": "Muévete con W A S D o las flechas.",
+				"detalle": "El minimapa (arriba a la derecha) marca La 501, el Mercado y la Cervecería. Durante el tutorial el reloj de la mañana no avanza.",
+				"hecho": func() -> bool: return dani.global_position.distance_to(inicio) > 150.0},
+			{"texto": "Mantén Shift mientras caminas para correr.",
+				"detalle": "Correr gasta estamina (la barra azul debajo de Dani). Si se vacía se pone roja y hay que esperar a que se recupere.",
+				"hecho": func() -> bool: return dani.estamina < Dani.ESTAMINA_MAX - 15.0},
+			{"texto": "Presiona E para abrir la tablet.",
+				"detalle": "Ahí están el aviso del partido de hoy, las reservaciones y tu stock. Se cierra con Esc.",
+				"hecho": func() -> bool: return _tablet.esta_abierto()},
+			{"texto": "Presiona I para ver el inventario del almacén.",
+				"detalle": "La carne, el pollo, la verdura, el pan y el hielo caducan: compra solo lo que vayas a usar.",
+				"hecho": func() -> bool: return _inventario.esta_abierto()},
+			{"texto": "Entra al Mercado o a la Cervecería: camina hasta su puerta.",
+				"detalle": "El Mercado vende lo de la cocina (carne, pollo, papas, verdura y pan); la Cervecería, las bebidas y el hielo.",
+				"hecho": func() -> bool: return false},
+		]
+		add_child(Tutorial.new("pueblo", pasos))
+	elif GameState.tutorial_pendiente("restaurante") and GameState.tutoriales.get("tienda", false):
+		var pasos: Array[Dictionary] = [
+			{"texto": "Cuando termines de comprar, entra a La 501 (está marcada en el minimapa).",
+				"detalle": "Revisa que tengas comida y bebidas. Objetivo de hoy: no quedarte sin stock y perder máximo 3 clientes.",
+				"hecho": func() -> bool: return false},
+		]
+		add_child(Tutorial.new("regreso", pasos))
 
 # ---------------------------------------------------------------- Construcción
 

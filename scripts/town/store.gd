@@ -73,6 +73,29 @@ func _ready() -> void:
 	_menu = MenuCompra.new()
 	add_child(_menu)
 	GameState.aviso.emit("Habla con %s en la caja para comprar." % _nombre_vendedor)
+	if GameState.tutorial_pendiente("pueblo"):
+		GameState.completar_tutorial("pueblo")
+	if GameState.tutorial_pendiente("tienda"):
+		_iniciar_tutorial()
+
+## Jornada 1: cómo comprar con el menú del vendedor.
+func _iniciar_tutorial() -> void:
+	var inicial := GameState.inventario.total_unidades()
+	var pasos: Array[Dictionary] = [
+		{"texto": "Habla con %s en la caja: acércate y presiona Espacio." % _nombre_vendedor,
+			"detalle": "Los muebles con productos son decoración: todo se compra en la caja.",
+			"hecho": func() -> bool: return _menu.esta_abierto()},
+		{"texto": "Elige un producto con W / S (o las flechas) y presiona Espacio.",
+			"detalle": "Abajo ves en qué platillos se usa y cuántos días dura antes de caducar.",
+			"hecho": func() -> bool: return _menu.estado == MenuCompra.Estado.CANTIDAD},
+		{"texto": "Elige la cantidad y confirma con Espacio y luego «Sí».",
+			"detalle": "Arriba / abajo cambia de 1 en 1 y los lados de 10 en 10. Cuida tu dinero y el espacio del almacén.",
+			"hecho": func() -> bool: return GameState.inventario.total_unidades() > inicial},
+		{"texto": "Compra lo que necesites y cierra el menú con SALIR o Esc.",
+			"detalle": "Después sal por la puerta de abajo. Si te falta algo, visita la otra tienda.",
+			"hecho": func() -> bool: return not _menu.esta_abierto()},
+	]
+	add_child(Tutorial.new("tienda", pasos))
 
 func _process(delta: float) -> void:
 	super._process(delta)

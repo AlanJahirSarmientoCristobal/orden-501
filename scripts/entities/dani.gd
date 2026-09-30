@@ -28,8 +28,10 @@ var _sprite: AnimatedSprite2D
 var _detector: Area2D
 var _etiqueta: Label
 var _barra_mantener: ProgressBar
-var _barra_estamina: ProgressBar
-var _barra_agotada := true      # Fuerza a asignar el estilo la primera vez
+var _barra_estamina: ColorRect          # fondo de la barra de estamina
+var _relleno_estamina: ColorRect
+const ANCHO_BARRA_ESTAMINA := 40.0
+const COLOR_ESTAMINA := Color("7fe0ff")
 var _vista_bandeja: HBoxContainer
 var _cercanos: Array[Interactuable] = []
 var _objetivo_mantener: Interactuable
@@ -93,14 +95,17 @@ func _construir() -> void:
 	_barra_mantener.add_theme_stylebox_override("background", UIKit.estilo(Color(0, 0, 0, 0.6), 3, Color.TRANSPARENT, 0, 0))
 	add_child(_barra_mantener)
 
-	_barra_estamina = ProgressBar.new()
-	_barra_estamina.position = Vector2(-24, 36)
-	_barra_estamina.size = Vector2(48, 6)
-	_barra_estamina.show_percentage = false
-	_barra_estamina.max_value = ESTAMINA_MAX
-	_barra_estamina.value = ESTAMINA_MAX
+	# Barra delgada (3 px) debajo del nombre; solo se ve mientras la estamina no está llena.
+	_barra_estamina = ColorRect.new()
+	_barra_estamina.color = Color(0, 0, 0, 0.6)
+	_barra_estamina.position = Vector2(-ANCHO_BARRA_ESTAMINA / 2.0 - 1.0, 37)
+	_barra_estamina.size = Vector2(ANCHO_BARRA_ESTAMINA + 2.0, 5)
 	_barra_estamina.visible = false
-	_barra_estamina.add_theme_stylebox_override("background", UIKit.estilo(Color(0, 0, 0, 0.6), 3, Color.TRANSPARENT, 0, 0))
+	_relleno_estamina = ColorRect.new()
+	_relleno_estamina.color = COLOR_ESTAMINA
+	_relleno_estamina.position = Vector2(1, 1)
+	_relleno_estamina.size = Vector2(ANCHO_BARRA_ESTAMINA, 3)
+	_barra_estamina.add_child(_relleno_estamina)
 	add_child(_barra_estamina)
 
 	_vista_bandeja = UIKit.hbox(2)
@@ -155,11 +160,9 @@ func actualizar_estamina(delta: float, quiere_correr: bool, moviendose: bool) ->
 		if agotado and estamina >= MINIMO_PARA_CORRER:
 			agotado = false
 	if _barra_estamina:
-		_barra_estamina.value = estamina
 		_barra_estamina.visible = estamina < ESTAMINA_MAX
-		if agotado != _barra_agotada:
-			_barra_agotada = agotado
-			_barra_estamina.add_theme_stylebox_override("fill", UIKit.estilo(UIKit.ROJO if agotado else Color("7fe0ff"), 3, Color.TRANSPARENT, 0, 0))
+		_relleno_estamina.size.x = ANCHO_BARRA_ESTAMINA * estamina / ESTAMINA_MAX
+		_relleno_estamina.color = UIKit.ROJO if agotado else COLOR_ESTAMINA
 	return corriendo
 
 func _animar(direccion: Vector2) -> void:

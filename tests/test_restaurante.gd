@@ -10,6 +10,7 @@ var _habia_guardado := false
 var r: Node
 
 func _ready() -> void:
+	GameState.tutoriales_habilitados = false
 	_run.call_deferred()
 
 func _run() -> void:
@@ -38,6 +39,7 @@ func _run() -> void:
 	_probar_gol()
 	_probar_eventos()
 	await _probar_fin()
+	await _probar_practica()
 
 	_restaurar()
 	if fallos.is_empty():
@@ -283,3 +285,49 @@ func _restaurar() -> void:
 			archivo.store_string(_respaldo)
 	else:
 		GameState.borrar_guardado()
+
+## Jornada 1 con tutoriales: práctica antes del partido con un cliente que no gasta inventario.
+func _probar_practica() -> void:
+	GameState.tutoriales_habilitados = true
+	GameState.nueva_partida("dificil")
+	_check(GameState.tutorial_manana_activo(), "En la Jornada 1 el tutorial de la mañana debe detener el reloj")
+	GameState.nivel_actual = 2
+	_check(not GameState.tutorial_pendiente("restaurante"), "Los tutoriales solo aparecen en la Jornada 1")
+	GameState.nivel_actual = 1
+	for insumo in Catalogo.INSUMOS:
+		GameState.inventario.agregar(insumo, 5, GameState.dia)
+	GameState.iniciar_jornada()
+	var p: Node = load("res://scenes/restaurant/restaurant.tscn").instantiate()
+	add_child(p)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	_check(p.practica, "La Jornada 1 debe empezar con la práctica")
+	_check(p.get_children().any(func(n): return n is Tutorial), "No apareció el tutorial del restaurante")
+	var c: Cliente = p._cliente_practica
+	_check(c is ClientePractica, "No llegó el cliente de práctica")
+	p._process(5.0)
+	_check(p.tiempo == 0.0, "El reloj del partido no debe correr durante la práctica")
+	c._sentarse()
+	var mesa: Mesa = c.mesa
+	_check(mesa != null, "El cliente de práctica no tiene mesa")
+	var unidades := GameState.inventario.total_unidades()
+	var ventas: int = GameState.estadisticas["ventas"]
+	mesa.interactuar(p.dani)
+	_check(c.estado == Cliente.Estado.ESPERANDO_COMIDA, "No se tomó el pedido de práctica")
+	_check(GameState.inventario.total_unidades() == unidades, "La práctica no debe gastar inventario")
+	for i in range(100):
+		p.barra._process(0.1)
+	p.barra.interactuar(p.dani)
+	mesa.interactuar(p.dani)
+	_check(c.estado == Cliente.Estado.COMIENDO, "No se sirvió al cliente de práctica")
+	_check(GameState.estadisticas["ventas"] == ventas, "La práctica no debe contar como venta")
+	c._process(5.0)
+	_check(mesa.estado == Mesa.EstadoMesa.SUCIA, "La mesa de práctica debe quedar sucia")
+	p._terminar_practica()
+	_check(not p.practica, "La práctica no terminó")
+	p._process(1.0)
+	_check(p.tiempo > 0.0, "El partido no arrancó después de la práctica")
+	p.set_process(false)
+	p.queue_free()
+	await get_tree().process_frame
+	GameState.tutoriales_habilitados = false

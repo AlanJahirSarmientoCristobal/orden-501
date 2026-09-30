@@ -9,6 +9,7 @@ var _respaldo := ""
 var _habia_guardado := false
 
 func _ready() -> void:
+	GameState.tutoriales_habilitados = false
 	_run.call_deferred()
 
 func _run() -> void:

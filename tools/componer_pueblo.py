@@ -22,6 +22,7 @@ random.seed(501)
 VACIO = -1
 suelo = [[VACIO] * COLUMNAS for _ in range(FILAS)]
 objetos = [[VACIO] * COLUMNAS for _ in range(FILAS)]
+copas = [[VACIO] * COLUMNAS for _ in range(FILAS)]
 solidos = set()        # (capa, x, y) de las celdas que bloquean el paso
 
 # ------------------------------------------------------------------ Piezas del tileset
@@ -45,7 +46,11 @@ ASFALTO = 441
 AUTOS_FRENTE = [[[447, 448], [474, 475]], [[393, 394], [420, 421]], [[396, 397], [423, 424]]]   # 2x2, vistos de frente
 AUTOS_LADO = [[453, 454], [480, 481]]                                                      # 2x1, vistos de lado
 ESTACIONAMIENTO = 442
-ARBOLES = [260, 287, 292, 319]
+# Árboles de 2 tiles (copa, tronco): la copa va en la capa "copas", encima de los personajes.
+ARBOLES_DOBLES = [(233, 260), (232, 259), (314, 341), (313, 340)]
+MACETEROS = [(233, 287), (232, 286)]
+# Árboles de 1 tile, para donde no cabe la copa (orilla norte del mapa).
+ARBOLES = [292, 319, 238, 265]
 FAROL = (169, 196)                 # poste de 2 tiles (arriba, abajo)
 POSTE_LUZ = (164, 191)
 BANCA = 270
@@ -64,17 +69,27 @@ TOLDO_PUERTA = 332
 AIRE = [333, 334]
 CERCA = [382, 383, 384]
 
-SOLIDOS_OBJETO = set(ARBOLES + [BANCA, BOTE, BUZON, HIDRANTE, 382, 383, 384, 385])
+SOLIDOS_OBJETO = set(ARBOLES + [t for _, t in ARBOLES_DOBLES + MACETEROS] + [BANCA, BOTE, BUZON, HIDRANTE, 382, 383, 384, 385])
 
 
 def poner(capa, x, y, tile, solido=False):
     if 0 <= x < COLUMNAS and 0 <= y < FILAS:
         capa[y][x] = tile
-        nombre_capa = "suelo" if capa is suelo else "objetos"
+        nombre_capa = "suelo" if capa is suelo else ("copas" if capa is copas else "objetos")
         if solido:
             solidos.add((nombre_capa, x, y))
         else:
             solidos.discard((nombre_capa, x, y))
+
+
+def arbol(x, y, opciones=None):
+    """Árbol completo: tronco sólido en (x, y) y copa encima; si no cabe, uno de 1 tile."""
+    if y > 0 and copas[y - 1][x] == VACIO and objetos[y - 1][x] == VACIO:
+        copa, tronco = random.choice(opciones or ARBOLES_DOBLES)
+        poner(objetos, x, y, tronco, solido=True)
+        poner(copas, x, y - 1, copa)
+    else:
+        poner(objetos, x, y, random.choice(ARBOLES), solido=True)
 
 
 def nueve(capa, x0, y0, ancho, alto, piezas, solido=False):
@@ -231,7 +246,7 @@ for jx, jy, jw, jh in jardines:
     for ty in range(jy + 1, jy + jh - 1, 2):
         for tx in range(jx + 1 + (ty % 3), jx + jw - 1, 3):
             if random.random() < 0.6:
-                poner(objetos, tx, ty, random.choice(ARBOLES), solido=True)
+                arbol(tx, ty)
 for x in (mitad_x - 3, mitad_x + 3):
     for y in (mitad_y - 3, mitad_y + 3):
         poner(objetos, x, y, BANCA)
@@ -242,7 +257,7 @@ lugares["plaza"] = {"rect": [14, 3, 8, 8], "fuente": [17.5, 7.5]}
 for x in (14, 20):
     poner(objetos, x, 7, BANCA)
 for x, y in [(15, 4), (19, 4), (15, 10), (19, 10)]:
-    poner(objetos, x, y, ARBOLES[0], solido=True)
+    arbol(x, y, MACETEROS)
 
 # Cancha (sureste sur): pasto grande; las líneas se dibujan en el juego
 nueve(suelo, 35, 26, 18, 4, PASTO)
@@ -263,7 +278,7 @@ for x, y, t in [(2, 12, BOTE), (24, 12, BUZON), (28, 12, HIDRANTE), (44, 12, BOT
 # Árboles en las banquetas del norte
 for x in range(1, COLUMNAS, 7):
     if suelo[0][x] in (8, 9, 10) and objetos[0][x] == VACIO:
-        poner(objetos, x, 0, random.choice(ARBOLES), solido=True)
+        arbol(x, 0)
 
 # Autos de lado sobre las calles horizontales
 def auto_lado(x, y, modelo):
@@ -297,9 +312,9 @@ for x in range(35, 53):
         poner(objetos, x, 26, CERCA[(x - 35) % 3], solido=True)
 
 # Más árboles y maceteros en las banquetas amplias
-for x, y in [(2, 8), (12, 10), (23, 8), (30, 8), (44, 9), (52, 10), (29, 20), (44, 21), (2, 28), (23, 28), (33, 28)]:
+for x, y in [(2, 8), (12, 10), (23, 8), (30, 8), (44, 9), (52, 10), (44, 21), (2, 28), (23, 28), (33, 28)]:
     if objetos[y][x] == VACIO and ("objetos", x, y) not in solidos:
-        poner(objetos, x, y, random.choice(ARBOLES), solido=True)
+        arbol(x, y)
 
 # ------------------------------------------------------------------ Salida
 
@@ -311,6 +326,7 @@ datos = {
     "atlas_columnas": ATLAS_COLUMNAS,
     "suelo": suelo,
     "objetos": objetos,
+    "copas": copas,
     "solidos": sorted([list(p) for p in solidos]),   # [capa, x, y]
     "calles": {"avenida": [0, AV_Y, COLUMNAS, 3], "avenida_vertical": [AV_X, 0, 3, FILAS], "calle_sur": [AV_X + 3, SUR_Y, COLUMNAS - AV_X - 3, 3]},
     "lugares": lugares,
@@ -328,7 +344,7 @@ if len(sys.argv) > 1:
         return atlas.crop(((i % ATLAS_COLUMNAS) * 16, (i // ATLAS_COLUMNAS) * 16, (i % ATLAS_COLUMNAS) * 16 + 16, (i // ATLAS_COLUMNAS) * 16 + 16))
 
     vista = Image.new("RGBA", (COLUMNAS * 16, FILAS * 16), (30, 30, 40, 255))
-    for capa in (suelo, objetos):
+    for capa in (suelo, objetos, copas):
         for y in range(FILAS):
             for x in range(COLUMNAS):
                 if capa[y][x] != VACIO:

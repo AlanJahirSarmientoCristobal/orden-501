@@ -88,6 +88,17 @@ func _run() -> void:
 	await _capturar("06_inventario")
 	pueblo._inventario.cerrar()
 
+	# Práctica del restaurante (Jornada 1)
+	GameState.iniciar_jornada()
+	var practica := await _abrir("res://scenes/restaurant/restaurant.tscn")
+	await _esperar(3.0)
+	await _capturar("06b_practica")
+	practica._cliente_practica._sentarse()
+	practica._cliente_practica.mesa.interactuar(practica.dani)
+	await _esperar(1.5)
+	await _capturar("06c_practica_paso2")
+	GameState.tutoriales_habilitados = false
+
 	GameState.nivel_desbloqueado = 2
 	GameState.nivel_actual = 2
 	var dinero := GameState.dinero

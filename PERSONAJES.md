@@ -36,24 +36,32 @@ Para los diálogos y el menú de compra se puede entregar un **busto** cuadrado 
 
 ## 2. Dónde guardarlos y con qué nombre
 
-Guarda cada hoja en **`Assets/sprites/personajes/`** con el nombre de su clave:
+Guarda cada hoja en **`Assets/sprites/personajes/`** con su **nombre clave**:
 
-| Clave (nombre del archivo) | Personaje | Dónde aparece |
-|---|---|---|
-| `dani.png` | **Dani**, el gerente (protagonista) | Pueblo y restaurante |
-| `chef.png` | El Chef | Cocina del restaurante |
-| `cliente_1.png`, `cliente_2.png`, `cliente_3.png` | Clientes habituales (3 variantes) | Restaurante, peatones del pueblo, acompañantes de parejas y familias |
-| `cliente_vip.png` | Cliente VIP | Restaurante (Liguilla y Gran Final) |
-| `critico.png` | Crítico gastronómico | Evento del partido |
-| `vendedor_mercado.png` | Don Chema, vendedor del Mercado | Interior del Mercado y menú de compra |
-| `encargado_cerveceria.png` | Lupita, encargada de la Cervecería | Interior de la Cervecería y menú de compra |
-| `dona_mari.png` | Doña Mari (consejos) | Plaza del pueblo |
-| `profe_juve.png` | Profe Juve (consejos) | Parque del pueblo |
-| `capitan.png` | Capitán del equipo (consejos) | Cancha del pueblo |
+| Archivo | Personaje | Diseño actual | Dónde aparece |
+|---|---|---|---|
+| `player.png` | **Dani**, el gerente (protagonista) | Copete, audífonos con micrófono, playera oscura con mangas naranjas | Pueblo y restaurante |
+| `npc1.png` | Chef | Gorro y filipina blancos, pañuelo rojo, bigote | Cocina del restaurante |
+| `npc2.png` | Don Chema, vendedor del Mercado | Calvo y canoso, bigote, camisa azul y mandil de carnicero | Mercado y menú de compra |
+| `npc3.png` | Lupita, encargada de la Cervecería | Cabello rojo largo, playera negra y mandil verde | Cervecería y menú de compra |
+| `npc4.png` | Cliente VIP | Traje negro, lentes oscuros, corbata dorada | Restaurante (Liguilla y Gran Final) |
+| `npc5.png` | Crítico gastronómico | Saco morado, lentes, pañuelo amarillo | Evento del partido |
+| `npc6.png` | Doña Mari | Chongo canoso, vestido rosa con flores | Plaza del pueblo |
+| `npc7.png` | Profe Juve, entrenador | Pants deportivos azules, lentes y silbato | Parque del pueblo |
+| `npc8.png` | Capitán del equipo | Jersey verde con el 10, gafete de capitán, short blanco | Cancha del pueblo |
+| `npc9.png` | Cliente habitual 1 | Gorra roja, playera blanca, tenis rojos | Restaurante, peatones y acompañantes |
+| `npc10.png` | Cliente habitual 2 | Cabello largo, blusa turquesa | Restaurante, peatones y acompañantes |
+| `npc11.png` | Cliente habitual 3 | Señor canoso con lentes y bigote, polo guinda | Restaurante, peatones y acompañantes |
 
-Al abrir el proyecto en Godot, las imágenes se importan solas y el juego las usa en lugar del sprite de Kenney. Si un personaje no tiene hoja, conserva el provisional, así que puedes entregarlos uno por uno.
+El retrato opcional se llama igual, con `retrato_` delante: `retrato_player.png`, `retrato_npc2.png`, etc.
 
-Mientras el VIP y el crítico usan el sprite genérico, el juego los pinta de dorado o morado para distinguirlos. Con su hoja propia se muestran con sus colores originales.
+Todas estas hojas las genera `python tools/generar_personajes.py` (que **sobrescribe** los PNG). Si retocas uno a mano en Pixelorama, no vuelvas a correr el script, o cambia antes en el script el diseño de ese personaje. Las vistas previas quedan en `plantillas/vista_personajes.png` y `plantillas/personajes_caminando.gif`.
+
+La tabla de nombres clave está en `AssetPaths.CODIGOS` (`scripts/core/asset_paths.gd`).
+
+Al abrir el proyecto en Godot, las imágenes se importan solas y el juego las usa en lugar del sprite de Kenney. Si borras una hoja, ese personaje vuelve al sprite provisional de Kenney, así que puedes entregarlos uno por uno.
+
+Si el VIP o el crítico no tienen hoja y usan el sprite genérico, el juego los pinta de dorado o morado para distinguirlos. Con su hoja propia se muestran con sus colores originales.
 
 ## 3. Qué animación usa el juego y cuándo
 
@@ -78,7 +86,7 @@ Silueta reconocible por:    (gorra, mandil, bufanda del equipo…)
 Relación con la historia:
 Animaciones:                caminar abajo / arriba / lado (4 cuadros c/u), quieto
 Tamaño del sprite:          32 × 32 px (hoja de 128 × 96)
-Archivo:                    Assets/sprites/personajes/<clave>.png
+Archivo:                    Assets/sprites/personajes/<player o npcN>.png
 ```
 
 ### Ejemplo: Dani
@@ -96,7 +104,7 @@ Relación con la historia:   Debe poner en orden el restaurante durante la tempo
                             y llevarlo a la Gran Final
 Animaciones:                Caminar en 3 direcciones (4 cuadros), quieto; corre con Shift
 Tamaño del sprite:          32 × 32 px
-Archivo:                    Assets/sprites/personajes/dani.png
+Archivo:                    Assets/sprites/personajes/player.png
 ```
 
 **Personajes principales sugeridos para la entrega:** Dani, el Chef, el Cliente VIP, Don Chema y Lupita. Los clientes habituales y los NPCs del pueblo pueden ir como personajes secundarios.

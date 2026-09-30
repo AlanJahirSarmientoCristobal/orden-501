@@ -108,7 +108,7 @@ El script genera `monster_1.png` … `monster_7.png` sin el fondo. La hoja debe 
 Todos los gráficos y sonidos se referencian desde **`scripts/core/asset_paths.gd`**:
 
 - `TEXTURAS`: íconos de insumos y platillos, y decoración. Cambia la ruta por tu imagen.
-- `PERSONAJES`: sprites de Dani, el Chef, los clientes, los vendedores y los NPCs. Hoy se toman del tileset RPG Urban. Para usar sprites propios basta con guardar una hoja de 4 × 3 cuadros en `Assets/sprites/personajes/<clave>.png`; el formato, las claves y la plantilla están en **`PERSONAJES.md`**.
+- `PERSONAJES`: sprites de Dani, el Chef, los clientes, los vendedores y los NPCs. Hoy se toman del tileset RPG Urban. Para usar sprites propios basta con guardar una hoja de 4 × 3 cuadros en `Assets/sprites/personajes/` con su nombre clave (`player.png`, `npc1.png` … `npc11.png`). Las hojas actuales las genera `tools/generar_personajes.py`; el formato, las claves y la plantilla están en **`PERSONAJES.md`**.
 - `AUDIO`: si guardas en `Assets/audio/` un archivo con el nombre indicado (por ejemplo `musica_jornada.ogg` o `gol.ogg`), el juego lo usa en lugar del sonido generado por código.
 
 ### Mapa del pueblo (TileMap)

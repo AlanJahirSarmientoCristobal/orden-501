@@ -72,6 +72,22 @@ const PERSONAJES := {
 	"capitan": 348,
 }
 
+## Nombre clave del archivo de cada personaje (Assets/sprites/personajes/<código>.png).
+const CODIGOS := {
+	"dani": "player",
+	"chef": "npc1",
+	"vendedor_mercado": "npc2",       # Don Chema
+	"encargado_cerveceria": "npc3",   # Lupita
+	"cliente_vip": "npc4",
+	"critico": "npc5",
+	"dona_mari": "npc6",
+	"profe_juve": "npc7",
+	"capitan": "npc8",
+	"cliente_1": "npc9",
+	"cliente_2": "npc10",
+	"cliente_3": "npc11",
+}
+
 ## Hojas de sprites del equipo: 4 columnas (de pie, paso A, de pie 2, paso B) y 3 filas
 ## (abajo, arriba, lado mirando a la derecha). Cualquier tamaño de cuadro sirve: el juego
 ## calcula la escala para que el personaje mida 64 px en pantalla.
@@ -190,11 +206,15 @@ static func tile(indice: int) -> Texture2D:
 
 ## Hoja propia del personaje, o null si todavía se usa el tileset de Kenney.
 static func hoja_propia(clave: String) -> Texture2D:
-	var ruta := HOJAS_PROPIAS % clave
+	var ruta := HOJAS_PROPIAS % codigo(clave)
 	return load(ruta) if ResourceLoader.exists(ruta) else null
 
 static func tiene_hoja_propia(clave: String) -> bool:
-	return ResourceLoader.exists(HOJAS_PROPIAS % clave)
+	return ResourceLoader.exists(HOJAS_PROPIAS % codigo(clave))
+
+## "dani" -> "player", "chef" -> "npc1", etc.
+static func codigo(clave: String) -> String:
+	return CODIGOS.get(clave, clave)
 
 ## Escala del sprite: 4 con los tiles de 16 px; con una hoja propia se ajusta a su tamaño.
 static func escala(clave: String) -> Vector2:
@@ -254,8 +274,9 @@ static func retrato(clave: String) -> Texture2D:
 	var propio := textura("retrato_" + clave)
 	if propio:
 		return propio
-	if ResourceLoader.exists(RETRATOS_PROPIOS % clave):
-		return load(RETRATOS_PROPIOS % clave)
+	var ruta_retrato := RETRATOS_PROPIOS % codigo(clave)
+	if ResourceLoader.exists(ruta_retrato):
+		return load(ruta_retrato)
 	var hoja := hoja_propia(clave)
 	if hoja:
 		var cuadro := AtlasTexture.new()

@@ -35,19 +35,20 @@ func _ready() -> void:
 		pedidos += int(e.get("pedidos", 0))
 		perdidos += int(e.get("perdidos", 0))
 		merma += int(informe.get("costo_merma", 0))
-		if mejor.is_empty() or int(e.get("ventas", 0)) > int(mejor.get("estadisticas", {}).get("ventas", 0)):
+		if mejor.is_empty() or int(informe.get("puntos", 0)) > int(mejor.get("puntos", 0)):
 			mejor = informe
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 40)
 	for fila in [
+		["PUNTUACIÓN DE LA TEMPORADA", "%d puntos" % GameState.puntos_temporada()],
 		["Jornadas superadas", str(GameState.historial.size())],
 		["Ventas totales", UIKit.dinero(ventas)],
 		["Pedidos entregados", str(pedidos)],
 		["Clientes perdidos", str(perdidos)],
 		["Merma total", UIKit.dinero(merma)],
 		["Reputación final", "%d%% %s" % [int(GameState.reputacion), UIKit.estrellas(GameState.reputacion)]],
-		["Mejor jornada", "Día %d · %s (%s)" % [int(mejor.get("dia", 0)), mejor.get("nombre_nivel", "-"), UIKit.dinero(int(mejor.get("estadisticas", {}).get("ventas", 0)))] if not mejor.is_empty() else "-"],
+		["Mejor jornada", "Día %d · %s (%d puntos)" % [int(mejor.get("dia", 0)), mejor.get("nombre_nivel", "-"), int(mejor.get("puntos", 0))] if not mejor.is_empty() else "-"],
 		["Dinero final", UIKit.dinero(GameState.dinero)],
 	]:
 		grid.add_child(UIKit.etiqueta(fila[0], 16, UIKit.TEXTO_TENUE))

@@ -32,6 +32,7 @@ func _run() -> void:
 	_probar_faltante_sustituto()
 	_probar_faltante_agotado()
 	_probar_urgente()
+	_probar_agotado_vuelve()
 	_probar_paciencia()
 	_probar_vip()
 	_probar_grupos()
@@ -142,6 +143,16 @@ func _probar_faltante_agotado() -> void:
 	r.cancelar_pedidos(cliente)
 	cliente.retirarse()
 	mesa.liberar(false)
+
+## Un platillo agotado regresa al menú cuando vuelve a haber insumos.
+func _probar_agotado_vuelve() -> void:
+	var pollo := GameState.inventario.total("pollo")
+	GameState.inventario._retirar("pollo", pollo)
+	_check(r.platillos_sin_insumos().has(Catalogo.ALITAS), "Sin pollo, las alitas deben aparecer sin insumos")
+	r.agotados.append(Catalogo.ALITAS)
+	GameState.recibir_urgente("pollo", 6)
+	_check(not r.agotados.has(Catalogo.ALITAS), "Las alitas debían volver al menú al llegar el pollo")
+	_check(not r.platillos_sin_insumos().has(Catalogo.ALITAS), "Con pollo, las alitas no deben marcarse sin insumos")
 
 func _probar_urgente() -> void:
 	var dinero := GameState.dinero

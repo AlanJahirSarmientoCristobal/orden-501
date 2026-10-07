@@ -135,6 +135,10 @@ func _probar_condiciones_y_cierre() -> void:
 	_check(GameState.dia == 2, "El día no avanzó")
 	# En Normal los insumos duran 2 días: el pan del día 1 aún no caduca al pasar al día 2.
 	_check(informe["merma"].is_empty(), "No debería haber merma tras un día en Normal")
+	_check(int(informe["puntos"]) >= GameState.PUNTOS_JORNADA_SUPERADA, "Una jornada superada debe dar al menos el bono de puntos")
+	_check(GameState.puntos_temporada() == int(informe["puntos"]), "Los puntos de la temporada no suman las jornadas")
+	var e_mala := {"ventas": 100, "perdidos": 5, "quiebres": 3}
+	_check(GameState.calcular_puntos(e_mala, 50.0, 0, false) < GameState.calcular_puntos({"ventas": 100}, 50.0, 0, false), "Los errores deben restar puntos")
 
 	GameState.nueva_partida("dificil")
 	GameState.inventario.agregar("pan", 4, GameState.dia)

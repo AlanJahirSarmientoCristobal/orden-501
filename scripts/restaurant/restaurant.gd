@@ -104,6 +104,7 @@ func _ready() -> void:
 	_construir_hud()
 
 	GameState.dinero_cambiado.connect(_al_cambiar_valor)
+	GameState.inventario_cambiado.connect(_revisar_agotados)
 	GameState.reputacion_cambiada.connect(_al_cambiar_valor)
 	GameState.reputacion_agotada.connect(_al_agotar_reputacion)
 
@@ -695,6 +696,26 @@ func _marcar_agotado(cliente: Cliente, platillo: String) -> void:
 	GameState.aviso.emit("El cliente cambió su pedido a %s." % alternativa)
 	procesar_pedido(cliente)
 
+## Un platillo marcado como agotado vuelve al menú en cuanto hay insumos otra vez
+## (por ejemplo, al llegar un pedido urgente).
+func _revisar_agotados() -> void:
+	for platillo in agotados.duplicate():
+		if GameState.inventario.puede_preparar(platillo, 1):
+			agotados.erase(platillo)
+			GameState.aviso.emit("%s vuelve al menú: ya hay insumos." % platillo)
+
+## Platillos del menú que ya no se pueden preparar porque algún insumo llegó a cero.
+func platillos_sin_insumos() -> Array[String]:
+	var menu: Array[String] = []
+	menu.assign(Catalogo.MENU_HABITUAL)
+	if GameState.nivel_actual >= 2:
+		menu.append(Catalogo.COMBO)
+	var sin: Array[String] = []
+	for platillo in menu:
+		if not agotados.has(platillo) and not GameState.inventario.puede_preparar(platillo, 1):
+			sin.append(platillo)
+	return sin
+
 func cancelar_pedidos(cliente: Cliente) -> void:
 	cocina.cancelar(cliente)
 	barra.cancelar(cliente)
@@ -827,8 +848,16 @@ func _actualizar_panel_lateral() -> void:
 				en_camino += int(e["cantidad"])
 		var color_stock := UIKit.ROJO if cantidad <= 2 else (Color("f2d16b") if cantidad <= GameState.STOCK_BAJO else UIKit.TEXTO)
 		_fijar(_lateral["stock"][insumo], "%s: %d%s" % [Catalogo.nombre_insumo(insumo), cantidad, "  (+%d en camino)" % en_camino if en_camino > 0 else ""], color_stock)
-	_lateral["agotados"].visible = not agotados.is_empty()
-	_fijar(_lateral["agotados"], "Agotado: " + ", ".join(agotados), UIKit.ROJO)
+	# Regla 11: lo que no se puede preparar aparece agotado en el menú. Si un cliente lo pide,
+	# Dani decide qué hacer (agotar, urgente o sustituto).
+	var sin := platillos_sin_insumos()
+	var lineas_agotado: Array[String] = []
+	if not agotados.is_empty():
+		lineas_agotado.append("Agotado: " + ", ".join(agotados))
+	if not sin.is_empty():
+		lineas_agotado.append("Sin insumos: " + ", ".join(sin))
+	_lateral["agotados"].visible = not lineas_agotado.is_empty()
+	_fijar(_lateral["agotados"], "\n".join(lineas_agotado), UIKit.ROJO)
 	_fijar(_lateral["cocina"], "Cocina: %d en cola · %d listos" % [cocina.pendientes(), cocina.listos.size()], UIKit.TEXTO)
 	_fijar(_lateral["barra"], "Barra: %d en cola · %d listos" % [barra.pendientes(), barra.listos.size()], UIKit.TEXTO)
 	_fijar(_lateral["fila"], "Fila en la entrada: %d" % fila.size(), UIKit.ROJO if fila.size() >= 4 else UIKit.TEXTO)
@@ -851,6 +880,8 @@ func _construir_panel_lateral() -> void:
 		stock[insumo] = UIKit.etiqueta("", 12)
 		p.add_child(stock[insumo])
 	var agotado := UIKit.etiqueta("", 11, UIKit.ROJO)
+	agotado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	agotado.custom_minimum_size.x = 244
 	p.add_child(agotado)
 	p.add_child(HSeparator.new())
 	p.add_child(UIKit.etiqueta("COLA DE COCINA", 14, UIKit.ACENTO))

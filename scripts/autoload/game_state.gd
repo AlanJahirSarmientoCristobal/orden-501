@@ -463,6 +463,7 @@ func cerrar_jornada(motivo_derrota: String = "") -> Dictionary:
 		"temporada_completa": false,
 		"reto": modo_reto,
 	}
+	ultimo_informe["puntos"] = calcular_puntos(estadisticas, reputacion, costo_merma, exito)
 	if exito and not modo_reto:
 		historial.append(ultimo_informe)
 		nivel_desbloqueado = maxi(nivel_desbloqueado, mini(nivel_jugado + 1, 3))
@@ -474,6 +475,31 @@ func cerrar_jornada(motivo_derrota: String = "") -> Dictionary:
 			nivel_actual = nivel_jugado + 1
 		_guardar_datos(_capturar())
 	return ultimo_informe
+
+## Puntuación de una jornada (sistema de recompensa): premia ventas, pedidos, VIP,
+## reservaciones y reputación, y castiga clientes perdidos, quiebres, duplicados y merma.
+const PUNTOS_JORNADA_SUPERADA := 500
+
+func calcular_puntos(e: Dictionary, reputacion_final: float, costo_merma: int, exito: bool) -> int:
+	var puntos := int(e.get("ventas", 0))
+	puntos += int(e.get("pedidos", 0)) * 10
+	puntos += int(e.get("vip_atendidos", 0)) * 25
+	puntos += int(e.get("reservas_atendidas", 0)) * 30
+	puntos += int(reputacion_final) * 10
+	puntos -= int(e.get("perdidos", 0)) * 50
+	puntos -= int(e.get("quiebres", 0)) * 20
+	puntos -= int(e.get("duplicados", 0)) * 100
+	puntos -= costo_merma
+	if exito:
+		puntos += PUNTOS_JORNADA_SUPERADA
+	return maxi(0, puntos)
+
+## Suma de los puntos de las jornadas superadas en la temporada.
+func puntos_temporada() -> int:
+	var total := 0
+	for informe in historial:
+		total += int(informe.get("puntos", 0))
+	return total
 
 ## Compra una mejora en el reporte de cierre.
 func comprar_mejora(id: String) -> bool:

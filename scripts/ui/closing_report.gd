@@ -86,6 +86,7 @@ func _construir_informe() -> void:
 		["Merma por caducidad", "%s (%s)" % [_texto_merma(inf["merma"]), UIKit.dinero(inf["costo_merma"])]],
 		["Reputación", "%d%% → %d%%  %s" % [int(rep_inicial), int(inf["reputacion"]), UIKit.estrellas(inf["reputacion"])]],
 		["Dinero disponible", UIKit.dinero(GameState.dinero)],
+		["PUNTUACIÓN", "%d puntos%s" % [int(inf.get("puntos", 0)), "  (+%d por superar la jornada)" % GameState.PUNTOS_JORNADA_SUPERADA if exito else ""]],
 	]
 	var grid := GridContainer.new()
 	grid.columns = 2

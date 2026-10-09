@@ -8,7 +8,7 @@ extends FaseManana
 @export_enum("mercado", "cerveceria") var tienda := "mercado"
 
 var _rotacion := 0.0
-var _menu: MenuCompra
+@onready var _menu: MenuCompra = $MenuCompra
 var _nombre_vendedor := ""
 var _clave_vendedor := ""
 
@@ -22,8 +22,6 @@ func _ready() -> void:
 	_clave_vendedor = "vendedor_mercado" if tienda == Catalogo.MERCADO else "encargado_cerveceria"
 	_nombre_vendedor = "Don Chema" if tienda == Catalogo.MERCADO else "Lupita"
 	preparar_fase()
-	_menu = MenuCompra.new()
-	add_child(_menu)
 	GameState.aviso.emit("Habla con %s en la caja para comprar." % _nombre_vendedor)
 	if GameState.tutorial_pendiente("pueblo"):
 		GameState.completar_tutorial("pueblo")

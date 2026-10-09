@@ -1,0 +1,24 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/cursor_menu.gd" id="1_r"]
+[ext_resource type="Theme" path="res://Assets/tema/tema_tienda.tres" id="2_r"]
+
+[node name="FilaProducto" type="HBoxContainer"]
+custom_minimum_size = Vector2(0, 42)
+mouse_filter = 0
+theme = ExtResource("2_r")
+
+[node name="Cursor" type="Control" parent="."]
+layout_mode = 2
+custom_minimum_size = Vector2(28, 36)
+mouse_filter = 2
+script = ExtResource("1_r")
+
+[node name="Nombre" type="Label" parent="."]
+layout_mode = 2
+uppercase = true
+size_flags_horizontal = 3
+
+[node name="Precio" type="Label" parent="."]
+layout_mode = 2
+uppercase = true

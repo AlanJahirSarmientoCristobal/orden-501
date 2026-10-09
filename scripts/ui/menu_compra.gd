@@ -10,12 +10,7 @@ signal cerrado
 
 enum Estado { CERRADO, LISTA, CANTIDAD, CONFIRMAR, MENSAJE }
 
-const RUTA_FUENTE := "res://Assets/fonts/kenney_pixel.ttf"
-const TINTA := Color("303040")
-const SOMBRA := Color("c8c8c0")
-const PAPEL := Color("f8f8f0")
-const MARCO := Color("4f6a8f")
-const MARCO_CLARO := Color("a8c0dc")
+const FILA := preload("res://scenes/ui/fila_producto.tscn")
 
 const DESCRIPCIONES := {
 	"carne": "Carne de res fresca del mercado.",
@@ -29,8 +24,6 @@ const DESCRIPCIONES := {
 	"monster": "Bebida energética. Cada lata trae un diseño distinto.",
 }
 
-static var _fuente: FontFile
-
 var tienda := Catalogo.MERCADO
 var vendedor := ""
 var estado := Estado.CERRADO
@@ -39,181 +32,26 @@ var indice := 0
 var cantidad := 1
 var confirmar_si := true
 
-var _raiz: Control
-var _dinero: Label
-var _almacen: Label
 var _filas: Array[Dictionary] = []   # {"cursor": Control, "nombre": Label, "precio": Label}
-var _lista: VBoxContainer
-var _icono: TextureRect
-var _descripcion: Label
-var _retrato: TextureRect
-var _nombre_retrato: Label
-var _caja_cantidad: PanelContainer
-var _en_almacen: Label
-var _texto_cantidad: Label
-var _caja_si_no: PanelContainer
-var _cursor_si: Control
-var _cursor_no: Control
 
-## Fuente pixel sin suavizado (Kenney Pixel).
-static func fuente() -> FontFile:
-	if _fuente == null:
-		_fuente = load(RUTA_FUENTE)
-		_fuente.antialiasing = TextServer.FONT_ANTIALIASING_NONE
-		_fuente.hinting = TextServer.HINTING_NONE
-		_fuente.subpixel_positioning = TextServer.SUBPIXEL_POSITIONING_DISABLED
-	return _fuente
+# Nodos de la escena scenes/ui/menu_compra.tscn (estilo en Assets/tema/tema_tienda.tres)
+@onready var _raiz: Control = $Raiz
+@onready var _dinero: Label = $Raiz/CajaDinero/Columna/Dinero
+@onready var _almacen: Label = $Raiz/CajaDinero/Columna/Almacen
+@onready var _retrato: TextureRect = $Raiz/CajaRetrato/Columna/Fondo/Retrato
+@onready var _nombre_retrato: Label = $Raiz/CajaRetrato/Columna/Vendedor
+@onready var _lista: VBoxContainer = $Raiz/CajaLista/Lista
+@onready var _icono: TextureRect = $Raiz/CajaDescripcion/Fila/Icono
+@onready var _descripcion: Label = $Raiz/CajaDescripcion/Fila/Descripcion
+@onready var _caja_cantidad: PanelContainer = $Raiz/CajaCantidad
+@onready var _en_almacen: Label = $Raiz/CajaCantidad/Columna/EnAlmacen
+@onready var _texto_cantidad: Label = $Raiz/CajaCantidad/Columna/Cantidad
+@onready var _caja_si_no: PanelContainer = $Raiz/CajaSiNo
+@onready var _cursor_si: Control = $Raiz/CajaSiNo/Columna/FilaSi/Cursor
+@onready var _cursor_no: Control = $Raiz/CajaSiNo/Columna/FilaNo/Cursor
 
 func _ready() -> void:
-	layer = 45
-	process_mode = Node.PROCESS_MODE_ALWAYS
-	_raiz = Control.new()
-	_raiz.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_raiz.visible = false
-	add_child(_raiz)
-	var velo := UIKit.velo(0.25)
-	_raiz.add_child(velo)
-	_construir()
 	GameState.dinero_cambiado.connect(_al_cambiar_dinero)
-
-# ---------------------------------------------------------------- Construcción
-
-func _caja(pos: Vector2, tam: Vector2) -> PanelContainer:
-	var caja := PanelContainer.new()
-	caja.position = pos
-	caja.size = tam
-	var estilo := StyleBoxFlat.new()
-	estilo.bg_color = PAPEL
-	estilo.border_color = MARCO
-	estilo.set_border_width_all(6)
-	estilo.set_corner_radius_all(10)
-	estilo.set_content_margin_all(18)
-	estilo.shadow_color = Color(0, 0, 0, 0.35)
-	estilo.shadow_size = 4
-	caja.add_theme_stylebox_override("panel", estilo)
-	# Segundo borde interior claro, como en el juego original
-	var interior := Panel.new()
-	var estilo_int := StyleBoxFlat.new()
-	estilo_int.bg_color = Color.TRANSPARENT
-	estilo_int.border_color = MARCO_CLARO
-	estilo_int.set_border_width_all(2)
-	estilo_int.set_corner_radius_all(6)
-	interior.add_theme_stylebox_override("panel", estilo_int)
-	interior.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	interior.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	interior.offset_left = 6
-	interior.offset_top = 6
-	interior.offset_right = -6
-	interior.offset_bottom = -6
-	caja.add_child(interior)
-	_raiz.add_child(caja)
-	return caja
-
-func _texto(texto: String, tam: int = 32, color: Color = TINTA) -> Label:
-	var l := Label.new()
-	l.text = texto
-	l.add_theme_font_override("font", fuente())
-	l.add_theme_font_size_override("font_size", tam)
-	l.add_theme_color_override("font_color", color)
-	l.add_theme_color_override("font_shadow_color", SOMBRA)
-	l.add_theme_constant_override("shadow_offset_x", 2)
-	l.add_theme_constant_override("shadow_offset_y", 2)
-	# La fuente pixel dibuja las minúsculas acentuadas como mayúsculas: todo en mayúsculas.
-	l.uppercase = true
-	return l
-
-func _construir() -> void:
-	# Dinero y almacén (arriba a la izquierda)
-	var caja_dinero := _caja(Vector2(32, 64), Vector2(420, 160))
-	var columna := VBoxContainer.new()
-	columna.add_theme_constant_override("separation", 2)
-	_dinero = _texto("")
-	_almacen = _texto("")
-	columna.add_child(_texto("DINERO", 32, MARCO))
-	columna.add_child(_dinero)
-	columna.add_child(_almacen)
-	caja_dinero.add_child(columna)
-
-	# Retrato del vendedor (debajo del dinero)
-	var caja_retrato := _caja(Vector2(32, 236), Vector2(420, 272))
-	var col_retrato := VBoxContainer.new()
-	col_retrato.alignment = BoxContainer.ALIGNMENT_CENTER
-	var fondo := PanelContainer.new()
-	var estilo_fondo := StyleBoxFlat.new()
-	estilo_fondo.bg_color = Color("d8e8f8")
-	estilo_fondo.set_corner_radius_all(6)
-	fondo.add_theme_stylebox_override("panel", estilo_fondo)
-	fondo.custom_minimum_size = Vector2(0, 180)
-	_retrato = TextureRect.new()
-	_retrato.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_retrato.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_retrato.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_retrato.custom_minimum_size = Vector2(176, 176)
-	fondo.add_child(_retrato)
-	col_retrato.add_child(fondo)
-	_nombre_retrato = _texto("")
-	_nombre_retrato.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	col_retrato.add_child(_nombre_retrato)
-	caja_retrato.add_child(col_retrato)
-
-	# Lista de productos (derecha)
-	var caja_lista := _caja(Vector2(560, 64), Vector2(688, 444))
-	_lista = VBoxContainer.new()
-	_lista.add_theme_constant_override("separation", 4)
-	caja_lista.add_child(_lista)
-
-	# Descripción con ícono (abajo)
-	var caja_desc := _caja(Vector2(32, 524), Vector2(1216, 168))
-	var fila := HBoxContainer.new()
-	fila.add_theme_constant_override("separation", 24)
-	_icono = TextureRect.new()
-	_icono.custom_minimum_size = Vector2(112, 112)
-	_icono.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_icono.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	_icono.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	fila.add_child(_icono)
-	_descripcion = _texto("")
-	_descripcion.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_descripcion.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_descripcion.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	fila.add_child(_descripcion)
-	caja_desc.add_child(fila)
-
-	# Selector de cantidad
-	_caja_cantidad = _caja(Vector2(768, 360), Vector2(480, 148))
-	var col_cant := VBoxContainer.new()
-	_en_almacen = _texto("", 32, MARCO)
-	_texto_cantidad = _texto("")
-	col_cant.add_child(_en_almacen)
-	col_cant.add_child(_texto_cantidad)
-	_caja_cantidad.add_child(col_cant)
-	_caja_cantidad.visible = false
-
-	# Confirmación Sí / No
-	_caja_si_no = _caja(Vector2(1016, 344), Vector2(232, 164))
-	var col_sn := VBoxContainer.new()
-	var fila_si := HBoxContainer.new()
-	_cursor_si = Cursor.new()
-	fila_si.add_child(_cursor_si)
-	fila_si.add_child(_texto("SÍ"))
-	var fila_no := HBoxContainer.new()
-	_cursor_no = Cursor.new()
-	fila_no.add_child(_cursor_no)
-	fila_no.add_child(_texto("NO"))
-	col_sn.add_child(fila_si)
-	col_sn.add_child(fila_no)
-	_caja_si_no.add_child(col_sn)
-	_caja_si_no.visible = false
-
-## Cursor triangular (la fuente no trae el carácter ▶).
-class Cursor extends Control:
-	func _init() -> void:
-		custom_minimum_size = Vector2(28, 36)
-		mouse_filter = Control.MOUSE_FILTER_IGNORE
-	func _draw() -> void:
-		var puntos := PackedVector2Array([Vector2(6, 8), Vector2(22, 18), Vector2(6, 28)])
-		draw_colored_polygon(puntos + PackedVector2Array([Vector2(2, 2), Vector2(2, 2), Vector2(2, 2)]), SOMBRA)
-		draw_colored_polygon(puntos, TINTA)
 
 # ---------------------------------------------------------------- Abrir / cerrar
 
@@ -260,19 +98,14 @@ func _llenar_lista() -> void:
 	opciones.append("")      # SALIR
 	for i in range(opciones.size()):
 		var insumo := opciones[i]
-		var fila := HBoxContainer.new()
-		fila.custom_minimum_size.y = 42
-		fila.mouse_filter = Control.MOUSE_FILTER_STOP
+		var fila: HBoxContainer = FILA.instantiate()
 		fila.gui_input.connect(_clic_fila.bind(i))
-		var cursor := Cursor.new()
-		fila.add_child(cursor)
-		var nombre := _texto(Catalogo.nombre_insumo(insumo).to_upper() if insumo != "" else "SALIR")
-		nombre.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		fila.add_child(nombre)
-		var precio := _texto(UIKit.dinero(GameState.precio_insumo(insumo)) if insumo != "" else "")
-		fila.add_child(precio)
+		var nombre: Label = fila.get_node("Nombre")
+		nombre.text = Catalogo.nombre_insumo(insumo) if insumo != "" else "SALIR"
+		var precio: Label = fila.get_node("Precio")
+		precio.text = UIKit.dinero(GameState.precio_insumo(insumo)) if insumo != "" else ""
 		_lista.add_child(fila)
-		_filas.append({"cursor": cursor, "nombre": nombre, "precio": precio})
+		_filas.append({"cursor": fila.get_node("Cursor"), "nombre": nombre, "precio": precio})
 
 # ---------------------------------------------------------------- Estados
 

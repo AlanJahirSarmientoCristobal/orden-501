@@ -1,0 +1,46 @@
+[gd_resource type="Theme" load_steps=4 format=3]
+
+[ext_resource type="FontFile" path="res://Assets/fonts/kenney_pixel.ttf" id="1_fuente"]
+
+[sub_resource type="StyleBoxFlat" id="Caja"]
+content_margin_left = 18.0
+content_margin_top = 18.0
+content_margin_right = 18.0
+content_margin_bottom = 18.0
+bg_color = Color(0.972549, 0.972549, 0.941176, 1)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_color = Color(0.309804, 0.415686, 0.560784, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_size = 4
+
+[sub_resource type="StyleBoxFlat" id="Borde_interior"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.658824, 0.752941, 0.862745, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[resource]
+default_font = ExtResource("1_fuente")
+default_font_size = 32
+Label/colors/font_color = Color(0.188235, 0.188235, 0.25098, 1)
+Label/colors/font_shadow_color = Color(0.784314, 0.784314, 0.752941, 1)
+Label/constants/outline_size = 0
+Label/constants/shadow_offset_x = 2
+Label/constants/shadow_offset_y = 2
+Marco/base_type = &"Label"
+Marco/colors/font_color = Color(0.309804, 0.415686, 0.560784, 1)
+Panel/styles/panel = SubResource("Borde_interior")
+PanelContainer/styles/panel = SubResource("Caja")

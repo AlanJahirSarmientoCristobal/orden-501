@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/panel_inventario.tscn" id="ui_inventario"]
 [ext_resource type="PackedScene" path="res://scenes/ui/dialogo_opciones.tscn" id="ui_dialogo"]
 [ext_resource type="PackedScene" path="res://scenes/ui/menu_pausa.tscn" id="ui_pausa"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_compra.tscn" id="ui_menu_compra"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1jvpb"]
 size = Vector2(816, 144)
@@ -214,6 +215,8 @@ position = Vector2(640, 575.19995)
 [node name="Dialogo" parent="." instance=ExtResource("ui_dialogo")]
 
 [node name="Pausa" parent="." instance=ExtResource("ui_pausa")]
+
+[node name="MenuCompra" parent="." instance=ExtResource("ui_menu_compra")]
 
 [connection signal="usado" from="Caja" to="." method="_al_usar_caja"]
 [connection signal="body_entered" from="Salida" to="." method="_al_cruzar_puerta"]

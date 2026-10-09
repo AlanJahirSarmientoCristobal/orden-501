@@ -1,0 +1,256 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/menu_compra.gd" id="1_r"]
+[ext_resource type="Theme" path="res://Assets/tema/tema_tienda.tres" id="2_r"]
+[ext_resource type="Script" path="res://scripts/ui/cursor_menu.gd" id="3_r"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1"]
+bg_color = Color(0.847059, 0.909804, 0.972549, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="MenuCompra" type="CanvasLayer"]
+process_mode = 3
+layer = 45
+script = ExtResource("1_r")
+
+[node name="Raiz" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+theme = ExtResource("2_r")
+
+[node name="Velo" type="ColorRect" parent="Raiz"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.01, 0.02, 0.05, 0.25)
+
+[node name="CajaDinero" type="PanelContainer" parent="Raiz"]
+offset_left = 32.0
+offset_top = 64.0
+offset_right = 452.0
+offset_bottom = 224.0
+
+[node name="Borde" type="Panel" parent="Raiz/CajaDinero"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
+mouse_filter = 2
+
+[node name="Columna" type="VBoxContainer" parent="Raiz/CajaDinero"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="Titulo" type="Label" parent="Raiz/CajaDinero/Columna"]
+layout_mode = 2
+theme_type_variation = &"Marco"
+text = "DINERO"
+uppercase = true
+
+[node name="Dinero" type="Label" parent="Raiz/CajaDinero/Columna"]
+layout_mode = 2
+uppercase = true
+
+[node name="Almacen" type="Label" parent="Raiz/CajaDinero/Columna"]
+layout_mode = 2
+uppercase = true
+
+[node name="CajaRetrato" type="PanelContainer" parent="Raiz"]
+offset_left = 32.0
+offset_top = 236.0
+offset_right = 452.0
+offset_bottom = 508.0
+
+[node name="Borde" type="Panel" parent="Raiz/CajaRetrato"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
+mouse_filter = 2
+
+[node name="Columna" type="VBoxContainer" parent="Raiz/CajaRetrato"]
+layout_mode = 2
+alignment = 1
+
+[node name="Fondo" type="PanelContainer" parent="Raiz/CajaRetrato/Columna"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 180)
+theme_override_styles/panel = SubResource("StyleBoxFlat_1")
+
+[node name="Retrato" type="TextureRect" parent="Raiz/CajaRetrato/Columna/Fondo"]
+layout_mode = 2
+custom_minimum_size = Vector2(176, 176)
+texture_filter = 1
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Vendedor" type="Label" parent="Raiz/CajaRetrato/Columna"]
+layout_mode = 2
+uppercase = true
+horizontal_alignment = 1
+
+[node name="CajaLista" type="PanelContainer" parent="Raiz"]
+offset_left = 560.0
+offset_top = 64.0
+offset_right = 1248.0
+offset_bottom = 508.0
+
+[node name="Borde" type="Panel" parent="Raiz/CajaLista"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
+mouse_filter = 2
+
+[node name="Lista" type="VBoxContainer" parent="Raiz/CajaLista"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="CajaDescripcion" type="PanelContainer" parent="Raiz"]
+offset_left = 32.0
+offset_top = 524.0
+offset_right = 1248.0
+offset_bottom = 692.0
+
+[node name="Borde" type="Panel" parent="Raiz/CajaDescripcion"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
+mouse_filter = 2
+
+[node name="Fila" type="HBoxContainer" parent="Raiz/CajaDescripcion"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Icono" type="TextureRect" parent="Raiz/CajaDescripcion/Fila"]
+layout_mode = 2
+custom_minimum_size = Vector2(112, 112)
+texture_filter = 1
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Descripcion" type="Label" parent="Raiz/CajaDescripcion/Fila"]
+layout_mode = 2
+uppercase = true
+size_flags_horizontal = 3
+autowrap_mode = 3
+vertical_alignment = 1
+
+[node name="CajaCantidad" type="PanelContainer" parent="Raiz"]
+offset_left = 768.0
+offset_top = 360.0
+offset_right = 1248.0
+offset_bottom = 508.0
+visible = false
+
+[node name="Borde" type="Panel" parent="Raiz/CajaCantidad"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
+mouse_filter = 2
+
+[node name="Columna" type="VBoxContainer" parent="Raiz/CajaCantidad"]
+layout_mode = 2
+
+[node name="EnAlmacen" type="Label" parent="Raiz/CajaCantidad/Columna"]
+layout_mode = 2
+theme_type_variation = &"Marco"
+uppercase = true
+
+[node name="Cantidad" type="Label" parent="Raiz/CajaCantidad/Columna"]
+layout_mode = 2
+uppercase = true
+
+[node name="CajaSiNo" type="PanelContainer" parent="Raiz"]
+offset_left = 1016.0
+offset_top = 344.0
+offset_right = 1248.0
+offset_bottom = 508.0
+visible = false
+
+[node name="Borde" type="Panel" parent="Raiz/CajaSiNo"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -6.0
+offset_bottom = -6.0
+mouse_filter = 2
+
+[node name="Columna" type="VBoxContainer" parent="Raiz/CajaSiNo"]
+layout_mode = 2
+
+[node name="FilaSi" type="HBoxContainer" parent="Raiz/CajaSiNo/Columna"]
+layout_mode = 2
+
+[node name="Cursor" type="Control" parent="Raiz/CajaSiNo/Columna/FilaSi"]
+layout_mode = 2
+custom_minimum_size = Vector2(28, 36)
+mouse_filter = 2
+script = ExtResource("3_r")
+
+[node name="Texto" type="Label" parent="Raiz/CajaSiNo/Columna/FilaSi"]
+layout_mode = 2
+text = "SÍ"
+uppercase = true
+
+[node name="FilaNo" type="HBoxContainer" parent="Raiz/CajaSiNo/Columna"]
+layout_mode = 2
+
+[node name="Cursor" type="Control" parent="Raiz/CajaSiNo/Columna/FilaNo"]
+layout_mode = 2
+custom_minimum_size = Vector2(28, 36)
+mouse_filter = 2
+script = ExtResource("3_r")
+
+[node name="Texto" type="Label" parent="Raiz/CajaSiNo/Columna/FilaNo"]
+layout_mode = 2
+text = "NO"
+uppercase = true

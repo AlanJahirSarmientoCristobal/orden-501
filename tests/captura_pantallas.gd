@@ -123,7 +123,7 @@ func _run() -> void:
 	for grupo in [4, 2]:
 		for m in resto.mesas:
 			if m.esta_libre() and m.capacidad >= grupo and (grupo == 4 or m.capacidad == 2):
-				var c := ClienteHabitual.new()
+				var c: ClienteHabitual = Cliente.crear("cliente_habitual")
 				c.personas = grupo
 				c.restaurante = resto
 				c.position = m.posicion_asiento()
@@ -141,7 +141,7 @@ func _run() -> void:
 	resto._urgente.abrir("PEDIDO URGENTE POR TELÉFONO")
 	await _capturar("09_pedido_urgente")
 	resto._urgente.cerrar()
-	var cliente := ClienteHabitual.new()
+	var cliente: ClienteHabitual = Cliente.crear("cliente_habitual")
 	var mesa_libre: Mesa = null
 	for m in resto.mesas:
 		if m.esta_libre():

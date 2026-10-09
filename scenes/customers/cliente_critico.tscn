@@ -1,0 +1,11 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/customers/cliente.tscn" id="1_base"]
+[ext_resource type="Script" path="res://scripts/customers/cliente_critico.gd" id="2_script"]
+[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/critico.tres" id="3_frames"]
+
+[node name="ClienteCritico" instance=ExtResource("1_base")]
+script = ExtResource("2_script")
+
+[node name="Sprite" parent="." index="0"]
+sprite_frames = ExtResource("3_frames")

@@ -4,8 +4,9 @@ class_name ClienteCritico
 ## Evento del partido: un crítico gastronómico. Tiene poca paciencia, pero una buena
 ## reseña sube mucho la reputación; si se va molesto, la baja mucho.
 
-func clave_sprite() -> String:
-	return "critico"
+## Su sprite está fijo en la escena cliente_critico.tscn.
+func _elegir_aspecto() -> void:
+	pass
 
 func nombre_tipo() -> String:
 	return "Crítico"
@@ -27,8 +28,3 @@ func penalizacion_reputacion() -> float:
 
 func bonificacion_reputacion() -> float:
 	return 10.0
-
-func _ready() -> void:
-	super._ready()
-	if not AssetPaths.tiene_hoja_propia(clave_sprite()):
-		_sprite.modulate = Color(0.85, 0.8, 1.1)

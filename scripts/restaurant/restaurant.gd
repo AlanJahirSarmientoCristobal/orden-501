@@ -124,7 +124,7 @@ func _arrancar_partido() -> void:
 # ---------------------------------------------------------------- Práctica (Jornada 1)
 
 func _iniciar_practica() -> void:
-	_cliente_practica = ClientePractica.new()
+	_cliente_practica = Cliente.crear("cliente_practica")
 	_agregar_a_fila(_cliente_practica, true)
 	var pasos: Array[Dictionary] = [
 		{"texto": "Llegó un cliente de práctica: cuando se siente, acércate a su mesa y presiona Espacio.",
@@ -260,18 +260,6 @@ func _construir_escenario() -> void:
 	_neon.scale = Vector2(2.5, 2.5)
 	_neon.position = Vector2(110, 79)
 	add_child(_neon)
-	var chef := AnimatedSprite2D.new()
-	chef.sprite_frames = AssetPaths.frames_personaje("chef")
-	chef.animation = &"side"
-	chef.flip_h = false
-	chef.scale = AssetPaths.escala("chef")
-	chef.position = Vector2(72, 215)
-	chef.play()
-	add_child(chef)
-	var etiqueta_chef := UIKit.etiqueta("CHEF", 10, UIKit.ACENTO, true)
-	etiqueta_chef.position = Vector2(37, 240)
-	etiqueta_chef.size = Vector2(70, 14)
-	add_child(etiqueta_chef)
 	var etiqueta_tel := UIKit.etiqueta("TELÉFONO", 9, UIKit.TEXTO, true)
 	etiqueta_tel.position = Vector2(80, 626)
 	etiqueta_tel.size = Vector2(80, 12)
@@ -374,9 +362,9 @@ func _llegar_cliente() -> Cliente:
 		return null
 	var cliente: Cliente
 	if randf() < GameState.probabilidad_vip():
-		cliente = ClienteVIP.new()
+		cliente = Cliente.crear("cliente_vip")
 	else:
-		cliente = ClienteHabitual.new()
+		cliente = Cliente.crear("cliente_habitual")
 		cliente.personas = GameState.tamano_grupo()
 	_agregar_a_fila(cliente, false)
 	return cliente
@@ -401,7 +389,7 @@ func _procesar_reservaciones() -> void:
 		if reserva["estado"] in ["pendiente", "asignada"] and minuto >= float(reserva["minuto"]):
 			var sin_mesa: bool = reserva["estado"] == "pendiente"
 			reserva["estado"] = "llego"
-			var cliente := ClienteReservacion.new()
+			var cliente: ClienteReservacion = Cliente.crear("cliente_reservacion")
 			cliente.reserva = reserva
 			cliente.personas = int(reserva["personas"])
 			if sin_mesa:
@@ -501,7 +489,7 @@ func _evento(tipo: String) -> void:
 			AudioManager.sfx("telefono")
 			GameState.aviso.emit("EVENTO: el proveedor avisa que viene retrasado. Los pedidos urgentes tardarán 50% más un rato.")
 		"critico":
-			var critico := ClienteCritico.new()
+			var critico: ClienteCritico = Cliente.crear("cliente_critico")
 			_agregar_a_fila(critico, true)
 			AudioManager.sfx("pedido")
 			GameState.aviso.emit("EVENTO: ¡llegó un crítico gastronómico! Atiéndelo rápido: una buena reseña da +10% de reputación.")

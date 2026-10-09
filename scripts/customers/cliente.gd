@@ -32,24 +32,38 @@ var _acompanantes: Array[AnimatedSprite2D] = []
 static var _estilos_barra := {}
 var _color_barra := -1
 
-var _sprite: AnimatedSprite2D
-var _barra: ProgressBar
-var _burbuja: PanelContainer
-var _icono: TextureRect
-var _texto: Label
-var _insignia: Label
+# Nodos de la escena scenes/customers/cliente.tscn
+@onready var _sprite: AnimatedSprite2D = $Sprite
+@onready var _barra: ProgressBar = $Barra
+@onready var _burbuja: PanelContainer = $Burbuja
+@onready var _icono: TextureRect = $Burbuja/Fila/Icono
+@onready var _texto: Label = $Burbuja/Fila/Texto
+@onready var _insignia: Label = $Insignia
+
+## Crea un cliente a partir de su escena: "cliente_habitual", "cliente_vip",
+## "cliente_reservacion", "cliente_critico" o "cliente_practica".
+static func crear(tipo: String) -> Cliente:
+	return load("res://scenes/customers/%s.tscn" % tipo).instantiate()
 
 func _ready() -> void:
-	z_index = 5
-	add_to_group("clientes")
 	paciencia_max = GameState.paciencia_base() * multiplicador_paciencia()
 	paciencia = paciencia_max
-	_construir()
+	_elegir_aspecto()
+	# Acompañantes de parejas y familias (nodos ocultos en la escena).
+	for i in range(personas - 1):
+		var acompanante: AnimatedSprite2D = $Acompanantes.get_child(i)
+		acompanante.visible = true
+		_acompanantes.append(acompanante)
+	_formar_grupo()
+	_insignia.text = texto_grupo()
+	_insignia.add_theme_color_override("font_color", color_insignia())
+	_actualizar_barra()
 
 # ---------------------------------------------------------------- Comportamiento por tipo (polimorfismo)
 
-func clave_sprite() -> String:
-	return "cliente_1"
+## El sprite se configura en la escena; ClienteHabitual elige además una variante al azar.
+func _elegir_aspecto() -> void:
+	pass
 
 func nombre_tipo() -> String:
 	return "Cliente"
@@ -104,61 +118,6 @@ func _sentar_grupo() -> void:
 		if i + 1 < asientos.size():
 			a.position = asientos[i + 1] - global_position + Vector2(0, AssetPaths.ALTURA_PERSONAJE)
 			a.animation = &"up" if asientos[i + 1].y > mesa.global_position.y else &"down"
-
-# ---------------------------------------------------------------- Construcción visual
-
-func _construir() -> void:
-	_sprite = AnimatedSprite2D.new()
-	_sprite.sprite_frames = AssetPaths.frames_personaje(clave_sprite())
-	_sprite.animation = &"down"
-	_sprite.frame = 0
-	_sprite.scale = AssetPaths.escala(clave_sprite())
-	_sprite.position = Vector2(0, AssetPaths.ALTURA_PERSONAJE)
-	add_child(_sprite)
-	for i in range(personas - 1):
-		var acompanante := AnimatedSprite2D.new()
-		var clave_acompanante: String = ["cliente_1", "cliente_2", "cliente_3"][randi() % 3]
-		acompanante.sprite_frames = AssetPaths.frames_personaje(clave_acompanante)
-		acompanante.animation = &"down"
-		acompanante.frame = 0
-		acompanante.scale = AssetPaths.escala(clave_acompanante)
-		acompanante.z_index = -1
-		add_child(acompanante)
-		_acompanantes.append(acompanante)
-	_formar_grupo()
-
-	_insignia = UIKit.etiqueta(texto_grupo(), 10, color_insignia(), true)
-	_insignia.position = Vector2(-50, 19)
-	_insignia.size = Vector2(100, 14)
-	_insignia.visible = false      # Se muestra al sentarse (en la fila se enciman)
-	add_child(_insignia)
-
-	_barra = ProgressBar.new()
-	_barra.position = Vector2(-26, -52)
-	_barra.size = Vector2(52, 7)
-	_barra.show_percentage = false
-	_barra.max_value = 1.0
-	_barra.value = 1.0
-	_barra.add_theme_stylebox_override("background", UIKit.estilo(Color(0, 0, 0, 0.6), 3, Color.TRANSPARENT, 0, 0))
-	add_child(_barra)
-
-	_burbuja = UIKit.panel(Color("f4efe3"), Color("1b1f2a"), 4)
-	_burbuja.position = Vector2(-60, -90)
-	_burbuja.custom_minimum_size = Vector2(120, 32)
-	var fila := UIKit.hbox(4)
-	_icono = TextureRect.new()
-	_icono.custom_minimum_size = Vector2(24, 24)
-	_icono.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_icono.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	fila.add_child(_icono)
-	_texto = Label.new()
-	_texto.add_theme_font_size_override("font_size", 11)
-	_texto.add_theme_color_override("font_color", Color("1b1f2a"))
-	fila.add_child(_texto)
-	_burbuja.add_child(fila)
-	_burbuja.visible = false
-	add_child(_burbuja)
-	_actualizar_barra()
 
 # ---------------------------------------------------------------- Ciclo
 

@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/town/peaton.gd" id="1_script"]
+[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/cliente_1.tres" id="2_frames"]
+
+[node name="Peaton" type="Node2D"]
+z_index = 4
+script = ExtResource("1_script")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -14)
+scale = Vector2(2, 2)
+sprite_frames = ExtResource("2_frames")
+animation = &"down"

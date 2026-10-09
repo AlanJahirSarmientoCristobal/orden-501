@@ -116,22 +116,15 @@ func etiqueta_mapa(texto: String, pos: Vector2, ancho: float, color: Color, tam:
 	add_child(l)
 	return l
 
-func npc(clave: String, pos: Vector2, nombre: String, animacion: StringName = &"down") -> AnimatedSprite2D:
-	var s := AnimatedSprite2D.new()
-	s.sprite_frames = AssetPaths.frames_personaje(clave)
-	s.animation = animacion
-	s.frame = 0
-	s.scale = AssetPaths.escala(clave)
-	s.position = pos
-	s.z_index = 5
-	add_child(s)
-	if nombre != "":
-		var l := UIKit.etiqueta(nombre, 11, UIKit.TEXTO, true)
-		l.position = pos + Vector2(-60, 26)
-		l.size = Vector2(120, 16)
-		l.z_index = 5
-		add_child(l)
-	return s
+## Agrega un personaje fijo (escena scenes/entities/npc.tscn).
+func npc(clave: String, pos: Vector2, nombre: String, animacion: StringName = &"down") -> NPC:
+	var personaje: NPC = load("res://scenes/entities/npc.tscn").instantiate()
+	personaje.frames = AssetPaths.frames(clave)
+	personaje.nombre = nombre
+	personaje.animacion = animacion
+	personaje.position = pos
+	add_child(personaje)
+	return personaje
 
 # ---------------------------------------------------------------- HUD
 

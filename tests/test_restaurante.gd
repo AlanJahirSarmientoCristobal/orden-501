@@ -91,7 +91,7 @@ func _probar_estamina() -> void:
 
 func _probar_ciclo_cliente() -> void:
 	var mesa: Mesa = r.mesas[0]
-	var cliente := ClienteHabitual.new()
+	var cliente: ClienteHabitual = Cliente.crear("cliente_habitual")
 	_sentar(cliente, mesa, Catalogo.HAMBURGUESA)
 	_check(cliente.estado == Cliente.Estado.ORDENANDO, "El cliente sentado debe estar ordenando")
 	var carne := GameState.inventario.total("carne")
@@ -118,7 +118,7 @@ func _probar_faltante_sustituto() -> void:
 	var mesa: Mesa = r.mesas[1]
 	var pollo := GameState.inventario.total("pollo")
 	GameState.inventario._retirar("pollo", pollo)
-	var cliente := ClienteHabitual.new()
+	var cliente: ClienteHabitual = Cliente.crear("cliente_habitual")
 	_sentar(cliente, mesa, Catalogo.ALITAS)
 	var quiebres: int = GameState.estadisticas["quiebres"]
 	mesa.interactuar(r.dani)
@@ -135,7 +135,7 @@ func _probar_faltante_sustituto() -> void:
 
 func _probar_faltante_agotado() -> void:
 	var mesa: Mesa = r.mesas[2]
-	var cliente := ClienteHabitual.new()
+	var cliente: ClienteHabitual = Cliente.crear("cliente_habitual")
 	_sentar(cliente, mesa, Catalogo.ALITAS)
 	r._marcar_agotado(cliente, Catalogo.ALITAS)
 	_check(r.agotados.has(Catalogo.ALITAS), "No se marcó el platillo como agotado")
@@ -164,7 +164,7 @@ func _probar_urgente() -> void:
 
 func _probar_paciencia() -> void:
 	var mesa: Mesa = r.mesas[3]
-	var cliente := ClienteHabitual.new()
+	var cliente: ClienteHabitual = Cliente.crear("cliente_habitual")
 	_sentar(cliente, mesa, Catalogo.PAPAS)
 	var perdidos: int = GameState.estadisticas["perdidos"]
 	var rep := GameState.reputacion
@@ -175,8 +175,8 @@ func _probar_paciencia() -> void:
 	mesa.interactuar(r.dani)
 
 func _probar_vip() -> void:
-	var vip := ClienteVIP.new()
-	var normal := ClienteHabitual.new()
+	var vip: ClienteVIP = Cliente.crear("cliente_vip")
+	var normal: ClienteHabitual = Cliente.crear("cliente_habitual")
 	_sentar(vip, r.mesas[4], Catalogo.COMBO)
 	_sentar(normal, r.mesas[5], Catalogo.PAPAS)
 	_check(vip.paciencia_max < normal.paciencia_max, "El VIP debe tener menos paciencia")
@@ -189,11 +189,11 @@ func _probar_vip() -> void:
 
 func _probar_grupos() -> void:
 	# Mesa según el tamaño del grupo
-	var familia := ClienteHabitual.new()
+	var familia: ClienteHabitual = Cliente.crear("cliente_habitual")
 	familia.personas = 4
 	var mesa_familia: Mesa = r._mesa_para(familia)
 	_check(mesa_familia != null and mesa_familia.capacidad == 4, "La familia de 4 debe ir a una mesa de 4")
-	var pareja := ClienteHabitual.new()
+	var pareja: ClienteHabitual = Cliente.crear("cliente_habitual")
 	pareja.personas = 2
 	var mesa_pareja: Mesa = r._mesa_para(pareja)
 	_check(mesa_pareja != null and mesa_pareja.capacidad == 2, "La pareja debe preferir una mesa de 2")
@@ -223,7 +223,7 @@ func _probar_reservacion() -> void:
 	reserva["personas"] = 2
 	_check(GameState.asignar_reservacion(reserva["id"], 2) == "ok", "No se asignó la reservación")
 	r.minuto = float(reserva["minuto"]) - 5.0
-	_check(r._mesa_para(ClienteHabitual.new()) != r.mesas[1], "Un cliente sin reservación ocupó una mesa reservada")
+	_check(r._mesa_para(Cliente.crear("cliente_habitual")) != r.mesas[1], "Un cliente sin reservación ocupó una mesa reservada")
 	r.minuto = float(reserva["minuto"])
 	var antes: int = r.fila.size()
 	r._procesar_reservaciones()
@@ -235,7 +235,7 @@ func _probar_reservacion() -> void:
 
 func _probar_gol() -> void:
 	var mesa: Mesa = r.mesas[3]
-	var cliente := ClienteHabitual.new()
+	var cliente: ClienteHabitual = Cliente.crear("cliente_habitual")
 	_sentar(cliente, mesa, Catalogo.PAPAS)
 	cliente.estado = Cliente.Estado.COMIENDO
 	cliente.tiempo_comiendo = 10.0
@@ -244,7 +244,7 @@ func _probar_gol() -> void:
 
 func _probar_eventos() -> void:
 	# Apagón: la cocina deja de avanzar y se reanuda a los 10 s
-	var cliente := ClienteHabitual.new()
+	var cliente: ClienteHabitual = Cliente.crear("cliente_habitual")
 	_sentar(cliente, r.mesas[5], Catalogo.PAPAS)
 	GameState.inventario.agregar("papas", 4, GameState.dia)
 	r.mesas[5].interactuar(r.dani)

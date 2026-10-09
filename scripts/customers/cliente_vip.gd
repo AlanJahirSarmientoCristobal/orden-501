@@ -3,9 +3,6 @@ class_name ClienteVIP
 
 ## Pide el Combo VIP (más caro), deja más propina y tiene muy poca paciencia.
 
-func clave_sprite() -> String:
-	return "cliente_vip"
-
 func nombre_tipo() -> String:
 	return "★ VIP"
 
@@ -29,9 +26,3 @@ func es_vip() -> bool:
 
 func elegir_pedido() -> String:
 	return Catalogo.COMBO
-
-func _ready() -> void:
-	super._ready()
-	# El tono dorado solo distingue al VIP mientras usa el sprite genérico.
-	if not AssetPaths.tiene_hoja_propia(clave_sprite()):
-		_sprite.modulate = Color(1.0, 0.92, 0.6)

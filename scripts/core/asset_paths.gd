@@ -204,6 +204,10 @@ static func tile(indice: int) -> Texture2D:
 	var ruta := TILES % indice
 	return load(ruta) if ResourceLoader.exists(ruta) else null
 
+## Animaciones de un personaje guardadas como recurso (tools/generar_frames.gd).
+static func frames(clave: String) -> SpriteFrames:
+	return load("res://Assets/sprites/personajes/frames/%s.tres" % clave)
+
 ## Hoja propia del personaje, o null si todavía se usa el tileset de Kenney.
 static func hoja_propia(clave: String) -> Texture2D:
 	var ruta := HOJAS_PROPIAS % codigo(clave)

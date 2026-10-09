@@ -7,24 +7,18 @@ const VELOCIDAD := 70.0
 
 var ruta: Array[Vector2] = []
 var _indice := 0
-var _sprite: AnimatedSprite2D
 
+@onready var _sprite: AnimatedSprite2D = $Sprite
+
+## Crea un peatón (escena scenes/town/peaton.tscn) con el aspecto indicado.
 static func crear(clave: String, puntos: Array[Vector2]) -> Peaton:
-	var p := Peaton.new()
+	var p: Peaton = load("res://scenes/town/peaton.tscn").instantiate()
 	p.ruta = puntos
 	p.position = puntos[0]
-	p._clave = clave
+	p.get_node("Sprite").sprite_frames = AssetPaths.frames(clave)
 	return p
 
-var _clave := "cliente_1"
-
 func _ready() -> void:
-	z_index = 4
-	_sprite = AnimatedSprite2D.new()
-	_sprite.sprite_frames = AssetPaths.frames_personaje(_clave)
-	_sprite.scale = AssetPaths.escala(_clave)
-	_sprite.position = Vector2(0, AssetPaths.ALTURA_PERSONAJE)
-	add_child(_sprite)
 	_indice = randi_range(0, ruta.size() - 1)
 	position = ruta[_indice]
 	_siguiente()

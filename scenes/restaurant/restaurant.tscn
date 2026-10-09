@@ -1,10 +1,19 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/restaurant/restaurant.gd" id="1_script"]
 [ext_resource type="PackedScene" path="res://scenes/entities/dani.tscn" id="2_dani"]
+[ext_resource type="PackedScene" path="res://scenes/entities/npc.tscn" id="3_npc"]
+[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/chef.tres" id="4_chef"]
 
 [node name="Restaurant" type="Node2D"]
 script = ExtResource("1_script")
+
+[node name="Chef" parent="." instance=ExtResource("3_npc")]
+position = Vector2(72, 215)
+frames = ExtResource("4_chef")
+nombre = "CHEF"
+animacion = &"side"
+animado = true
 
 [node name="Dani" parent="." instance=ExtResource("2_dani")]
 position = Vector2(560, 600)

@@ -1,0 +1,109 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/customers/cliente.gd" id="1_script"]
+[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/cliente_1.tres" id="2_c1"]
+[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/cliente_2.tres" id="3_c2"]
+[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/cliente_3.tres" id="4_c3"]
+
+[sub_resource type="StyleBoxFlat" id="Barra_fondo"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0, 0, 0, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Burbuja_fondo"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.956863, 0.937255, 0.890196, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.105882, 0.121569, 0.164706, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[node name="Cliente" type="Node2D" groups=["clientes"]]
+z_index = 5
+script = ExtResource("1_script")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -14)
+scale = Vector2(2, 2)
+sprite_frames = ExtResource("2_c1")
+animation = &"down"
+
+[node name="Acompanantes" type="Node2D" parent="."]
+
+[node name="Acompanante1" type="AnimatedSprite2D" parent="Acompanantes"]
+visible = false
+z_index = -1
+scale = Vector2(2, 2)
+sprite_frames = ExtResource("3_c2")
+animation = &"down"
+
+[node name="Acompanante2" type="AnimatedSprite2D" parent="Acompanantes"]
+visible = false
+z_index = -1
+scale = Vector2(2, 2)
+sprite_frames = ExtResource("4_c3")
+animation = &"down"
+
+[node name="Acompanante3" type="AnimatedSprite2D" parent="Acompanantes"]
+visible = false
+z_index = -1
+scale = Vector2(2, 2)
+sprite_frames = ExtResource("2_c1")
+animation = &"down"
+
+[node name="Insignia" type="Label" parent="."]
+visible = false
+offset_left = -50.0
+offset_top = 19.0
+offset_right = 50.0
+offset_bottom = 33.0
+theme_override_colors/font_color = Color(0.956863, 0.937255, 0.890196, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.03, 0.05, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1
+
+[node name="Barra" type="ProgressBar" parent="."]
+offset_left = -26.0
+offset_top = -52.0
+offset_right = 26.0
+offset_bottom = -45.0
+theme_override_styles/background = SubResource("Barra_fondo")
+max_value = 1.0
+value = 1.0
+show_percentage = false
+
+[node name="Burbuja" type="PanelContainer" parent="."]
+visible = false
+custom_minimum_size = Vector2(120, 32)
+offset_left = -60.0
+offset_top = -90.0
+offset_right = 60.0
+offset_bottom = -58.0
+theme_override_styles/panel = SubResource("Burbuja_fondo")
+
+[node name="Fila" type="HBoxContainer" parent="Burbuja"]
+theme_override_constants/separation = 4
+
+[node name="Icono" type="TextureRect" parent="Burbuja/Fila"]
+custom_minimum_size = Vector2(24, 24)
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Texto" type="Label" parent="Burbuja/Fila"]
+theme_override_colors/font_color = Color(0.105882, 0.121569, 0.164706, 1)
+theme_override_font_sizes/font_size = 11

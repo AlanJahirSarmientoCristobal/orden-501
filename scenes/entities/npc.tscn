@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/entities/npc.gd" id="1_script"]
+[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/cliente_1.tres" id="2_frames"]
+
+[node name="NPC" type="Node2D"]
+z_index = 5
+script = ExtResource("1_script")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+scale = Vector2(2, 2)
+sprite_frames = ExtResource("2_frames")
+animation = &"down"
+
+[node name="Nombre" type="Label" parent="."]
+offset_left = -60.0
+offset_top = 26.0
+offset_right = 60.0
+offset_bottom = 42.0
+theme_override_colors/font_color = Color(0.956863, 0.937255, 0.890196, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.03, 0.05, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1

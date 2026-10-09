@@ -3,13 +3,10 @@ class_name ClienteHabitual
 
 ## Llega sin reservación, pide del menú y tiene paciencia normal.
 
-var _variante := "cliente_1"
+const VARIANTES := ["cliente_1", "cliente_2", "cliente_3"]
 
-func _init() -> void:
-	_variante = ["cliente_1", "cliente_2", "cliente_3"].pick_random()
-
-func clave_sprite() -> String:
-	return _variante
+func _elegir_aspecto() -> void:
+	_sprite.sprite_frames = AssetPaths.frames(VARIANTES.pick_random())
 
 func nombre_tipo() -> String:
 	return "Aficionado"

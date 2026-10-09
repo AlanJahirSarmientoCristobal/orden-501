@@ -1,0 +1,124 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/entities/dani.gd" id="1_script"]
+[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/dani.tres" id="2_frames"]
+
+[sub_resource type="RectangleShape2D" id="Forma_cuerpo"]
+size = Vector2(26, 16)
+
+[sub_resource type="CircleShape2D" id="Forma_alcance"]
+radius = 30.0
+
+[sub_resource type="StyleBoxFlat" id="Barra_fondo"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0, 0, 0, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Barra_relleno"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.372549, 0.827451, 0.552941, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[node name="Dani" type="CharacterBody2D" groups=["dani"]]
+z_index = 10
+collision_layer = 2
+motion_mode = 1
+script = ExtResource("1_script")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -14)
+scale = Vector2(2, 2)
+sprite_frames = ExtResource("2_frames")
+animation = &"down"
+
+[node name="Colision" type="CollisionShape2D" parent="."]
+position = Vector2(0, 10)
+shape = SubResource("Forma_cuerpo")
+
+[node name="Detector" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 8
+monitorable = false
+
+[node name="Alcance" type="CollisionShape2D" parent="Detector"]
+shape = SubResource("Forma_alcance")
+
+[node name="Nombre" type="Label" parent="."]
+offset_left = -40.0
+offset_top = 20.0
+offset_right = 40.0
+offset_bottom = 34.0
+theme_override_colors/font_color = Color(0.94902, 0.709804, 0.266667, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.03, 0.05, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 10
+text = "DANI"
+horizontal_alignment = 1
+
+[node name="Indicacion" type="Label" parent="."]
+visible = false
+z_index = 50
+offset_left = -160.0
+offset_top = -72.0
+offset_right = 160.0
+offset_bottom = -52.0
+theme_override_colors/font_color = Color(1, 0.92, 0.45, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.03, 0.05, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 1
+
+[node name="BarraMantener" type="ProgressBar" parent="."]
+visible = false
+offset_left = -30.0
+offset_top = -48.0
+offset_right = 30.0
+offset_bottom = -40.0
+theme_override_styles/background = SubResource("Barra_fondo")
+theme_override_styles/fill = SubResource("Barra_relleno")
+max_value = 1.0
+show_percentage = false
+
+[node name="BarraEstamina" type="ColorRect" parent="."]
+visible = false
+offset_left = -21.0
+offset_top = 37.0
+offset_right = 21.0
+offset_bottom = 42.0
+color = Color(0, 0, 0, 0.6)
+
+[node name="Relleno" type="ColorRect" parent="BarraEstamina"]
+offset_left = 1.0
+offset_top = 1.0
+offset_right = 41.0
+offset_bottom = 4.0
+color = Color(0.498039, 0.878431, 1, 1)
+
+[node name="Bandeja" type="HBoxContainer" parent="."]
+z_index = 40
+offset_left = -44.0
+offset_top = -40.0
+offset_right = 44.0
+offset_bottom = -18.0
+theme_override_constants/separation = 2
+alignment = 1
+
+[node name="Camara" type="Camera2D" parent="."]
+enabled = false
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+
+[connection signal="area_entered" from="Detector" to="." method="_al_entrar"]
+[connection signal="area_exited" from="Detector" to="." method="_al_salir"]

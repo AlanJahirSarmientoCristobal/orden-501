@@ -83,9 +83,7 @@ func _ready() -> void:
 	_construir_estaciones()
 	_construir_mesas()
 
-	dani = Dani.new()
-	dani.position = Vector2(560, 600)
-	add_child(dani)
+	dani = $Dani
 	dani.bandeja_cambiada.connect(func(_b): _actualizar_hud())
 
 	_notificaciones = Notificaciones.new()

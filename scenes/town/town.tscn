@@ -1,6 +1,22 @@
-[gd_scene format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/town/town.gd" id="1_script"]
+[ext_resource type="PackedScene" path="res://scenes/town/mapa_pueblo.tscn" id="2_mapa"]
+[ext_resource type="PackedScene" path="res://scenes/entities/dani.tscn" id="3_dani"]
 
 [node name="Town" type="Node2D"]
 script = ExtResource("1_script")
+
+[node name="MapaPueblo" parent="." instance=ExtResource("2_mapa")]
+z_index = -10
+
+[node name="Dani" parent="." instance=ExtResource("3_dani")]
+
+[node name="Camara" parent="Dani" index="8"]
+enabled = true
+limit_left = 0
+limit_top = 0
+limit_right = 2592
+limit_bottom = 1440
+
+[editable path="Dani"]

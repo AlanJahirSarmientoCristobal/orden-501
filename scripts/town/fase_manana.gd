@@ -22,12 +22,10 @@ var _aviso_30s := false
 func nombre_lugar() -> String:
 	return "PUEBLO"
 
-func crear_dani(posicion: Vector2, camara: bool, limites: Rect2 = Rect2(0, 0, 1280, 720)) -> void:
-	dani = Dani.new()
-	dani.usar_camara = camara
-	dani.limites_camara = limites
+## Coloca al nodo Dani de la escena (cada escena de la mañana lo tiene como hijo).
+func colocar_dani(posicion: Vector2) -> void:
+	dani = $Dani
 	dani.position = posicion
-	add_child(dani)
 
 func preparar_fase() -> void:
 	AudioManager.musica("manana")

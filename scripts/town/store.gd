@@ -68,7 +68,7 @@ func _ready() -> void:
 	etiqueta_mapa(nombre_lugar(), ORIGEN + Vector2(0, -2), ANCHO * Interior.LADO, UIKit.ACENTO, 20)
 	_crear_puerta()
 
-	crear_dani(interior.a_mundo(8, ALTO - 2.6), false)
+	colocar_dani(interior.a_mundo(8, ALTO - 2.6))
 	preparar_fase()
 	_menu = MenuCompra.new()
 	add_child(_menu)

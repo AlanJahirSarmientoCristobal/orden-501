@@ -4,7 +4,6 @@ extends FaseManana
 ## El mapa está en scenes/town/mapa_pueblo.tscn y se puede editar en el editor de Godot;
 ## la ubicación de puertas y zonas se lee de scenes/town/mapa_pueblo.json.
 
-const ESCENA_MAPA := "res://scenes/town/mapa_pueblo.tscn"
 const DATOS_MAPA := "res://scenes/town/mapa_pueblo.json"
 
 var tile := 48.0                        # Tamaño de un tile en pantalla (16 px × escala 3)
@@ -27,16 +26,13 @@ func _ready() -> void:
 	datos = JSON.parse_string(FileAccess.get_file_as_string(DATOS_MAPA))
 	tile = float(datos["tile"]) * float(datos["escala"])
 	tamano = Vector2(float(datos["columnas"]), float(datos["filas"])) * tile
-	var mapa: Node2D = load(ESCENA_MAPA).instantiate()
-	mapa.z_index = -10
-	add_child(mapa)
 	_crear_limites()
 	_crear_letreros()
 	_crear_personajes()
 	_crear_interacciones()
 
 	var inicio := GameState.posicion_pueblo if GameState.posicion_pueblo != Vector2.ZERO else _a_mundo(datos["inicio"])
-	crear_dani(inicio, true, Rect2(Vector2.ZERO, tamano))
+	colocar_dani(inicio)
 	preparar_fase()
 	queue_redraw()
 

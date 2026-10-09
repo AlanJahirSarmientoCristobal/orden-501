@@ -1,6 +1,90 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/ui/victory.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/ui/victory.gd" id="1_r"]
 
 [node name="Victory" type="Control"]
-script = ExtResource("1_script")
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_r")
+
+[node name="Fondo" type="ColorRect" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0588235, 0.164706, 0.113725, 1)
+
+[node name="Centro" type="CenterContainer" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Centro"]
+layout_mode = 2
+custom_minimum_size = Vector2(820, 560)
+
+[node name="Caja" type="VBoxContainer" parent="Centro/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Titulo" type="Label" parent="Centro/Panel/Caja"]
+layout_mode = 2
+theme_type_variation = &"Titulo"
+theme_override_font_sizes/font_size = 32
+text = "¡CAMPEONES DE LA TEMPORADA!"
+horizontal_alignment = 1
+
+[node name="Historia" type="Label" parent="Centro/Panel/Caja"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Gracias a Dani, La 501 superó la Gran Final y se convirtió en el restaurante de referencia del pueblo para ver los partidos. Se desbloqueó la TERRAZA con dos mesas nuevas."
+horizontal_alignment = 1
+autowrap_mode = 3
+custom_minimum_size = Vector2(760, 0)
+
+[node name="Separador1" type="HSeparator" parent="Centro/Panel/Caja"]
+layout_mode = 2
+
+[node name="Subtitulo" type="Label" parent="Centro/Panel/Caja"]
+layout_mode = 2
+theme_type_variation = &"Titulo"
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+
+[node name="CentroTabla" type="CenterContainer" parent="Centro/Panel/Caja"]
+layout_mode = 2
+
+[node name="Tabla" type="GridContainer" parent="Centro/Panel/Caja/CentroTabla"]
+layout_mode = 2
+theme_override_constants/h_separation = 40
+columns = 2
+
+[node name="Separador2" type="HSeparator" parent="Centro/Panel/Caja"]
+layout_mode = 2
+
+[node name="Botones" type="HBoxContainer" parent="Centro/Panel/Caja"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Terraza" type="Button" parent="Centro/Panel/Caja/Botones"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Jugar la Gran Final con terraza"
+
+[node name="MenuPrincipal" type="Button" parent="Centro/Panel/Caja/Botones"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Menú principal"
+
+[connection signal="pressed" from="Centro/Panel/Caja/Botones/Terraza" to="." method="_jugar_terraza"]
+[connection signal="pressed" from="Centro/Panel/Caja/Botones/MenuPrincipal" to="." method="_menu_principal"]

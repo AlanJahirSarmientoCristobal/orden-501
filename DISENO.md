@@ -8,7 +8,7 @@ Resumen de cómo se implementó cada sección de `ORDEN_501_Actividad1.docx`, y 
 |---|---|
 | Ciclo del día: mañana → jornada → faltante → cierre | `town.gd` → `restaurant.gd` → `closing_report.gd` |
 | Mapa del pueblo con Mercado y Cervecería | `scenes/town/mapa_pueblo.tscn` (TileMap estilo Kenney) + `scripts/town/town.gd` (puertas, minimapa, peatones y vecinos) |
-| Tiendas con interior | `scripts/town/store.gd` con tiles Roguelike (clase `Interior`): la tienda está decorada y se compra con el vendedor en `scripts/ui/menu_compra.gd` (estilo Pokémon Rojo Fuego) |
+| Tiendas con interior | `scenes/town/mercado.tscn` y `cerveceria.tscn` (script `store.gd`), con tiles Roguelike en `TileMapLayer`: la tienda está decorada y se compra con el vendedor en `scenes/ui/menu_compra.tscn` (estilo Pokémon Rojo Fuego) |
 | Monster (7 diseños, un solo producto) | `AssetPaths.siguiente_diseno("monster")` rota el sprite cada vez que se muestra |
 | Dinero y capacidad del almacén limitados | `GameState.comprar()`, `capacidad_almacen()` |
 | Caducidad y merma | `Inventario.retirar_caducados()`; la merma se calcula al cerrar la jornada |
@@ -94,3 +94,4 @@ godot --headless --path . res://tests/simulador_partida.tscn -- dificil 3
 Los precios y las recetas están en `scripts/core/catalogo.gd`, y los valores de progresión en `scripts/autoload/game_state.gd`.
 - **Tutorial de la Jornada 1** (`scripts/ui/tutorial.gd`): franja de objetivos sobre el HUD que avanza al cumplir cada paso. Tiene tres partes: pueblo (moverse, Shift, tablet, inventario y entrar a una tienda), tienda (menú del vendedor) y práctica en La 501 con un `ClientePractica`, que no se desespera, no gasta inventario y no cuenta en las ventas. El reloj de la mañana y el del partido no corren durante el tutorial. Se guarda cuáles ya se vieron (`GameState.tutoriales`) y **T** los omite todos.
 - **Árboles del pueblo:** los de 2 tiles ponen el tronco (sólido) en la capa Objetos y la copa en la capa Copas, que se dibuja encima de los personajes.
+- **Escenas y nodos:** todo el juego está armado con escenas `.tscn` editables. Dani (`dani.tscn`) tiene su `Camera2D` como nodo hijo; en `town.tscn` está activada y limitada al mapa (0, 0, 2592, 1440). Los clientes son escenas heredadas de `cliente.tscn`. Las mesas, estaciones, puertas y pláticas son `Interactuable` (Area2D) cuya señal `usado` se conecta en la escena. La interfaz usa el Theme `Assets/tema/tema.tres` y las ventanas heredan de `panel_modal.tscn`.

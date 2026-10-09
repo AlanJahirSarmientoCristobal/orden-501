@@ -1,6 +1,346 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_r"]
+[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/cliente_1.tres" id="2_r"]
+[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/cliente_vip.tres" id="3_r"]
+[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/dani.tres" id="4_r"]
+[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/chef.tres" id="5_r"]
+[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/cliente_2.tres" id="6_r"]
+[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/cliente_3.tres" id="7_r"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1"]
+content_margin_left = 10.0
+content_margin_top = 10.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
+bg_color = Color(0.164706, 0.0784314, 0.12549, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.419608, 0.419608, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [node name="MainMenu" type="Control"]
-script = ExtResource("1_script")
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_r")
+
+[node name="Fondo" type="ColorRect" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0784314, 0.12549, 0.168627, 1)
+
+[node name="Decoracion" type="Node2D" parent="."]
+
+[node name="Personaje1" type="AnimatedSprite2D" parent="Decoracion"]
+position = Vector2(110, 646)
+scale = Vector2(2, 2)
+sprite_frames = ExtResource("2_r")
+animation = &"down"
+autoplay = "down"
+
+[node name="Personaje2" type="AnimatedSprite2D" parent="Decoracion"]
+position = Vector2(174, 646)
+scale = Vector2(2, 2)
+sprite_frames = ExtResource("3_r")
+animation = &"down"
+autoplay = "down"
+
+[node name="Personaje3" type="AnimatedSprite2D" parent="Decoracion"]
+position = Vector2(238, 646)
+scale = Vector2(2, 2)
+sprite_frames = ExtResource("4_r")
+animation = &"down"
+autoplay = "down"
+
+[node name="Personaje4" type="AnimatedSprite2D" parent="Decoracion"]
+position = Vector2(302, 646)
+scale = Vector2(2, 2)
+sprite_frames = ExtResource("5_r")
+animation = &"down"
+autoplay = "down"
+
+[node name="Personaje5" type="AnimatedSprite2D" parent="Decoracion"]
+position = Vector2(366, 646)
+scale = Vector2(2, 2)
+sprite_frames = ExtResource("6_r")
+animation = &"down"
+autoplay = "down"
+
+[node name="Personaje6" type="AnimatedSprite2D" parent="Decoracion"]
+position = Vector2(430, 646)
+scale = Vector2(2, 2)
+sprite_frames = ExtResource("7_r")
+animation = &"down"
+autoplay = "down"
+
+[node name="Columnas" type="HBoxContainer" parent="."]
+offset_left = 80.0
+offset_top = 90.0
+offset_right = 1200.0
+offset_bottom = 650.0
+theme_override_constants/separation = 30
+
+[node name="Izquierda" type="VBoxContainer" parent="Columnas"]
+layout_mode = 2
+custom_minimum_size = Vector2(380, 0)
+theme_override_constants/separation = 10
+
+[node name="Titulo" type="Label" parent="Columnas/Izquierda"]
+layout_mode = 2
+theme_type_variation = &"Titulo"
+theme_override_font_sizes/font_size = 64
+text = "ORDEN 501"
+
+[node name="Lema" type="Label" parent="Columnas/Izquierda"]
+layout_mode = 2
+theme_type_variation = &"Tenue"
+theme_override_font_sizes/font_size = 15
+text = "Pon en orden el restaurante deportivo La 501: compra por la mañana, atiende durante el partido y llega a la Gran Final."
+autowrap_mode = 3
+custom_minimum_size = Vector2(380, 0)
+
+[node name="Espacio" type="Control" parent="Columnas/Izquierda"]
+layout_mode = 2
+
+[node name="Principal" type="VBoxContainer" parent="Columnas/Izquierda"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="NuevaPartida" type="Button" parent="Columnas/Izquierda/Principal"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Nueva partida"
+custom_minimum_size = Vector2(320, 0)
+
+[node name="Continuar" type="Button" parent="Columnas/Izquierda/Principal"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Continuar"
+custom_minimum_size = Vector2(320, 0)
+
+[node name="SeleccionarNivel" type="Button" parent="Columnas/Izquierda/Principal"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Seleccionar nivel"
+custom_minimum_size = Vector2(320, 0)
+
+[node name="ComoJugar" type="Button" parent="Columnas/Izquierda/Principal"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Cómo jugar"
+custom_minimum_size = Vector2(320, 0)
+
+[node name="PantallaCompleta" type="Button" parent="Columnas/Izquierda/Principal"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Pantalla completa"
+custom_minimum_size = Vector2(320, 0)
+
+[node name="Salir" type="Button" parent="Columnas/Izquierda/Principal"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Salir"
+custom_minimum_size = Vector2(320, 0)
+
+[node name="Secundario" type="PanelContainer" parent="Columnas"]
+layout_mode = 2
+visible = false
+custom_minimum_size = Vector2(660, 520)
+
+[node name="Dificultad" type="VBoxContainer" parent="Columnas/Secundario"]
+layout_mode = 2
+visible = false
+theme_override_constants/separation = 10
+
+[node name="Titulo" type="Label" parent="Columnas/Secundario/Dificultad"]
+layout_mode = 2
+theme_type_variation = &"Titulo"
+theme_override_font_sizes/font_size = 24
+text = "ELIGE LA DIFICULTAD"
+
+[node name="Facil" type="PanelContainer" parent="Columnas/Secundario/Dificultad"]
+layout_mode = 2
+theme_type_variation = &"PanelClaro"
+
+[node name="Caja" type="VBoxContainer" parent="Columnas/Secundario/Dificultad/Facil"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Jugar" type="Button" parent="Columnas/Secundario/Dificultad/Facil/Caja"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Jugar en Fácil"
+custom_minimum_size = Vector2(600, 0)
+
+[node name="Descripcion" type="Label" parent="Columnas/Secundario/Dificultad/Facil/Caja"]
+layout_mode = 2
+theme_type_variation = &"Tenue"
+theme_override_font_sizes/font_size = 13
+
+[node name="Normal" type="PanelContainer" parent="Columnas/Secundario/Dificultad"]
+layout_mode = 2
+theme_type_variation = &"PanelClaro"
+
+[node name="Caja" type="VBoxContainer" parent="Columnas/Secundario/Dificultad/Normal"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Jugar" type="Button" parent="Columnas/Secundario/Dificultad/Normal/Caja"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Jugar en Normal"
+custom_minimum_size = Vector2(600, 0)
+
+[node name="Descripcion" type="Label" parent="Columnas/Secundario/Dificultad/Normal/Caja"]
+layout_mode = 2
+theme_type_variation = &"Tenue"
+theme_override_font_sizes/font_size = 13
+
+[node name="Dificil" type="PanelContainer" parent="Columnas/Secundario/Dificultad"]
+layout_mode = 2
+theme_type_variation = &"PanelClaro"
+
+[node name="Caja" type="VBoxContainer" parent="Columnas/Secundario/Dificultad/Dificil"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Jugar" type="Button" parent="Columnas/Secundario/Dificultad/Dificil/Caja"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Jugar en Difícil"
+custom_minimum_size = Vector2(600, 0)
+
+[node name="Descripcion" type="Label" parent="Columnas/Secundario/Dificultad/Dificil/Caja"]
+layout_mode = 2
+theme_type_variation = &"Tenue"
+theme_override_font_sizes/font_size = 13
+
+[node name="Niveles" type="VBoxContainer" parent="Columnas/Secundario"]
+layout_mode = 2
+visible = false
+theme_override_constants/separation = 10
+
+[node name="Titulo" type="Label" parent="Columnas/Secundario/Niveles"]
+layout_mode = 2
+theme_type_variation = &"Titulo"
+theme_override_font_sizes/font_size = 24
+text = "SELECCIONAR NIVEL"
+
+[node name="Nivel1" type="Button" parent="Columnas/Secundario/Niveles"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = ""
+custom_minimum_size = Vector2(600, 0)
+
+[node name="Objetivo1" type="Label" parent="Columnas/Secundario/Niveles"]
+layout_mode = 2
+theme_type_variation = &"Tenue"
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 3
+custom_minimum_size = Vector2(600, 0)
+
+[node name="Nivel2" type="Button" parent="Columnas/Secundario/Niveles"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = ""
+custom_minimum_size = Vector2(600, 0)
+
+[node name="Objetivo2" type="Label" parent="Columnas/Secundario/Niveles"]
+layout_mode = 2
+theme_type_variation = &"Tenue"
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 3
+custom_minimum_size = Vector2(600, 0)
+
+[node name="Nivel3" type="Button" parent="Columnas/Secundario/Niveles"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = ""
+custom_minimum_size = Vector2(600, 0)
+
+[node name="Objetivo3" type="Label" parent="Columnas/Secundario/Niveles"]
+layout_mode = 2
+theme_type_variation = &"Tenue"
+theme_override_font_sizes/font_size = 13
+autowrap_mode = 3
+custom_minimum_size = Vector2(600, 0)
+
+[node name="Separador" type="HSeparator" parent="Columnas/Secundario/Niveles"]
+layout_mode = 2
+
+[node name="Reto" type="PanelContainer" parent="Columnas/Secundario/Niveles"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_1")
+
+[node name="Caja" type="VBoxContainer" parent="Columnas/Secundario/Niveles/Reto"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Jugar" type="Button" parent="Columnas/Secundario/Niveles/Reto/Caja"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "RETO IMPOSIBLE"
+custom_minimum_size = Vector2(600, 0)
+
+[node name="Texto" type="Label" parent="Columnas/Secundario/Niveles/Reto/Caja"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.701961, 0.756863, 1)
+theme_override_font_sizes/font_size = 13
+text = "Una Gran Final con el balance original de Difícil: insumos caros, VIP muy impacientes, familias desde el inicio y sin mejoras. No afecta tu partida guardada."
+autowrap_mode = 3
+custom_minimum_size = Vector2(600, 0)
+
+[node name="Controles" type="VBoxContainer" parent="Columnas/Secundario"]
+layout_mode = 2
+visible = false
+theme_override_constants/separation = 10
+
+[node name="Titulo" type="Label" parent="Columnas/Secundario/Controles"]
+layout_mode = 2
+theme_type_variation = &"Titulo"
+theme_override_font_sizes/font_size = 24
+text = "CÓMO JUGAR"
+
+[node name="Texto" type="Label" parent="Columnas/Secundario/Controles"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "MAÑANA (pueblo): recorre el pueblo y compra insumos en el Mercado (carne, pollo, papas, verdura, pan) y la Cervecería (cerveza, refresco, hielo, Monster). Tienes dinero y almacén limitados, y algunos insumos caducan.\n\nJORNADA (restaurante): toma pedidos en las mesas, recoge los platillos en el pase de cocina o la barra, sirve y limpia las mesas antes de que se agote la paciencia. En el medio tiempo y con cada gol llegan olas de pedidos.\n\nFALTANTE: si un insumo se acaba, elige entre marcar el platillo como agotado, pedir urgente por teléfono u ofrecer un sustituto.\n\nCIERRE: revisa el reporte del día y compra mejoras.\n\nW A S D / Flechas: moverse\nShift: correr (gasta estamina; si se agota, espera a que se recupere)\nEspacio: interactuar (mantener para limpiar mesas)\nE: tablet (stock, cocina, reservaciones, avisos)\nQ: pedido urgente al proveedor\nR: asignar reservaciones\nI: inventario (en el pueblo)\nEsc: pausa"
+autowrap_mode = 3
+custom_minimum_size = Vector2(620, 0)
+
+[node name="Creditos" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 690.0
+offset_right = 1280.0
+offset_bottom = 710.0
+theme_type_variation = &"Tenue"
+theme_override_font_sizes/font_size = 12
+text = "Alan Jahir Sarmiento Cristóbal · Luis Ángel Hernández Hernández · Optativa 1: Creación de Videojuegos · Gráficos temporales: Kenney (CC0)"
+horizontal_alignment = 1
+
+[connection signal="pressed" from="Columnas/Izquierda/Principal/NuevaPartida" to="." method="_mostrar_dificultad"]
+[connection signal="pressed" from="Columnas/Izquierda/Principal/Continuar" to="." method="_continuar"]
+[connection signal="pressed" from="Columnas/Izquierda/Principal/SeleccionarNivel" to="." method="_mostrar_niveles"]
+[connection signal="pressed" from="Columnas/Izquierda/Principal/ComoJugar" to="." method="_mostrar_controles"]
+[connection signal="pressed" from="Columnas/Izquierda/Principal/PantallaCompleta" to="." method="_pantalla_completa"]
+[connection signal="pressed" from="Columnas/Izquierda/Principal/Salir" to="." method="_salir"]
+[connection signal="pressed" from="Columnas/Secundario/Dificultad/Facil/Caja/Jugar" to="." method="_nueva_partida" binds= ["facil"]]
+[connection signal="pressed" from="Columnas/Secundario/Dificultad/Normal/Caja/Jugar" to="." method="_nueva_partida" binds= ["normal"]]
+[connection signal="pressed" from="Columnas/Secundario/Dificultad/Dificil/Caja/Jugar" to="." method="_nueva_partida" binds= ["dificil"]]
+[connection signal="pressed" from="Columnas/Secundario/Niveles/Nivel1" to="." method="_jugar_nivel" binds= [1]]
+[connection signal="pressed" from="Columnas/Secundario/Niveles/Nivel2" to="." method="_jugar_nivel" binds= [2]]
+[connection signal="pressed" from="Columnas/Secundario/Niveles/Nivel3" to="." method="_jugar_nivel" binds= [3]]
+[connection signal="pressed" from="Columnas/Secundario/Niveles/Reto/Caja/Jugar" to="." method="_jugar_reto"]

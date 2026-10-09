@@ -39,6 +39,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	# En las pruebas headless no hay salida de audio: no se genera nada.
 	_silencio = DisplayServer.get_name() == "headless"
+	# Todos los botones del juego suenan al presionarse (sin código en cada pantalla).
+	get_tree().node_added.connect(_al_agregar_nodo)
 	for i in range(MAX_CANALES):
 		var canal := AudioStreamPlayer.new()
 		add_child(canal)
@@ -254,3 +256,10 @@ func _a_wav(datos: PackedFloat32Array, bucle: bool) -> AudioStreamWAV:
 		wav.loop_begin = 0
 		wav.loop_end = datos.size()
 	return wav
+
+func _al_agregar_nodo(nodo: Node) -> void:
+	if nodo is BaseButton and not nodo.pressed.is_connected(_clic):
+		nodo.pressed.connect(_clic)
+
+func _clic() -> void:
+	sfx("click")

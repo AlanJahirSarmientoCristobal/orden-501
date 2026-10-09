@@ -7,8 +7,6 @@ class_name AssetPaths
 
 const TILES := "res://Assets/sprites/rpg_urban/Tiles/tile_%04d.png"
 
-## Escala de todos los personajes (sprites de 16 px). 4 = 64 px: píxeles exactos, algo más grandes que un tile (48 px).
-const ESCALA_PERSONAJE := 4.0
 ## Desplazamiento vertical del sprite para que los pies queden en la posición del nodo.
 const ALTURA_PERSONAJE := -14.0
 const COMIDA := "res://Assets/sprites/food_kit/Previews/%s.png"
@@ -89,14 +87,12 @@ const CODIGOS := {
 }
 
 ## Hojas de sprites del equipo: 4 columnas (de pie, paso A, de pie 2, paso B) y 3 filas
-## (abajo, arriba, lado mirando a la derecha). Cualquier tamaño de cuadro sirve: el juego
-## calcula la escala para que el personaje mida 64 px en pantalla.
+## (abajo, arriba, lado mirando a la derecha), en cuadros de 32 px (se dibujan a escala 2).
+## tools/generar_frames.gd las convierte en recursos SpriteFrames para las escenas.
 const HOJAS_PROPIAS := "res://Assets/sprites/personajes/%s.png"
 const RETRATOS_PROPIOS := "res://Assets/sprites/personajes/retrato_%s.png"
 const COLUMNAS_HOJA := 4
 const FILAS_HOJA := 3
-## Altura en pantalla de un personaje (16 px del tileset × ESCALA_PERSONAJE).
-const ALTO_EN_PANTALLA := 16.0 * ESCALA_PERSONAJE
 
 ## Sonidos y música opcionales. Si el archivo existe se usa; si no, AudioManager
 ## genera un tono procedural equivalente.
@@ -213,22 +209,11 @@ static func hoja_propia(clave: String) -> Texture2D:
 	var ruta := HOJAS_PROPIAS % codigo(clave)
 	return load(ruta) if ResourceLoader.exists(ruta) else null
 
-static func tiene_hoja_propia(clave: String) -> bool:
-	return ResourceLoader.exists(HOJAS_PROPIAS % codigo(clave))
-
 ## "dani" -> "player", "chef" -> "npc1", etc.
 static func codigo(clave: String) -> String:
 	return CODIGOS.get(clave, clave)
 
-## Escala del sprite: 4 con los tiles de 16 px; con una hoja propia se ajusta a su tamaño.
-static func escala(clave: String) -> Vector2:
-	var hoja := hoja_propia(clave)
-	if hoja == null:
-		return Vector2(ESCALA_PERSONAJE, ESCALA_PERSONAJE)
-	var e := ALTO_EN_PANTALLA / (hoja.get_height() / float(FILAS_HOJA))
-	return Vector2(e, e)
-
-## Construye las animaciones "down", "up" y "side" de un personaje.
+## Construye las animaciones "down", "up" y "side" de un personaje (lo usa tools/generar_frames.gd).
 static func frames_personaje(clave: String) -> SpriteFrames:
 	var cache_clave := "frames_" + clave
 	if _cache.has(cache_clave):

@@ -1,6 +1,203 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/ui/closing_report.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/ui/closing_report.gd" id="1_r"]
+[ext_resource type="PackedScene" path="res://scenes/ui/notificaciones.tscn" id="2_r"]
 
 [node name="ClosingReport" type="Control"]
-script = ExtResource("1_script")
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_r")
+
+[node name="Fondo" type="ColorRect" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0705882, 0.0823529, 0.113725, 1)
+
+[node name="Margen" type="MarginContainer" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="Columnas" type="HBoxContainer" parent="Margen"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Informe" type="PanelContainer" parent="Margen/Columnas"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Desplazable" type="ScrollContainer" parent="Margen/Columnas/Informe"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="Contenido" type="VBoxContainer" parent="Margen/Columnas/Informe/Desplazable"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Titulo" type="Label" parent="Margen/Columnas/Informe/Desplazable/Contenido"]
+layout_mode = 2
+theme_type_variation = &"Titulo"
+theme_override_font_sizes/font_size = 26
+
+[node name="Nivel" type="Label" parent="Margen/Columnas/Informe/Desplazable/Contenido"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+
+[node name="Resultado" type="Label" parent="Margen/Columnas/Informe/Desplazable/Contenido"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+
+[node name="Motivo" type="Label" parent="Margen/Columnas/Informe/Desplazable/Contenido"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.419608, 0.419608, 1)
+theme_override_font_sizes/font_size = 15
+autowrap_mode = 3
+visible = false
+custom_minimum_size = Vector2(700, 0)
+
+[node name="Objetivo" type="Label" parent="Margen/Columnas/Informe/Desplazable/Contenido"]
+layout_mode = 2
+theme_type_variation = &"Tenue"
+theme_override_font_sizes/font_size = 15
+autowrap_mode = 3
+custom_minimum_size = Vector2(700, 0)
+
+[node name="LineasObjetivo" type="VBoxContainer" parent="Margen/Columnas/Informe/Desplazable/Contenido"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Separador1" type="HSeparator" parent="Margen/Columnas/Informe/Desplazable/Contenido"]
+layout_mode = 2
+
+[node name="Tabla" type="GridContainer" parent="Margen/Columnas/Informe/Desplazable/Contenido"]
+layout_mode = 2
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 4
+columns = 2
+
+[node name="Separador2" type="HSeparator" parent="Margen/Columnas/Informe/Desplazable/Contenido"]
+layout_mode = 2
+
+[node name="Derecha" type="PanelContainer" parent="Margen/Columnas"]
+layout_mode = 2
+custom_minimum_size = Vector2(440, 0)
+
+[node name="Columna" type="VBoxContainer" parent="Margen/Columnas/Derecha"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Acciones" type="VBoxContainer" parent="Margen/Columnas/Derecha/Columna"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Reto" type="Label" parent="Margen/Columnas/Derecha/Columna/Acciones"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+visible = false
+
+[node name="VerFinal" type="Button" parent="Margen/Columnas/Derecha/Columna/Acciones"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "Ver final de temporada"
+custom_minimum_size = Vector2(400, 0)
+visible = false
+
+[node name="SiguienteDia" type="Button" parent="Margen/Columnas/Derecha/Columna/Acciones"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "Siguiente día"
+custom_minimum_size = Vector2(400, 0)
+visible = false
+
+[node name="ReintentarReto" type="Button" parent="Margen/Columnas/Derecha/Columna/Acciones"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "Reintentar el reto"
+custom_minimum_size = Vector2(400, 0)
+visible = false
+
+[node name="Reiniciar" type="Button" parent="Margen/Columnas/Derecha/Columna/Acciones"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "Reiniciar jornada"
+custom_minimum_size = Vector2(400, 0)
+visible = false
+
+[node name="MenuPrincipal" type="Button" parent="Margen/Columnas/Derecha/Columna/Acciones"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "Menú principal"
+custom_minimum_size = Vector2(400, 0)
+visible = false
+
+[node name="Ayuda" type="Label" parent="Margen/Columnas/Derecha/Columna/Acciones"]
+layout_mode = 2
+theme_type_variation = &"Tenue"
+theme_override_font_sizes/font_size = 13
+text = "\"Reiniciar jornada\" repite el día desde la mañana con el dinero y el inventario que tenías al inicio. Los niveles superados siguen desbloqueados; se pierden las monedas de esta jornada."
+autowrap_mode = 3
+visible = false
+custom_minimum_size = Vector2(400, 0)
+
+[node name="Separador" type="HSeparator" parent="Margen/Columnas/Derecha/Columna"]
+layout_mode = 2
+
+[node name="Mejoras" type="VBoxContainer" parent="Margen/Columnas/Derecha/Columna"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Titulo" type="Label" parent="Margen/Columnas/Derecha/Columna/Mejoras"]
+layout_mode = 2
+theme_type_variation = &"Titulo"
+theme_override_font_sizes/font_size = 20
+text = "MEJORAS DEL RESTAURANTE"
+
+[node name="Dinero" type="Label" parent="Margen/Columnas/Derecha/Columna/Mejoras"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+
+[node name="Aviso" type="Label" parent="Margen/Columnas/Derecha/Columna/Mejoras"]
+layout_mode = 2
+theme_type_variation = &"Tenue"
+theme_override_font_sizes/font_size = 14
+visible = false
+
+[node name="Desplazable" type="ScrollContainer" parent="Margen/Columnas/Derecha/Columna/Mejoras"]
+layout_mode = 2
+custom_minimum_size = Vector2(400, 380)
+horizontal_scroll_mode = 0
+
+[node name="Lista" type="VBoxContainer" parent="Margen/Columnas/Derecha/Columna/Mejoras/Desplazable"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Recordatorio" type="Label" parent="Margen/Columnas/Derecha/Columna/Mejoras"]
+layout_mode = 2
+theme_type_variation = &"Tenue"
+theme_override_font_sizes/font_size = 12
+text = "Recuerda guardar dinero para las compras de mañana."
+
+[node name="Notificaciones" parent="." instance=ExtResource("2_r")]
+
+[connection signal="pressed" from="Margen/Columnas/Derecha/Columna/Acciones/VerFinal" to="." method="_ver_final"]
+[connection signal="pressed" from="Margen/Columnas/Derecha/Columna/Acciones/SiguienteDia" to="." method="_siguiente_dia"]
+[connection signal="pressed" from="Margen/Columnas/Derecha/Columna/Acciones/ReintentarReto" to="." method="_reintentar_reto"]
+[connection signal="pressed" from="Margen/Columnas/Derecha/Columna/Acciones/Reiniciar" to="." method="_reiniciar"]
+[connection signal="pressed" from="Margen/Columnas/Derecha/Columna/Acciones/MenuPrincipal" to="." method="_menu_principal"]

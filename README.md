@@ -81,18 +81,29 @@ godot --path . res://tests/captura_pantallas.tscn -- C:/ruta/de/salida
 
 ## Estructura
 
+El juego está armado con **escenas y nodos de Godot**: cada pantalla, personaje, mesa y ventana es un `.tscn` que se abre y edita en el editor (posiciones, sprites, colisiones, cámara, textos y estilos en el Inspector). Los scripts solo contienen la lógica y obtienen sus nodos con `@onready var ... = $Nodo`.
+
 ```
+scenes/
+  entities/     dani.tscn (CharacterBody2D, AnimatedSprite2D, colisión, detector, barras y Camera2D) y npc.tscn
+  customers/    cliente.tscn (base) y sus escenas heredadas: habitual, VIP, reservación, crítico y práctica
+  restaurant/   restaurant.tscn, mesa_2.tscn, mesa_4.tscn y estacion.tscn
+  town/         town.tscn (pueblo), mercado.tscn, cerveceria.tscn, mapa_pueblo.tscn y peaton.tscn
+  ui/           HUD, ventanas (panel_modal.tscn y heredadas), menú de compra, avisos, pausa, tutorial,
+                reporte de cierre y victoria
+  menu/         main_menu.tscn
 scripts/
   autoload/     GameState (partida, economía, reservaciones, guardado) y AudioManager
-  core/         ConfiguracionDificultad, Catalogo, Inventario, AssetPaths, UIKit
-  customers/    Cliente (base) → ClienteHabitual, ClienteVIP, ClienteReservacion
-  entities/     Dani, Interactuable, PuntoInteraccion
+  core/         ConfiguracionDificultad, Catalogo, Inventario, AssetPaths, UIKit (colores y listas dinámicas)
+  customers/    Cliente (base) → ClienteHabitual, ClienteVIP, ClienteReservacion, ClienteCritico, ClientePractica
+  entities/     Dani, NPC e Interactuable (Area2D que emite la señal "usado")
   restaurant/   Controlador del restaurante, Mesa y Estacion (cocina / barra)
-  town/         Fase de mañana: base común, pueblo, interior de tiendas, peatones y minimapa
-  ui/           Menú, tablet, tiendas, pedido urgente, diálogos, reporte, victoria
-scenes/         Escenas de cada pantalla (menu, town, restaurant, ui)
+  town/         Fase de mañana (base común), pueblo, tiendas, peatones y minimapa
+  ui/           Lógica de cada pantalla y ventana
+Assets/tema/    tema.tres (Theme del juego) y tema_tienda.tres (menú de compra)
+Assets/sprites/personajes/frames/   Animaciones de cada personaje (SpriteFrames)
 tests/          Pruebas headless
-tools/          recortar_monster.py, componer_pueblo.py, construir_mapa_pueblo.gd y generar_sprites_restaurante.py
+tools/          Scripts que generan assets (mapa, sprites, animaciones)
 ```
 
 El detalle de cómo se implementó cada mecánica del documento está en `DISENO.md`.
@@ -110,7 +121,7 @@ El script genera `monster_1.png` … `monster_7.png` sin el fondo. La hoja debe 
 Todos los gráficos y sonidos se referencian desde **`scripts/core/asset_paths.gd`**:
 
 - `TEXTURAS`: íconos de insumos y platillos, y decoración. Cambia la ruta por tu imagen.
-- `PERSONAJES`: sprites de Dani, el Chef, los clientes, los vendedores y los NPCs. Hoy se toman del tileset RPG Urban. Para usar sprites propios basta con guardar una hoja de 4 × 3 cuadros en `Assets/sprites/personajes/` con su nombre clave (`player.png`, `npc1.png` … `npc11.png`). Las hojas actuales las genera `tools/generar_personajes.py`; el formato, las claves y la plantilla están en **`PERSONAJES.md`**.
+- **Personajes:** cada personaje tiene una hoja de 4 × 3 cuadros en `Assets/sprites/personajes/` con su nombre clave (`player.png`, `npc1.png` … `npc11.png`); el formato y las claves están en **`PERSONAJES.md`**. Las animaciones que usan las escenas son recursos `SpriteFrames` en `Assets/sprites/personajes/frames/`: se pueden editar en el panel SpriteFrames, o regenerarse desde las hojas con `godot --headless --path . --script res://tools/generar_frames.gd`.
 - `AUDIO`: si guardas en `Assets/audio/` un archivo con el nombre indicado (por ejemplo `musica_jornada.ogg` o `gol.ogg`), el juego lo usa en lugar del sonido generado por código.
 
 ### Mapa del pueblo (TileMap)
@@ -131,15 +142,13 @@ Si cambias en el editor dónde están las puertas, actualiza también sus coorde
 
 ### Interiores (tiendas y restaurante)
 
-El Mercado, la Cervecería y el restaurante se arman con tiles de **Kenney Roguelike RPG Pack** y **Roguelike Indoors** (`Assets/sprites/interiores/`), usando la clase `scripts/core/interior.gd`:
+El Mercado (`mercado.tscn`), la Cervecería (`cerveceria.tscn`) y el restaurante (`restaurant.tscn`) tienen sus pisos, paredes y muebles pintados en nodos `TileMapLayer` (Suelo, Objetos y Encima) con el TileSet `Assets/tilesets/interiores.tres` (Kenney **Roguelike RPG Pack** y **Roguelike Indoors**). Las colisiones son `StaticBody2D` con sus `CollisionShape2D`. Todo se edita en el editor: selecciona una capa y pinta con el panel TileMap.
 
-- `cuarto()` arma las paredes, el piso y la puerta.
-- `poner()`, `fila()` y `columna()` colocan muebles por número de tile.
-- `solido()` agrega la colisión.
+Las pantallas del partido y el letrero de neón son pixel art propio generado por `tools/generar_sprites_restaurante.py` (`Assets/sprites/restaurante/`): la cancha alterna dos cuadros, muestra "GOL!" en cada gol y el neón parpadea.
 
-Las pantallas del partido y el letrero de neón son pixel art propio generado por `tools/generar_sprites_restaurante.py` (`Assets/sprites/restaurante/`): la cancha alterna dos cuadros, muestra "GOL!" en cada gol y el neón parpadea. Se pueden reemplazar desde `AssetPaths` (claves `tv_1`, `tv_2`, `tv_gol`, `neon_on` y `neon_off`).
+### Interfaz
 
-La distribución de cada tienda está en `store.gd` (`_amueblar_mercado` y `_amueblar_cerveceria`) y la del restaurante en `restaurant.gd` (`_construir_escenario`).
+El estilo de botones, paneles y etiquetas está en el Theme **`Assets/tema/tema.tres`** (configurado en *Proyecto → Configuración → GUI → Tema*), con las variaciones `Titulo`, `Tenue`, `PanelBarra`, `PanelClaro` y `PanelAviso`. El menú de compra usa `Assets/tema/tema_tienda.tres` (fuente pixel y marcos estilo Pokémon).
 
 Los gráficos temporales son de Kenney (CC0). Consulta `THIRD_PARTY_LICENSES.md`.
 

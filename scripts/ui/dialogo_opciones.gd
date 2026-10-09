@@ -1,8 +1,6 @@
 extends PanelModal
 class_name DialogoOpciones
 
-## Ventana con un mensaje y varias opciones. Cada opción es [texto, Callable].
-
 var _mensaje := ""
 var _opciones: Array = []
 var permitir_cerrar := true

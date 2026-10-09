@@ -1,12 +1,10 @@
 extends PanelModal
 class_name Tablet
 
-## Tablet de gestión (tecla E): stock, cola de cocina, reservaciones y avisos del partido.
-
 const SECCIONES := {"stock": "Stock", "cocina": "Cocina", "reservaciones": "Reservaciones", "avisos": "Avisos del partido"}
 
 var seccion := "avisos"
-var proveedor_cocina: Callable        # Devuelve Array[String] con la cola de cocina.
+var proveedor_cocina: Callable
 var notificaciones: Notificaciones
 
 func _ready() -> void:
@@ -50,7 +48,6 @@ func _cambiar_seccion(nueva: String) -> void:
 	seccion = nueva
 	construir()
 
-## También lo usa el panel de inventario del pueblo (tecla I).
 static func llenar_stock(destino: VBoxContainer) -> void:
 	var inv := GameState.inventario
 	destino.add_child(UIKit.etiqueta("Almacén: %d / %d espacios · Día %d" % [inv.total_unidades(), GameState.capacidad_almacen(), GameState.dia], 16, UIKit.AZUL))

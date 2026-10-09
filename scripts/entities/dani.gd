@@ -1,19 +1,14 @@
 extends CharacterBody2D
 class_name Dani
 
-## Dani, el gerente de La 501. El mismo personaje se usa en el pueblo y en el restaurante.
-## Sus nodos (sprite, colisión, detector, barras y cámara) están en scenes/entities/dani.tscn.
-
 signal bandeja_cambiada(platillos: Array[String])
 
 const VELOCIDAD_BASE := 240.0
 
-# Sprint (Shift): corre más rápido gastando estamina. Si se agota, hay que esperar
-# a recuperar un mínimo antes de volver a correr.
 const MULTIPLICADOR_SPRINT := 1.6
 const ESTAMINA_MAX := 100.0
-const GASTO_ESTAMINA := 35.0          # por segundo corriendo
-const RECUPERACION_ESTAMINA := 22.0   # por segundo sin correr
+const GASTO_ESTAMINA := 35.0
+const RECUPERACION_ESTAMINA := 22.0
 const MINIMO_PARA_CORRER := 25.0
 
 var bloqueado := false
@@ -22,7 +17,6 @@ var estamina := ESTAMINA_MAX
 var agotado := false
 var corriendo := false
 
-# Nodos de la escena scenes/entities/dani.tscn
 @onready var _sprite: AnimatedSprite2D = $Sprite
 @onready var _etiqueta: Label = $Indicacion
 @onready var _barra_mantener: ProgressBar = $BarraMantener
@@ -60,7 +54,6 @@ func _physics_process(delta: float) -> void:
 	_procesar_mantener(delta)
 	_actualizar_prompt()
 
-## Actualiza la estamina y devuelve si Dani está corriendo en este cuadro.
 func actualizar_estamina(delta: float, quiere_correr: bool, moviendose: bool) -> bool:
 	corriendo = quiere_correr and moviendose and not agotado and estamina > 0.0
 	if corriendo:
@@ -153,8 +146,6 @@ func _al_entrar(area: Area2D) -> void:
 
 func _al_salir(area: Area2D) -> void:
 	_cercanos.erase(area)
-
-# ---------------------------------------------------------------- Bandeja
 
 func puede_cargar() -> bool:
 	return bandeja.size() < GameState.capacidad_bandeja()

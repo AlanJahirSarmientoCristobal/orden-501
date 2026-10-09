@@ -1,14 +1,10 @@
 extends CanvasLayer
 class_name PanelModal
 
-## Base para ventanas que se abren sobre el juego (tablet, inventario, pedidos urgentes, diálogos).
-## Mientras hay una abierta, Dani no se mueve; Esc o el botón Cerrar la cierran.
-
 signal cerrado
 
 static var abiertos := 0
 
-# Nodos de la escena scenes/ui/panel_modal.tscn (cada ventana es una escena heredada).
 @onready var raiz: Control = $Raiz
 @onready var contenido: VBoxContainer = $Raiz/Centro/Panel/Marco/Desplazable/Contenido
 @onready var _titulo: Label = $Raiz/Centro/Panel/Marco/Cabecera/Titulo
@@ -37,7 +33,6 @@ func cerrar() -> void:
 func esta_abierto() -> bool:
 	return _abierto
 
-## Las subclases reconstruyen aquí su contenido.
 func construir() -> void:
 	pass
 

@@ -1,9 +1,6 @@
 extends ClienteHabitual
 class_name ClientePractica
 
-## Cliente del tutorial de la Jornada 1: nunca se desespera, pide un refresco que no gasta
-## inventario y no cuenta en las ventas ni en la reputación.
-
 func nombre_tipo() -> String:
 	return "Cliente de práctica"
 

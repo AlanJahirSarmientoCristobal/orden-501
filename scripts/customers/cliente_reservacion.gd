@@ -1,8 +1,6 @@
 extends ClienteHabitual
 class_name ClienteReservacion
 
-## Llega a una hora fija y espera su mesa lista. Pone a prueba la asignación de mesas.
-
 var reserva: Dictionary = {}
 
 func nombre_tipo() -> String:

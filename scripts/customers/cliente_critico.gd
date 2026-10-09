@@ -1,10 +1,6 @@
 extends ClienteHabitual
 class_name ClienteCritico
 
-## Evento del partido: un crítico gastronómico. Tiene poca paciencia, pero una buena
-## reseña sube mucho la reputación; si se va molesto, la baja mucho.
-
-## Su sprite está fijo en la escena cliente_critico.tscn.
 func _elegir_aspecto() -> void:
 	pass
 

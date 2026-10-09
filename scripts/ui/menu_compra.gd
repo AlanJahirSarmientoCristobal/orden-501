@@ -1,11 +1,6 @@
 extends CanvasLayer
 class_name MenuCompra
 
-## Menú de compra al estilo de las tiendas de Pokémon Rojo Fuego:
-## ventana de dinero, lista de productos con cursor, descripción con ícono,
-## selector de cantidad ("¿Cuántos?") y confirmación Sí / No.
-## Controles: flechas/WASD para moverse, Espacio/Enter para elegir, Esc para regresar.
-
 signal cerrado
 
 enum Estado { CERRADO, LISTA, CANTIDAD, CONFIRMAR, MENSAJE }
@@ -32,9 +27,8 @@ var indice := 0
 var cantidad := 1
 var confirmar_si := true
 
-var _filas: Array[Dictionary] = []   # {"cursor": Control, "nombre": Label, "precio": Label}
+var _filas: Array[Dictionary] = []
 
-# Nodos de la escena scenes/ui/menu_compra.tscn (estilo en Assets/tema/tema_tienda.tres)
 @onready var _raiz: Control = $Raiz
 @onready var _dinero: Label = $Raiz/CajaDinero/Columna/Dinero
 @onready var _almacen: Label = $Raiz/CajaDinero/Columna/Almacen
@@ -52,8 +46,6 @@ var _filas: Array[Dictionary] = []   # {"cursor": Control, "nombre": Label, "pre
 
 func _ready() -> void:
 	GameState.dinero_cambiado.connect(_al_cambiar_dinero)
-
-# ---------------------------------------------------------------- Abrir / cerrar
 
 func abrir(nueva_tienda: String, nombre_vendedor: String, clave_retrato: String = "") -> void:
 	tienda = nueva_tienda
@@ -95,7 +87,7 @@ func _llenar_lista() -> void:
 	UIKit.limpiar(_lista)
 	_filas.clear()
 	var opciones: Array[String] = productos.duplicate()
-	opciones.append("")      # SALIR
+	opciones.append("")
 	for i in range(opciones.size()):
 		var insumo := opciones[i]
 		var fila: HBoxContainer = FILA.instantiate()
@@ -106,8 +98,6 @@ func _llenar_lista() -> void:
 		precio.text = UIKit.dinero(GameState.precio_insumo(insumo)) if insumo != "" else ""
 		_lista.add_child(fila)
 		_filas.append({"cursor": fila.get_node("Cursor"), "nombre": nombre, "precio": precio})
-
-# ---------------------------------------------------------------- Estados
 
 func _ir_a(nuevo: Estado) -> void:
 	estado = nuevo
@@ -160,8 +150,6 @@ func _maximo(insumo: String) -> int:
 func _al_cambiar_dinero(_valor: int) -> void:
 	if estado != Estado.CERRADO:
 		_actualizar()
-
-# ---------------------------------------------------------------- Entrada
 
 func _input(evento: InputEvent) -> void:
 	if estado == Estado.CERRADO or not (evento is InputEventKey) or not evento.is_pressed():
@@ -242,7 +230,6 @@ func _mensaje(texto: String) -> void:
 	_almacen.text = "ALMACÉN %d/%d" % [GameState.inventario.total_unidades(), GameState.capacidad_almacen()]
 	_descripcion.text = "%s: %s" % [vendedor, texto]
 
-## Compra directa (también la usan las pruebas). Devuelve el mensaje del vendedor.
 func comprar(insumo: String, unidades: int) -> String:
 	var error := GameState.comprar(insumo, unidades)
 	if error != "":

@@ -1,8 +1,5 @@
 extends Node
 
-## Sonido del juego. Si existe un archivo en AssetPaths.AUDIO se usa ese; si no, se genera
-## un sonido procedural para que el juego tenga audio desde el primer momento.
-
 const MAX_CANALES := 10
 const FRECUENCIA := 22050
 
@@ -12,13 +9,11 @@ var _murmullo: AudioStreamPlayer
 var _cache := {}
 var _pista_actual := ""
 var _silencio := false
-# Generación en segundo plano (evita tirones al cambiar de escena)
 var _mutex := Mutex.new()
 var _tarea := -1
 var _pregenerado := false
 var _pendiente := ""
 
-## nombre -> [frecuencia, duración, tipo, volumen dB, clave de archivo opcional]
 const EFECTOS := {
 	"click": [700.0, 0.05, "click", -6.0, ""],
 	"pedido_listo": [1200.0, 0.45, "campana", 0.0, "pedido_listo"],
@@ -37,9 +32,7 @@ const EFECTOS := {
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	# En las pruebas headless no hay salida de audio: no se genera nada.
 	_silencio = DisplayServer.get_name() == "headless"
-	# Todos los botones del juego suenan al presionarse (sin código en cada pantalla).
 	get_tree().node_added.connect(_al_agregar_nodo)
 	for i in range(MAX_CANALES):
 		var canal := AudioStreamPlayer.new()
@@ -54,7 +47,6 @@ func _ready() -> void:
 	if not _silencio:
 		_tarea = WorkerThreadPool.add_task(_pregenerar, false, "Audio ORDEN 501")
 
-## Genera música, murmullo y efectos en un hilo aparte al iniciar el juego.
 func _pregenerar() -> void:
 	for nombre in EFECTOS:
 		var datos: Array = EFECTOS[nombre]
@@ -103,7 +95,6 @@ func sfx(nombre: String) -> void:
 	canal.volume_db = datos[3]
 	canal.play()
 
-## "manana", "jornada" o "" para detener.
 func musica(pista: String) -> void:
 	if _silencio or pista == _pista_actual:
 		return
@@ -115,7 +106,6 @@ func musica(pista: String) -> void:
 	var stream: AudioStream = AssetPaths.audio("musica_" + pista)
 	if stream == null:
 		if not _pregenerado and _leer("musica_" + pista) == null:
-			# Aún se está generando en segundo plano: empezará en cuanto esté lista.
 			_pendiente = pista
 			return
 		stream = _generar_musica(pista)
@@ -126,12 +116,10 @@ func musica(pista: String) -> void:
 		_murmullo.stream = _generar_murmullo()
 		_murmullo.play()
 
-## Acelera la música (medio tiempo y minutos finales).
 func intensidad(factor: float) -> void:
 	if _musica:
 		_musica.pitch_scale = clampf(factor, 0.5, 2.0)
 
-## Murmullo del restaurante: 0 = vacío, 1 = lleno.
 func murmullo(nivel: float) -> void:
 	if _murmullo:
 		_murmullo.volume_db = lerpf(-40.0, -16.0, clampf(nivel, 0.0, 1.0)) if nivel > 0.01 else -60.0
@@ -198,7 +186,6 @@ func _generar_musica(pista: String) -> AudioStreamWAV:
 	var pulso := 60.0 / bpm
 	var compases := 8
 	var duracion := pulso * 4.0 * compases
-	# Progresión I - vi - IV - V en Do mayor.
 	var acordes := [[261.63, 329.63, 392.0], [220.0, 261.63, 329.63], [174.61, 220.0, 261.63], [196.0, 246.94, 293.66]]
 	var muestras := int(FRECUENCIA * duracion)
 	var datos := PackedFloat32Array()
@@ -234,7 +221,6 @@ func _generar_murmullo() -> AudioStreamWAV:
 	var previo := 0.0
 	for i in range(muestras):
 		var t := float(i) / FRECUENCIA
-		# Ruido filtrado con modulación lenta: suena como conversación lejana.
 		previo = lerpf(previo, randf() * 2.0 - 1.0, 0.08)
 		datos[i] = previo * (0.6 + 0.4 * sin(TAU * 1.3 * t)) * 1.5
 	var wav := _a_wav(datos, true)

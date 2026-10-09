@@ -1,15 +1,12 @@
 extends RefCounted
 class_name Catalogo
 
-## Insumos, platillos, recetas y tiendas del juego.
-
 const MERCADO := "mercado"
 const CERVECERIA := "cerveceria"
 
 const COCINA := "cocina"
 const BARRA := "barra"
 
-## Insumos: tienda donde se compran, precio por unidad y si caducan.
 const INSUMOS := {
 	"carne":    {"nombre": "Carne",    "tienda": MERCADO,    "precio": 12, "perecedero": true,  "icono": "insumo_carne"},
 	"pollo":    {"nombre": "Pollo",    "tienda": MERCADO,    "precio": 10, "perecedero": true,  "icono": "insumo_pollo"},
@@ -30,7 +27,6 @@ const CERVEZA := "Cerveza"
 const MONSTER := "Monster"
 const COMBO := "Combo VIP"
 
-## Platillos: receta, precio, estación donde se prepara/recoge y tiempo de preparación base.
 const PLATILLOS := {
 	HAMBURGUESA: {"receta": {"carne": 1, "pan": 1, "verdura": 1}, "precio": 90,  "estacion": COCINA, "tiempo": 5.0, "icono": "platillo_hamburguesa", "bebida": false},
 	ALITAS:      {"receta": {"pollo": 2},                          "precio": 110, "estacion": COCINA, "tiempo": 6.0, "icono": "platillo_alitas",      "bebida": false},
@@ -41,11 +37,9 @@ const PLATILLOS := {
 	COMBO:       {"receta": {"carne": 1, "pan": 1, "verdura": 1, "papas": 2, "cerveza": 1, "hielo": 1}, "precio": 220, "estacion": COCINA, "tiempo": 7.0, "icono": "platillo_combo", "bebida": false},
 }
 
-## Menú que piden los clientes habituales (el Combo es exclusivo de VIP).
 const MENU_HABITUAL := [HAMBURGUESA, ALITAS, PAPAS, REFRESCO, CERVEZA, MONSTER]
 const BEBIDAS := [REFRESCO, CERVEZA, MONSTER]
 
-## Sustitutos que Dani puede ofrecer cuando falta un insumo (en orden de preferencia).
 const SUSTITUTOS := {
 	HAMBURGUESA: [ALITAS, PAPAS],
 	ALITAS: [HAMBURGUESA, PAPAS],

@@ -1,12 +1,8 @@
 extends Interactuable
 class_name Mesa
 
-## Mesa del restaurante (escenas mesa_2.tscn y mesa_4.tscn). Estados: LIMPIA, OCUPADA o SUCIA.
-## Una mesa desocupada queda sucia y nadie puede sentarse hasta que Dani la limpie.
-
 enum EstadoMesa { LIMPIA, OCUPADA, SUCIA }
 
-## Número de mesa (en el Inspector). La capacidad sale del número: 1-3 para 2 personas, el resto para 4.
 @export var numero := 1
 @export var terraza := false
 
@@ -15,7 +11,6 @@ var estado: EstadoMesa = EstadoMesa.LIMPIA
 var cliente: Cliente = null
 var restaurante: Node = null
 
-# Nodos de la escena (scenes/restaurant/mesa_2.tscn o mesa_4.tscn)
 @onready var _etiqueta: Label = $Etiqueta
 @onready var _cartel: Label = $Cartel
 @onready var _platos: Node2D = $Platos
@@ -26,13 +21,11 @@ func _ready() -> void:
 	if terraza:
 		$Muebles.modulate = Color(1.08, 1.05, 0.95)
 
-## Sillas en coordenadas locales: primero las de arriba (el cliente principal usa la primera).
 func asientos_locales() -> Array[Vector2]:
 	if capacidad <= 2:
 		return [Vector2(0, -44), Vector2(0, 44)]
 	return [Vector2(-24, -44), Vector2(24, -44), Vector2(-24, 44), Vector2(24, 44)]
 
-## Dónde se para cada persona sentada (los pies quedan sobre la silla).
 func asientos_globales() -> Array[Vector2]:
 	var lista: Array[Vector2] = []
 	for asiento in asientos_locales():
@@ -49,7 +42,6 @@ func ocupar(nuevo_cliente: Cliente) -> void:
 	cliente = nuevo_cliente
 	estado = EstadoMesa.OCUPADA
 
-## El cliente se fue: la mesa queda sucia (si llegó a sentarse) o libre.
 func liberar(ensuciar: bool) -> void:
 	cliente = null
 	estado = EstadoMesa.SUCIA if ensuciar else EstadoMesa.LIMPIA
@@ -57,8 +49,6 @@ func liberar(ensuciar: bool) -> void:
 
 func actualizar_cartel(texto_cartel: String) -> void:
 	_cartel.text = texto_cartel
-
-# ---------------------------------------------------------------- Interacción con Dani
 
 func disponible(_dani: Node) -> bool:
 	if estado == EstadoMesa.SUCIA:

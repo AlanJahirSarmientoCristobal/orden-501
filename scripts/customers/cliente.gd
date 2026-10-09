@@ -1,11 +1,6 @@
 extends Node2D
 class_name Cliente
 
-## Cliente base. Máquina de estados:
-## EN_FILA → CAMINANDO → ORDENANDO → ESPERANDO_COMIDA → COMIENDO → SALIENDO
-## Cada cliente tiene su propia paciencia y temporizadores independientes.
-## Subclases: ClienteHabitual, ClienteVIP, ClienteReservacion.
-
 signal se_fue(cliente: Cliente, enojado: bool)
 
 enum Estado { EN_FILA, CAMINANDO, ORDENANDO, ESPERANDO_COMIDA, COMIENDO, SALIENDO }
@@ -13,26 +8,24 @@ enum Estado { EN_FILA, CAMINANDO, ORDENANDO, ESPERANDO_COMIDA, COMIENDO, SALIEND
 const VELOCIDAD_CAMINAR := 160.0
 
 var estado: Estado = Estado.EN_FILA
-var mesa: Node = null                 # Mesa asignada
-var restaurante: Node = null          # Controlador del restaurante
+var mesa: Node = null
+var restaurante: Node = null
 var pedido := ""
-var pedido_enviado := false           # Ya está en cocina/barra
-var factor_propina := 1.0             # Baja si se ofreció un sustituto
+var pedido_enviado := false
+var factor_propina := 1.0
 var paciencia_max := 40.0
 var paciencia := 40.0
 var tiempo_comiendo := 0.0
 var extras_pedidos := 0
-var quiebre_registrado := ""           # Platillo cuyo faltante ya se contó
-var personas := 1                      # 1, 2 (pareja) o 4 (familia); se fija antes de agregarlo
+var quiebre_registrado := ""
+var personas := 1
 
-# Posición de los acompañantes mientras caminan o esperan en la fila.
 const FORMACION := [Vector2(-22, 8), Vector2(22, 8), Vector2(0, 16)]
 var _acompanantes: Array[AnimatedSprite2D] = []
 
 static var _estilos_barra := {}
 var _color_barra := -1
 
-# Nodos de la escena scenes/customers/cliente.tscn
 @onready var _sprite: AnimatedSprite2D = $Sprite
 @onready var _barra: ProgressBar = $Barra
 @onready var _burbuja: PanelContainer = $Burbuja
@@ -40,8 +33,6 @@ var _color_barra := -1
 @onready var _texto: Label = $Burbuja/Fila/Texto
 @onready var _insignia: Label = $Insignia
 
-## Crea un cliente a partir de su escena: "cliente_habitual", "cliente_vip",
-## "cliente_reservacion", "cliente_critico" o "cliente_practica".
 static func crear(tipo: String) -> Cliente:
 	return load("res://scenes/customers/%s.tscn" % tipo).instantiate()
 
@@ -49,7 +40,6 @@ func _ready() -> void:
 	paciencia_max = GameState.paciencia_base() * multiplicador_paciencia()
 	paciencia = paciencia_max
 	_elegir_aspecto()
-	# Acompañantes de parejas y familias (nodos ocultos en la escena).
 	for i in range(personas - 1):
 		var acompanante: AnimatedSprite2D = $Acompanantes.get_child(i)
 		acompanante.visible = true
@@ -59,9 +49,6 @@ func _ready() -> void:
 	_insignia.add_theme_color_override("font_color", color_insignia())
 	_actualizar_barra()
 
-# ---------------------------------------------------------------- Comportamiento por tipo (polimorfismo)
-
-## El sprite se configura en la escena; ClienteHabitual elige además una variante al azar.
 func _elegir_aspecto() -> void:
 	pass
 
@@ -74,7 +61,6 @@ func color_insignia() -> Color:
 func multiplicador_paciencia() -> float:
 	return 1.0
 
-## Porcentaje del precio que deja de propina si se le atiende al instante.
 func propina_base() -> float:
 	return 0.15
 
@@ -90,7 +76,6 @@ func elegir_pedido() -> String:
 func es_vip() -> bool:
 	return false
 
-## Texto de la insignia: tipo de cliente y tamaño del grupo.
 func texto_grupo() -> String:
 	match personas:
 		2:
@@ -106,7 +91,6 @@ func _formar_grupo() -> void:
 	for i in range(_acompanantes.size()):
 		_acompanantes[i].position = FORMACION[i % FORMACION.size()] + Vector2(0, AssetPaths.ALTURA_PERSONAJE)
 
-## Acomoda a los acompañantes en las demás sillas de la mesa.
 func _sentar_grupo() -> void:
 	if mesa == null:
 		return
@@ -119,12 +103,9 @@ func _sentar_grupo() -> void:
 			a.position = asientos[i + 1] - global_position + Vector2(0, AssetPaths.ALTURA_PERSONAJE)
 			a.animation = &"up" if asientos[i + 1].y > mesa.global_position.y else &"down"
 
-# ---------------------------------------------------------------- Ciclo
-
 func _process(delta: float) -> void:
 	match estado:
 		Estado.EN_FILA:
-			# En la fila la paciencia baja más despacio (35 % del ritmo normal en la campaña).
 			_gastar_paciencia(delta * GameState.config.paciencia_fila)
 		Estado.ORDENANDO, Estado.ESPERANDO_COMIDA:
 			_gastar_paciencia(delta)
@@ -156,8 +137,6 @@ func _actualizar_barra() -> void:
 func razon_paciencia() -> float:
 	return clampf(paciencia / paciencia_max, 0.0, 1.0)
 
-# ---------------------------------------------------------------- Transiciones
-
 func ir_a_mesa(nueva_mesa: Node) -> void:
 	mesa = nueva_mesa
 	_insignia.visible = true
@@ -177,13 +156,11 @@ func _sentarse() -> void:
 	_mostrar_burbuja("", "¡Ordenar!")
 	AudioManager.sfx("pedido")
 
-## Dani toma la comanda en la mesa.
 func tomar_pedido() -> void:
 	if estado != Estado.ORDENANDO:
 		return
 	restaurante.procesar_pedido(self)
 
-## Llamado por el restaurante cuando la comanda llegó a cocina o barra.
 func pedido_confirmado(platillo: String, sustituto: bool = false) -> void:
 	pedido = platillo
 	pedido_enviado = true
@@ -192,7 +169,6 @@ func pedido_confirmado(platillo: String, sustituto: bool = false) -> void:
 	estado = Estado.ESPERANDO_COMIDA
 	_mostrar_burbuja(Catalogo.icono_platillo(pedido), _abreviar(pedido) + _sufijo())
 
-## El pedido espera insumos (pedido urgente en camino).
 func esperar_insumo() -> void:
 	_mostrar_burbuja(Catalogo.icono_platillo(pedido), "Esperando insumo")
 
@@ -213,7 +189,6 @@ func servir(dani: Dani) -> bool:
 	_mostrar_burbuja(Catalogo.icono_platillo(pedido), "¡Gracias!")
 	return true
 
-## Ronda extra de bebidas tras un gol o en el medio tiempo.
 func pedir_extra() -> bool:
 	if estado != Estado.COMIENDO or extras_pedidos >= 2:
 		return false
@@ -226,7 +201,6 @@ func pedir_extra() -> bool:
 	_mostrar_burbuja(Catalogo.icono_platillo(pedido), "¡Otra ronda!")
 	return true
 
-## El platillo pedido está agotado: el cliente elige otro disponible o se va.
 func cambiar_pedido(nuevo: String) -> void:
 	pedido = nuevo
 	_mostrar_burbuja(Catalogo.icono_platillo(pedido), _abreviar(pedido) + _sufijo())
@@ -257,7 +231,6 @@ func irse_enojado(motivo: String = "") -> void:
 	se_fue.emit(self, true)
 	_salir()
 
-## Se retira sin penalización (fin del partido).
 func retirarse() -> void:
 	if estado == Estado.SALIENDO:
 		return

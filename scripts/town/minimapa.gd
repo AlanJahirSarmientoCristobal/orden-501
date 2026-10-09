@@ -1,11 +1,9 @@
 extends Control
 class_name Minimapa
 
-## Minimapa del pueblo: calles, edificios importantes y la posición de Dani.
-
 var tamano_mundo := Vector2(2560, 1440)
 var calles: Array[Rect2] = []
-var lugares: Array[Dictionary] = []    # {"rect": Rect2, "color": Color, "nombre": String}
+var lugares: Array[Dictionary] = []
 var objetivo: Node2D
 
 var _espera := 0.0

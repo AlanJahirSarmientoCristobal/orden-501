@@ -1,10 +1,6 @@
 extends RefCounted
 class_name UIKit
 
-## Colores del juego y utilidades para las listas que se llenan en tiempo de ejecución
-## (filas de stock, reservaciones, reportes). Las pantallas son escenas .tscn con el Theme
-## Assets/tema/tema.tres, que define el estilo de botones, paneles y etiquetas.
-
 const FONDO := Color("1b1f2a")
 const FONDO_CLARO := Color("262c3b")
 const BORDE := Color("f2b544")
@@ -29,7 +25,6 @@ static func panel(color: Color = FONDO, borde: Color = BORDE, margen: int = 14) 
 	p.add_theme_stylebox_override("panel", estilo(Color(color, 0.96), 10, borde, 2, margen))
 	return p
 
-## Etiqueta para listas que se llenan en tiempo de ejecución (el contorno viene del Theme).
 static func etiqueta(texto: String, tam: int = 16, color: Color = TEXTO, centrado: bool = false) -> Label:
 	var l := Label.new()
 	l.text = texto
@@ -39,7 +34,6 @@ static func etiqueta(texto: String, tam: int = 16, color: Color = TEXTO, centrad
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	return l
 
-## Botón para listas dinámicas (estilo del Theme; el clic lo hace sonar AudioManager).
 static func boton(texto: String, accion: Callable, tam: int = 16, ancho_min: float = 0.0) -> Button:
 	var b := Button.new()
 	b.text = texto

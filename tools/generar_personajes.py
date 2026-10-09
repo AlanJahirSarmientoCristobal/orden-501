@@ -1,12 +1,3 @@
-"""Genera las hojas de sprites de todos los personajes con el estilo moderno de Dani.
-
-    python tools/generar_personajes.py
-
-Cada hoja es de 4x3 cuadros de 32x32 (ver PERSONAJES.md) y se guarda en
-Assets/sprites/personajes/<código>.png (player.png, npc1.png ...), donde el juego la usa.
-También deja vistas previas en Assets/sprites/personajes/plantillas/.
-Son un punto de partida: se pueden abrir en Pixelorama y retocar a mano.
-"""
 import os
 from PIL import Image
 
@@ -15,12 +6,12 @@ DESTINO = os.path.join(RAIZ, "Assets", "sprites", "personajes")
 PLANTILLAS = os.path.join(DESTINO, "plantillas")
 
 BASE = {
-    "K": (27, 27, 36),      # contorno
-    "E": (27, 27, 36),      # ojos
-    "w": (255, 255, 255),   # brillo de ojos
-    "m": (164, 82, 74),     # boca
-    "G": (70, 76, 94),      # audífonos
-    "L": (40, 40, 52),      # lentes
+    "K": (27, 27, 36),
+    "E": (27, 27, 36),
+    "w": (255, 255, 255),
+    "m": (164, 82, 74),
+    "G": (70, 76, 94),
+    "L": (40, 40, 52),
 }
 PIELES = {
     "clara": [(245, 204, 170), (214, 166, 130)],
@@ -28,9 +19,6 @@ PIELES = {
     "morena": [(214, 160, 118), (176, 122, 86)],
     "oscura": [(176, 120, 84), (140, 92, 62)],
 }
-
-# ---------------------------------------------------------------- Cabezas
-# 14 píxeles de ancho; la fila 0 es la coronilla. "." deja lo que haya debajo.
 
 CABEZA_BASE = {
     "down": [
@@ -80,9 +68,7 @@ CABEZA_BASE = {
     ],
 }
 
-# Peinados: (fila inicial, filas). Una fila inicial negativa sobresale por arriba.
 PEINADOS = {
-    # Dani: copete con rapado y audífonos con micrófono (cabeza completa).
     "dani": {
         "down": (0, [
             "....HHhHHh....", "..HHHhHHHhHH..", ".HHHHHHhHHHHH.", "GHHHHHHHHHHHHG",
@@ -190,7 +176,6 @@ ACCESORIOS = {
     },
 }
 
-
 def poner(img, pal, x0, y0, filas):
     for y, fila in enumerate(filas):
         for x, c in enumerate(fila):
@@ -198,12 +183,10 @@ def poner(img, pal, x0, y0, filas):
             if c != "." and 0 <= px < 32 and 0 <= py < 32:
                 img.putpixel((px, py), pal[c] + (255,))
 
-
 def rect(img, pal, x0, y0, x1, y1, c):
     for y in range(max(y0, 0), min(y1, 31) + 1):
         for x in range(max(x0, 0), min(x1, 31) + 1):
             img.putpixel((x, y), pal[c] + (255,))
-
 
 def contorno(img, pal):
     lleno = [[img.getpixel((x, y))[3] > 0 for x in range(32)] for y in range(32)]
@@ -214,13 +197,10 @@ def contorno(img, pal):
                     for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
                 img.putpixel((x, y), pal["K"] + (255,))
 
-
 def pierna(img, pal, x0, x1, y_fin, sombra):
-    """Pantalón (P) hasta la fila 25 y parte baja (Q: pantalón, calcetas o piel)."""
     rect(img, pal, x0, 24, x1, min(25, y_fin), "p" if sombra else "P")
     if y_fin >= 26:
         rect(img, pal, x0, 26, x1, y_fin, "q" if sombra else "Q")
-
 
 def cuadro(pj, pal, direccion, paso):
     img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
@@ -303,7 +283,6 @@ def cuadro(pj, pal, direccion, paso):
             rect(img, pal, 15 + dx, y + 3, 16 + dx, y + 6, "S")
         for ddx, ddy, c in pj.get("brazo", []):
             poner(img, pal, ddx + dx, y + ddy, [c])
-    # Cabeza
     cy = 3 - bob
     peinado = PEINADOS[pj["pelo"]]
     if pj["pelo"] != "dani":
@@ -316,7 +295,6 @@ def cuadro(pj, pal, direccion, paso):
             poner(img, pal, 9, cy + fila, filas)
     contorno(img, pal)
     return img
-
 
 def hoja(pj):
     pal = dict(BASE)
@@ -332,17 +310,12 @@ def hoja(pj):
             img.paste(cuadro(pj, pal, direccion, paso), (col * 32, fila * 32))
     return img
 
-
-# ---------------------------------------------------------------- Personajes
-# Código del archivo -> diseño. La tabla código / personaje está en PERSONAJES.md
-# y en AssetPaths.CODIGOS.
-
 NEGRO = (30, 30, 38)
 BLANCO = (238, 238, 242)
 GRIS_BLANCO = (196, 198, 210)
 
 PERSONAJES = {
-    "player": {  # Dani, el gerente
+    "player": {
         "nombre": "Dani", "pelo": "dani",
         "colores": {"H": (52, 38, 34), "h": (92, 66, 54), "f": (98, 76, 68),
                     "T": (38, 42, 58), "t": (28, 31, 44), "O": (255, 122, 47), "o": (214, 86, 26),
@@ -350,7 +323,7 @@ PERSONAJES = {
                     "D": (255, 122, 47)},
         "frente": [(17, 3, "DD")], "espalda": [(12, 4, "DDDDDDDD")],
     },
-    "npc1": {  # Chef
+    "npc1": {
         "nombre": "Chef", "pelo": "chef", "piel": "morena", "bob": False, "mangas_largas": True,
         "accesorios": ["bigote"], "cuello": "D",
         "colores": {"H": (40, 30, 28), "h": (70, 52, 44), "C": BLANCO, "c": GRIS_BLANCO,
@@ -360,7 +333,7 @@ PERSONAJES = {
         "frente": [(13, 3, "d"), (13, 5, "d"), (18, 3, "d"), (18, 5, "d")],
         "lado": [(19, 3, "d"), (19, 5, "d")],
     },
-    "npc2": {  # Don Chema, vendedor del Mercado
+    "npc2": {
         "nombre": "Don Chema", "pelo": "calvo", "piel": "morena", "accesorios": ["bigote"],
         "colores": {"H": (200, 200, 206), "h": (230, 230, 234), "w": (255, 226, 196),
                     "T": (86, 128, 176), "t": (64, 100, 142), "O": (86, 128, 176), "o": (64, 100, 142),
@@ -369,7 +342,7 @@ PERSONAJES = {
                     "D": (196, 70, 70)},
         "frente": [(16, 6, "D"), (14, 8, "D")],
     },
-    "npc3": {  # Lupita, encargada de la Cervecería
+    "npc3": {
         "nombre": "Lupita", "pelo": "largo", "piel": "clara",
         "colores": {"H": (196, 74, 40), "h": (232, 120, 70),
                     "T": NEGRO, "t": (20, 20, 26), "O": NEGRO, "o": (20, 20, 26),
@@ -378,7 +351,7 @@ PERSONAJES = {
                     "D": (250, 200, 60)},
         "frente": [(15, 5, "DD")], "espalda": [(14, 3, "DDDD")],
     },
-    "npc4": {  # Cliente VIP
+    "npc4": {
         "nombre": "Cliente VIP", "pelo": "corto", "piel": "media", "mangas_largas": True,
         "accesorios": ["lentes_sol"], "cuello": "V",
         "colores": {"H": (24, 22, 26), "h": (60, 56, 70), "L": (20, 20, 28),
@@ -387,7 +360,7 @@ PERSONAJES = {
                     "W": (60, 40, 30), "u": (40, 26, 20), "D": (240, 196, 60)},
         "frente": [(15, 1, "DD"), (15, 2, "DD"), (20, 3, "D")], "lado": [(19, 1, "D")],
     },
-    "npc5": {  # Crítico gastronómico
+    "npc5": {
         "nombre": "Crítico", "pelo": "corto", "piel": "clara", "mangas_largas": True,
         "accesorios": ["lentes"], "cuello": "V",
         "colores": {"H": (90, 90, 100), "h": (140, 140, 150),
@@ -396,7 +369,7 @@ PERSONAJES = {
                     "D": (250, 210, 90)},
         "frente": [(13, 0, "DDDDDD"), (13, 1, "D")],
     },
-    "npc6": {  # Doña Mari
+    "npc6": {
         "nombre": "Doña Mari", "pelo": "chongo", "piel": "morena", "vestido": True,
         "colores": {"H": (190, 190, 198), "h": (226, 226, 232),
                     "T": (170, 60, 110), "t": (132, 42, 84), "O": (170, 60, 110), "o": (132, 42, 84),
@@ -405,7 +378,7 @@ PERSONAJES = {
         "frente": [(13, 4, "D"), (17, 6, "D"), (14, 9, "D"), (19, 10, "D")],
         "espalda": [(14, 4, "D"), (18, 7, "D"), (12, 10, "D")],
     },
-    "npc7": {  # Profe Juve, entrenador
+    "npc7": {
         "nombre": "Profe Juve", "pelo": "corto", "piel": "media", "mangas_largas": True,
         "accesorios": ["lentes"],
         "colores": {"H": (40, 34, 32), "h": (84, 76, 72),
@@ -415,7 +388,7 @@ PERSONAJES = {
         "frente": [(8, 1, "D"), (23, 1, "D"), (16, 3, "d")],
         "espalda": [(8, 1, "D"), (23, 1, "D"), (12, 3, "DDDDDDDD")],
     },
-    "npc8": {  # Capitán del equipo
+    "npc8": {
         "nombre": "Capitán", "pelo": "corto", "piel": "oscura",
         "colores": {"H": (20, 18, 20), "h": (56, 50, 50),
                     "T": (30, 140, 80), "t": (20, 106, 58), "O": BLANCO, "o": GRIS_BLANCO,
@@ -425,7 +398,7 @@ PERSONAJES = {
         "espalda": [(12, 3, "DD.DDD"), (13, 4, "D.D.D"), (13, 5, "D.DDD"), (8, 2, "ddd")],
         "brazo": [(14, 2, "dddd")],
     },
-    "npc9": {  # Cliente habitual 1: joven con gorra
+    "npc9": {
         "nombre": "Cliente 1", "pelo": "gorra", "piel": "morena",
         "colores": {"H": (36, 28, 26), "h": (70, 56, 50), "C": (200, 50, 50), "c": (150, 34, 34),
                     "T": BLANCO, "t": GRIS_BLANCO, "O": BLANCO, "o": GRIS_BLANCO,
@@ -433,7 +406,7 @@ PERSONAJES = {
                     "D": (60, 110, 200)},
         "frente": [(14, 3, "DDDD"), (14, 4, "D..D"), (14, 5, "DDDD")],
     },
-    "npc10": {  # Cliente habitual 2: joven con cabello largo
+    "npc10": {
         "nombre": "Cliente 2", "pelo": "largo", "piel": "media",
         "colores": {"H": (70, 44, 30), "h": (120, 80, 56),
                     "T": (40, 160, 160), "t": (28, 122, 122), "O": (40, 160, 160), "o": (28, 122, 122),
@@ -441,7 +414,7 @@ PERSONAJES = {
                     "D": BLANCO},
         "frente": [(15, 4, "DD")],
     },
-    "npc11": {  # Cliente habitual 3: señor con lentes
+    "npc11": {
         "nombre": "Cliente 3", "pelo": "corto", "piel": "clara", "accesorios": ["lentes", "bigote"],
         "colores": {"H": (170, 170, 176), "h": (210, 210, 216),
                     "T": (140, 40, 56), "t": (106, 28, 40), "O": (140, 40, 56), "o": (106, 28, 40),
@@ -450,7 +423,6 @@ PERSONAJES = {
         "frente": [(14, 0, "D"), (17, 0, "D")],
     },
 }
-
 
 def vistas(hojas):
     fondo = (60, 70, 86, 255)
@@ -480,7 +452,6 @@ def vistas(hojas):
         cuadros.append(lienzo.resize((lienzo.width * 3, 96), Image.NEAREST).convert("P"))
     cuadros[0].save(os.path.join(PLANTILLAS, "personajes_caminando.gif"), save_all=True,
                     append_images=cuadros[1:], duration=125, loop=0)
-
 
 if __name__ == "__main__":
     os.makedirs(PLANTILLAS, exist_ok=True)

@@ -1,18 +1,12 @@
 extends Node2D
 
-## Fase de jornada: Dani atiende La 501 durante el partido.
-## Distribución (sección 9 del documento): cocina y barra a la izquierda, mesas al centro,
-## pantallas en la pared superior, entrada abajo y panel de gestión a la derecha.
-
 const AREA_JUEGO := Rect2(0, 100, 1000, 620)
 const PUERTA := Vector2(552, 770)
 const INICIO_FILA := Vector2(660, 652)
 const MAX_FILA := 5
 const MINUTOS_PARTIDO := 90.0
 
-
 var dani: Dani
-# Nodos de la escena scenes/restaurant/restaurant.tscn
 @onready var cocina: Estacion = $Cocina
 @onready var barra: Estacion = $Barra
 @onready var _neon: Sprite2D = $Neon
@@ -20,7 +14,7 @@ var dani: Dani
 @onready var _pantallas: Array[Label] = [$Pantallas/Marcador1, $Pantallas/Marcador2]
 var mesas: Array[Mesa] = []
 var fila: Array[Cliente] = []
-var entregas: Array[Dictionary] = []     # {"insumo", "cantidad", "restante"}
+var entregas: Array[Dictionary] = []
 var agotados: Array[String] = []
 
 var tiempo := 0.0
@@ -34,22 +28,19 @@ var _acumulado_llegada := 0.0
 var _medio_tiempo := false
 var _final_cerca := false
 var _goles: Array[float] = []
-# Eventos del partido
-var _eventos: Array[Dictionary] = []      # {"minuto": float, "tipo": String}
-var _retraso_hasta := -1.0                # Minuto hasta el que el proveedor viene retrasado
-var _apagon := 0.0                        # Segundos restantes de apagón
+var _eventos: Array[Dictionary] = []
+var _retraso_hasta := -1.0
+var _apagon := 0.0
 var _velo_apagon: ColorRect
 var penales := false
 var _penales_restante := 0.0
 const DURACION_PENALES := 20.0
 var _equipos := ["LOCAL", "VISITA"]
-# Práctica de la Jornada 1: antes del partido, un cliente de prueba y el tutorial.
 var practica := false
 var _cliente_practica: Cliente
 var _mesa_practica: Mesa
 var _refresco_panel := 0.0
 
-# Interfaz: nodos de la escena (HUD, ventanas y avisos).
 @onready var _tablet: Tablet = $Tablet
 @onready var _urgente: PanelUrgente = $Urgente
 @onready var _dialogo: DialogoOpciones = $Dialogo
@@ -109,8 +100,6 @@ func _arrancar_partido() -> void:
 	if GameState.promo_activa:
 		GameState.aviso.emit("Promoción 2x1 activa: llegarán más clientes.")
 
-# ---------------------------------------------------------------- Práctica (Jornada 1)
-
 func _iniciar_practica() -> void:
 	_cliente_practica = Cliente.crear("cliente_practica")
 	_agregar_a_fila(_cliente_practica, true)
@@ -138,7 +127,6 @@ func _iniciar_practica() -> void:
 	tutorial.terminado.connect(_terminar_practica)
 	add_child(tutorial)
 
-## El cliente de práctica ya llegó (o pasó) a ese estado. Si ya se fue, cuenta como pasado.
 func _practica_en(estado: Cliente.Estado) -> bool:
 	if not is_instance_valid(_cliente_practica):
 		return true
@@ -167,9 +155,6 @@ func _al_cambiar_valor(_valor) -> void:
 func _al_agotar_reputacion() -> void:
 	terminar_jornada("La reputación de La 501 llegó a 0%. Los clientes dejaron de venir.")
 
-# ---------------------------------------------------------------- Construcción
-
-## Las mesas 1-6 siempre están; las 7-8 (nodo Terraza) solo después de ganar la Gran Final.
 func _preparar_mesas() -> void:
 	for mesa in $Mesas.get_children():
 		mesas.append(mesa)
@@ -193,13 +178,10 @@ func _generar_goles() -> void:
 		_goles.append(randf_range(8.0, 86.0))
 	_goles.sort()
 
-# ---------------------------------------------------------------- Ciclo del partido
-
 func _process(delta: float) -> void:
 	if terminado:
 		return
 	if practica:
-		# Antes del partido: solo se mueve el cliente de práctica; el reloj no corre.
 		_sentar_clientes()
 		_animar_decoracion(delta)
 		_refresco_panel += delta
@@ -297,7 +279,6 @@ func _mesa_para(cliente: Cliente) -> Mesa:
 	if cliente is ClienteReservacion and cliente.mesa_reservada() > 0:
 		var propia := _mesa_numero(cliente.mesa_reservada())
 		return propia if propia and propia.esta_libre() else null
-	# La mesa libre más chica en la que quepa el grupo (las de 4 quedan para familias).
 	var mejor: Mesa = null
 	for mesa in mesas:
 		if mesa.esta_libre() and mesa.capacidad >= cliente.personas and GameState.reservacion_para_mesa(mesa.numero, minuto).is_empty():
@@ -340,9 +321,6 @@ func _procesar_eventos() -> void:
 		_goles.pop_front()
 		_gol()
 
-# ---------------------------------------------------------------- Eventos del partido
-
-## Nivel 1: un evento; Liguilla: uno o dos; Gran Final: dos. Nunca se repite el mismo.
 func _generar_eventos() -> void:
 	var cantidad: int = {1: 1, 2: randi_range(1, 2), 3: 2}.get(GameState.nivel_actual, 1)
 	var tipos := ["retraso", "critico", "apagon"]
@@ -403,7 +381,6 @@ func _fin_apagon() -> void:
 func _demora_actual() -> float:
 	return GameState.demora_urgente() * (1.5 if minuto < _retraso_hasta else 1.0)
 
-## Al llegar al 90': si el partido va empatado hay penales (20 s más y otra ronda de bebidas).
 func _final_del_partido(delta: float) -> void:
 	if not penales and marcador[0] == marcador[1] and _penales_restante == 0.0:
 		penales = true
@@ -448,7 +425,6 @@ func _gol() -> void:
 	tween.tween_property(destello, "color:a", 0.0, 0.6)
 	tween.tween_callback(destello.queue_free)
 
-## Pantallas: la jugada alterna dos cuadros; en un gol muestran "GOL!". El neón parpadea a ratos.
 func _animar_decoracion(delta: float) -> void:
 	_cuadro_tv += delta
 	if _gol_en_pantalla > 0.0:
@@ -474,9 +450,6 @@ func _clientes_sentados() -> int:
 			total += 1
 	return total
 
-# ---------------------------------------------------------------- Pedidos y faltantes
-
-## Dani tomó la comanda de un cliente: se consume el inventario y se envía a cocina o barra.
 func procesar_pedido(cliente: Cliente) -> void:
 	if cliente is ClientePractica:
 		_enviar(cliente, cliente.pedido, false)
@@ -490,7 +463,6 @@ func procesar_pedido(cliente: Cliente) -> void:
 	if GameState.preparar(platillo, cliente.personas):
 		_enviar(cliente, platillo, false)
 		return
-	# Cada pedido cuenta como un solo quiebre aunque Dani vuelva a intentarlo.
 	if cliente.quiebre_registrado != platillo:
 		cliente.quiebre_registrado = platillo
 		GameState.registrar_quiebre(platillo)
@@ -562,15 +534,12 @@ func _marcar_agotado(cliente: Cliente, platillo: String) -> void:
 	GameState.aviso.emit("El cliente cambió su pedido a %s." % alternativa)
 	procesar_pedido(cliente)
 
-## Un platillo marcado como agotado vuelve al menú en cuanto hay insumos otra vez
-## (por ejemplo, al llegar un pedido urgente).
 func _revisar_agotados() -> void:
 	for platillo in agotados.duplicate():
 		if GameState.inventario.puede_preparar(platillo, 1):
 			agotados.erase(platillo)
 			GameState.aviso.emit("%s vuelve al menú: ya hay insumos." % platillo)
 
-## Platillos del menú que ya no se pueden preparar porque algún insumo llegó a cero.
 func platillos_sin_insumos() -> Array[String]:
 	var menu: Array[String] = []
 	menu.assign(Catalogo.MENU_HABITUAL)
@@ -617,8 +586,6 @@ func mostrar_ganancia(pos: Vector2, cantidad: int) -> void:
 	tween.parallel().tween_property(l, "modulate:a", 0.0, 0.9)
 	tween.tween_callback(l.queue_free)
 
-# ---------------------------------------------------------------- Entrada del jugador
-
 func _unhandled_input(evento: InputEvent) -> void:
 	if terminado or PanelModal.abiertos > 0 or _pausa.esta_abierto():
 		return
@@ -631,8 +598,6 @@ func _unhandled_input(evento: InputEvent) -> void:
 	elif evento.is_action_pressed("reservaciones"):
 		get_viewport().set_input_as_handled()
 		_tablet.abrir_seccion("reservaciones")
-
-# ---------------------------------------------------------------- Fin de la jornada
 
 func terminar_jornada(motivo: String) -> void:
 	if terminado:
@@ -652,8 +617,6 @@ func terminar_jornada(motivo: String) -> void:
 	AudioManager.musica("")
 	GameState.cambiar_escena(GameState.ESCENA_REPORTE)
 
-# ---------------------------------------------------------------- HUD y panel lateral
-
 func _actualizar_hud() -> void:
 	if _hud_reloj == null:
 		return
@@ -668,7 +631,6 @@ func _actualizar_hud() -> void:
 	for p in _pantallas:
 		p.text = texto_pantalla
 
-## El panel se construye una sola vez; después solo se actualizan textos y colores.
 func _actualizar_panel_lateral() -> void:
 	if _panel_lateral == null:
 		return
@@ -683,8 +645,6 @@ func _actualizar_panel_lateral() -> void:
 				en_camino += int(e["cantidad"])
 		var color_stock := UIKit.ROJO if cantidad <= 2 else (Color("f2d16b") if cantidad <= GameState.STOCK_BAJO else UIKit.TEXTO)
 		_fijar(_lateral["stock"][insumo], "%s: %d%s" % [Catalogo.nombre_insumo(insumo), cantidad, "  (+%d en camino)" % en_camino if en_camino > 0 else ""], color_stock)
-	# Regla 11: lo que no se puede preparar aparece agotado en el menú. Si un cliente lo pide,
-	# Dani decide qué hacer (agotar, urgente o sustituto).
 	var sin := platillos_sin_insumos()
 	var lineas_agotado: Array[String] = []
 	if not agotados.is_empty():
@@ -707,7 +667,6 @@ func _actualizar_panel_lateral() -> void:
 	for i in range(mini(lineas.size(), etiquetas_objetivo.size())):
 		_fijar(etiquetas_objetivo[i], lineas[i], UIKit.TEXTO)
 
-## Reúne las etiquetas del panel lateral y agrega las que dependen del día (reservaciones y objetivo).
 func _construir_panel_lateral() -> void:
 	var p := _panel_lateral
 	var stock := {}
@@ -730,7 +689,6 @@ func _construir_panel_lateral() -> void:
 	_lateral = {"stock": stock, "agotados": p.get_node("Agotados"), "cocina": p.get_node("Cocina"), "barra": p.get_node("Barra"),
 		"fila": p.get_node("Fila"), "reservas": reservas, "objetivo": objetivo}
 
-## Cambia texto y color solo si son distintos (evita recalcular el diseño de la interfaz).
 func _fijar(etiqueta: Label, texto: String, color: Color) -> void:
 	if etiqueta.text != texto:
 		etiqueta.text = texto

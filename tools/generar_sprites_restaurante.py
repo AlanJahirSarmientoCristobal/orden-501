@@ -1,12 +1,3 @@
-"""Genera en pixel art (estilo Kenney) las pantallas del partido y el letrero de neón de La 501.
-
-Salida en Assets/sprites/restaurante/:
-  tv_1.png, tv_2.png   pantalla con la cancha (dos cuadros de animación)
-  tv_gol.png           pantalla durante un gol
-  neon_on.png, neon_off.png   letrero "LA 501" encendido y atenuado (parpadeo)
-
-Uso: python tools/generar_sprites_restaurante.py
-"""
 from pathlib import Path
 
 from PIL import Image
@@ -26,7 +17,6 @@ AZUL = (63, 169, 245, 255)
 BALON = (255, 255, 255, 255)
 BRILLO = (255, 255, 255, 60)
 
-# Letras de 3x5 píxeles para textos cortos.
 LETRAS = {
     "L": ["X..", "X..", "X..", "X..", "XXX"],
     "A": ["XXX", "X.X", "XXX", "X.X", "X.X"],
@@ -38,7 +28,6 @@ LETRAS = {
     "!": ["X", "X", "X", ".", "X"],
     " ": ["..", "..", "..", "..", ".."],
 }
-
 
 def texto(img, x, y, cadena, color, escala=1):
     for letra in cadena:
@@ -52,10 +41,8 @@ def texto(img, x, y, cadena, color, escala=1):
         x += (len(patron[0]) + 1) * escala
     return x
 
-
 def ancho_texto(cadena, escala=1):
     return sum((len(LETRAS[l][0]) + 1) * escala for l in cadena) - escala
-
 
 def marco_tv(ancho=64, alto=20):
     img = Image.new("RGBA", (ancho, alto), (0, 0, 0, 0))
@@ -67,11 +54,9 @@ def marco_tv(ancho=64, alto=20):
         img.putpixel((x, 1), MARCO_LUZ)
     return img
 
-
 def cancha(img, jugadores):
     ancho, alto = img.size
     x0, x1, y0, y1 = 2, ancho - 3, 8, alto - 3
-    # Marcador (el texto del marcador lo pone el juego encima)
     for x in range(2, ancho - 2):
         for y in range(2, 8):
             img.putpixel((x, y), MARCADOR)
@@ -90,7 +75,6 @@ def cancha(img, jugadores):
     cy = (y0 + y1) // 2
     for dx, dy in [(-2, -1), (-2, 0), (-2, 1), (2, -1), (2, 0), (2, 1), (-1, -2), (0, -2), (1, -2), (-1, 2), (0, 2), (1, 2)]:
         img.putpixel((medio + dx, cy + dy), LINEA)
-    # Porterías
     for y in range(cy - 2, cy + 3):
         img.putpixel((x0 + 3, y), LINEA)
         img.putpixel((x1 - 3, y), LINEA)
@@ -98,7 +82,6 @@ def cancha(img, jugadores):
         img.putpixel((x, y), color)
         img.putpixel((x, y - 1), color)
     return img
-
 
 def tv_gol():
     img = marco_tv()
@@ -110,11 +93,9 @@ def tv_gol():
     frase = "GOL!"
     w = ancho_texto(frase, 2)
     texto(img, (ancho - w) // 2, 5, frase, (255, 255, 255, 255), 2)
-    # Confeti
     for i, (x, y) in enumerate([(5, 4), (10, 12), (54, 5), (58, 13), (16, 5), (48, 12), (8, 8), (57, 9)]):
         img.putpixel((x, y), [ROJO, AZUL, (95, 211, 141, 255), (255, 255, 255, 255)][i % 4])
     return img
-
 
 def neon(encendido):
     ancho, alto = 64, 18
@@ -126,7 +107,6 @@ def neon(encendido):
         for y in range(alto):
             borde = x in (0, ancho - 1) or y in (0, alto - 1)
             img.putpixel((x, y), NEGRO if borde else (27, 31, 42, 255))
-    # Tubo del contorno con esquinas redondeadas
     for x in range(3, ancho - 3):
         img.putpixel((x, 2), tubo)
         img.putpixel((x, alto - 3), tubo)
@@ -136,7 +116,6 @@ def neon(encendido):
     frase = "LA 501"
     w = ancho_texto(frase, 2)
     x0, y0 = (ancho - w) // 2, 4
-    # Halo alrededor de las letras
     capa = Image.new("RGBA", (ancho, alto), (0, 0, 0, 0))
     texto(capa, x0, y0, frase, luz, 2)
     for x in range(ancho):
@@ -148,7 +127,6 @@ def neon(encendido):
                         img.putpixel((nx, ny), halo)
     img.alpha_composite(capa)
     return img
-
 
 def main():
     SALIDA.mkdir(parents=True, exist_ok=True)
@@ -162,7 +140,6 @@ def main():
     neon(True).save(SALIDA / "neon_on.png")
     neon(False).save(SALIDA / "neon_off.png")
     print("Sprites generados en", SALIDA)
-
 
 if __name__ == "__main__":
     main()

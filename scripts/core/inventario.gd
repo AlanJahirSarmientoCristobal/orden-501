@@ -1,10 +1,7 @@
 extends RefCounted
 class_name Inventario
 
-## Almacén de insumos organizado por lotes. Cada lote recuerda el día en que se compró
-## para calcular la caducidad; el consumo es FIFO (primero se usa lo más viejo).
-
-var lotes: Array[Dictionary] = []   # {"insumo": String, "cantidad": int, "dia": int}
+var lotes: Array[Dictionary] = []
 
 func agregar(insumo: String, cantidad: int, dia: int) -> void:
 	if cantidad <= 0:
@@ -28,7 +25,6 @@ func total_unidades() -> int:
 		suma += int(lote["cantidad"])
 	return suma
 
-## porciones: cuántas veces se prepara la receta (un grupo de 4 pide 4 porciones).
 func faltantes(platillo: String, porciones: int = 1) -> Dictionary:
 	var resultado := {}
 	var receta := Catalogo.receta(platillo)
@@ -61,7 +57,6 @@ func _retirar(insumo: String, cantidad: int) -> void:
 		pendiente -= usar
 	lotes = lotes.filter(func(l): return int(l["cantidad"]) > 0)
 
-## Retira los lotes perecederos vencidos. Devuelve {insumo: unidades perdidas}.
 func retirar_caducados(dia_actual: int, dias_caducidad: int) -> Dictionary:
 	var merma := {}
 	var vigentes: Array[Dictionary] = []
@@ -74,7 +69,6 @@ func retirar_caducados(dia_actual: int, dias_caducidad: int) -> Dictionary:
 	lotes = vigentes
 	return merma
 
-## Días que le quedan al lote más viejo de un insumo (-1 si no caduca o no hay existencias).
 func dias_restantes(insumo: String, dia_actual: int, dias_caducidad: int) -> int:
 	if not bool(Catalogo.INSUMOS.get(insumo, {}).get("perecedero", false)):
 		return -1

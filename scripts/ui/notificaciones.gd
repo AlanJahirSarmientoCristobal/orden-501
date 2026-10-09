@@ -1,9 +1,6 @@
 extends CanvasLayer
 class_name Notificaciones
 
-## Avisos breves en la parte superior de la pantalla (cada uno es una escena aviso.tscn).
-## Escucha GameState.aviso.
-
 const MAXIMO := 4
 const DURACION := 3.5
 

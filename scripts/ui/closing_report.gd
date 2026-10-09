@@ -1,8 +1,5 @@
 extends Control
 
-## Reporte de cierre (scenes/ui/closing_report.tscn): resultados del día, merma, condición del
-## nivel, mejoras y "Reiniciar jornada". Cada mejora es una escena fila_mejora.tscn.
-
 const FILA_MEJORA := preload("res://scenes/ui/fila_mejora.tscn")
 
 @onready var _contenido: VBoxContainer = $Margen/Columnas/Informe/Desplazable/Contenido
@@ -64,7 +61,6 @@ func _construir_informe() -> void:
 		tabla.add_child(UIKit.etiqueta(fila[1], 15))
 	_mostrar_acciones(inf, exito)
 
-## Los botones están en la escena; aquí solo se muestran los que aplican.
 func _mostrar_acciones(inf: Dictionary, exito: bool) -> void:
 	if bool(inf.get("reto", false)):
 		var reto: Label = _acciones.get_node("Reto")

@@ -1,8 +1,6 @@
 extends Control
 class_name CursorMenu
 
-## Cursor triangular del menú de compra (la fuente pixel no trae el carácter ▶).
-
 const TINTA := Color("303040")
 const SOMBRA := Color("c8c8c0")
 

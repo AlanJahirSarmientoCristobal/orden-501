@@ -1,12 +1,5 @@
 extends SceneTree
 
-## Convierte scenes/town/mapa_pueblo.json (generado por tools/componer_pueblo.py) en:
-##   Assets/tilesets/rpg_urban.tres     TileSet del pack RPG Urban con colisiones
-##   scenes/town/mapa_pueblo.tscn       Escena con tres TileMapLayer (Suelo, Objetos y Copas)
-## La escena resultante se puede abrir y pintar en el editor de Godot.
-##
-## Uso: godot --headless --path . --script res://tools/construir_mapa_pueblo.gd
-
 const JSON_MAPA := "res://scenes/town/mapa_pueblo.json"
 const ATLAS := "res://Assets/sprites/rpg_urban/Tilemap/tilemap_packed.png"
 const TILESET := "res://Assets/tilesets/rpg_urban.tres"
@@ -21,14 +14,11 @@ func _init() -> void:
 	var columnas_atlas := int(datos["atlas_columnas"])
 	var tam := int(datos["tile"])
 
-	# Tiles sólidos: el tile de la MISMA capa en cada celda marcada como sólida
-	# (así un auto sobre la calle no vuelve sólido el asfalto de abajo).
 	var ids_solidos := {}
 	for p in datos["solidos"]:
 		var id := int(datos[str(p[0])][int(p[2])][int(p[1])])
 		if id >= 0:
 			ids_solidos[id] = true
-	# Banqueta, pasto y calle siempre se pueden pisar.
 	var transitables := [8, 9, 10, 35, 36, 37, 62, 63, 64, 0, 1, 2, 27, 28, 29, 54, 55, 56, 441, 442]
 	transitables.append_array([405, 406, 432, 433, 434, 435, 436, 459, 460, 461, 462, 463])
 	for libre in transitables:
@@ -75,7 +65,6 @@ func _init() -> void:
 		layer.scale = Vector2(escala, escala)
 		layer.collision_enabled = capa != "copas"
 		if capa == "copas":
-			# Las copas de los árboles tapan a los personajes que pasan detrás.
 			layer.z_as_relative = false
 			layer.z_index = 20
 		var filas: Array = datos[capa]

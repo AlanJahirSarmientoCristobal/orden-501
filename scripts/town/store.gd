@@ -1,10 +1,5 @@
 extends FaseManana
 
-## Interior del Mercado o la Cervecería (escenas mercado.tscn y cerveceria.tscn), pintado con tiles
-## de Kenney en sus TileMapLayer. La tienda está decorada con los productos en sus muebles; para
-## comprar se habla con el vendedor de la caja, que abre un menú al estilo de Pokémon Rojo Fuego.
-
-## Tienda de esta escena: "mercado" (mercado.tscn) o "cerveceria" (cerveceria.tscn).
 @export_enum("mercado", "cerveceria") var tienda := "mercado"
 
 var _rotacion := 0.0
@@ -12,7 +7,6 @@ var _rotacion := 0.0
 var _nombre_vendedor := ""
 var _clave_vendedor := ""
 
-# Solo la Cervecería tiene el exhibidor de Monster.
 @onready var _exhibidor: Sprite2D = get_node_or_null("ExhibidorMonster")
 
 func nombre_lugar() -> String:
@@ -28,7 +22,6 @@ func _ready() -> void:
 	if GameState.tutorial_pendiente("tienda"):
 		_iniciar_tutorial()
 
-## Jornada 1: cómo comprar con el menú del vendedor.
 func _iniciar_tutorial() -> void:
 	var inicial := GameState.inventario.total_unidades()
 	var pasos: Array[Dictionary] = [
@@ -49,7 +42,6 @@ func _iniciar_tutorial() -> void:
 
 func _process(delta: float) -> void:
 	super._process(delta)
-	# La lata del refrigerador de Monster cambia de diseño cada momento.
 	if _exhibidor:
 		_rotacion += delta
 		if _rotacion >= 1.2:
@@ -68,7 +60,6 @@ func abrir_menu() -> void:
 func _al_usar_caja(_dani: Node) -> void:
 	abrir_menu()
 
-## La puerta (Area2D "Salida"): al cruzarla Dani sale al pueblo.
 func _al_cruzar_puerta(cuerpo: Node) -> void:
 	if cuerpo is Dani:
 		_salir()

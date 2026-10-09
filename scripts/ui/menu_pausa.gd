@@ -1,10 +1,7 @@
 extends CanvasLayer
 class_name MenuPausa
 
-## Pausa con Esc: continuar o volver al menú principal.
-
 @onready var _raiz: Control = $Raiz
-
 
 func _unhandled_input(evento: InputEvent) -> void:
 	if evento.is_action_pressed("pausa") and (PanelModal.abiertos == 0 or _raiz.visible):

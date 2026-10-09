@@ -1,13 +1,9 @@
 extends Node2D
 class_name FaseManana
 
-## Base de la fase de mañana, compartida por el pueblo y el interior de las tiendas:
-## HUD, reloj de la mañana, tablet (E), inventario (I), reservaciones (R) y pausa.
-
 @onready var dani: Dani = $Dani
 var terminando := false
 
-# Interfaz: nodos de cada escena de la mañana (HUD, ventanas y avisos).
 @onready var _hud_lugar: Label = $HUD/Barra/Fila/Lugar
 @onready var _hud_dinero: Label = $HUD/Barra/Fila/Dinero
 @onready var _hud_reputacion: Label = $HUD/Barra/Fila/Reputacion
@@ -20,7 +16,6 @@ var terminando := false
 @onready var _pausa: MenuPausa = $Pausa
 var _aviso_30s := false
 
-## Nombre del lugar para la barra superior (lo define cada escena).
 func nombre_lugar() -> String:
 	return "PUEBLO"
 
@@ -39,7 +34,6 @@ func _al_cambiar_dinero(_valor: int) -> void:
 func _process(delta: float) -> void:
 	if terminando or get_tree().paused:
 		return
-	# El reloj corre en el pueblo y dentro de las tiendas; se detiene en pausa y en los diálogos.
 	if GameState.config.tiempo_pueblo > 0.0 and not _dialogo.esta_abierto() and not GameState.tutorial_manana_activo():
 		GameState.tiempo_manana -= delta
 		if GameState.tiempo_manana <= 30.0 and not _aviso_30s:
@@ -71,8 +65,6 @@ func ir_al_restaurante() -> void:
 	terminando = true
 	GameState.iniciar_jornada()
 	GameState.cambiar_escena(GameState.ESCENA_RESTAURANTE)
-
-# ---------------------------------------------------------------- HUD
 
 func _actualizar_hud() -> void:
 	_hud_dinero.text = "Dinero %s" % UIKit.dinero(GameState.dinero)

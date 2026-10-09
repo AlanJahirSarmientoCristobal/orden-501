@@ -1,8 +1,5 @@
 extends Node
 
-## Estado global de la partida: dificultad, día, dinero, reputación, inventario,
-## reservaciones, mejoras, estadísticas de la jornada y guardado.
-
 signal dinero_cambiado(total: int)
 signal reputacion_cambiada(valor: float)
 signal inventario_cambiado
@@ -14,7 +11,6 @@ const SAVE_PATH := "user://orden501_save.json"
 
 const ESCENA_MENU := "res://scenes/menu/main_menu.tscn"
 const ESCENA_PUEBLO := "res://scenes/town/town.tscn"
-## Escena de cada tienda: scenes/town/mercado.tscn o scenes/town/cerveceria.tscn.
 static func escena_tienda(tienda: String) -> String:
 	return "res://scenes/town/%s.tscn" % tienda
 
@@ -37,10 +33,8 @@ const NIVELES := {
 
 const META_VENTAS := {"facil": 1000, "normal": 1200, "dificil": 1400}
 const MAX_CLIENTES_PERDIDOS_N1 := 3
-## Unidades a partir de las cuales se avisa de stock bajo (alcanza para una familia mientras llega el proveedor).
 const STOCK_BAJO := 6
 
-## Mejoras del reporte de cierre. "costos" tiene un precio por nivel (el segundo cuesta más).
 const MEJORAS := {
 	"velocidad": {"nombre": "Tenis nuevos", "descripcion": "Dani camina 15% más rápido por nivel.", "costos": [400, 800]},
 	"bandeja": {"nombre": "Bandeja grande", "descripcion": "Cuarto espacio en la bandeja.", "costos": [600]},
@@ -70,19 +64,18 @@ var promo_activa := false
 var terraza_desbloqueada := false
 var temporada_completada := false
 var intro_vista := false
-var modo_reto := false       # Reto Imposible: no guarda ni avanza la campaña
-var tutoriales := {}         # Tutoriales de la Jornada 1 ya vistos: pueblo, tienda, regreso, restaurante
-var tutoriales_habilitados := true   # Las pruebas y el bot los desactivan
+var modo_reto := false
+var tutoriales := {}
+var tutoriales_habilitados := true
 var reservaciones: Array[Dictionary] = []
 var estadisticas := {}
 var historial: Array[Dictionary] = []
 var ultimo_informe := {}
 var _snapshot := {}
 
-# Estado de la mañana: se conserva al entrar y salir de las tiendas.
-var tiempo_manana := 0.0              # Segundos restantes (si la dificultad tiene límite)
-var posicion_pueblo := Vector2.ZERO   # Dónde reaparece Dani al volver al pueblo (ZERO = inicio)
-var tienda_actual := ""               # Catalogo.MERCADO o Catalogo.CERVECERIA
+var tiempo_manana := 0.0
+var posicion_pueblo := Vector2.ZERO
+var tienda_actual := ""
 
 var _transicion: ColorRect
 
@@ -95,11 +88,6 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	AssetPaths.limpiar_cache()
 
-# ---------------------------------------------------------------- Partida
-
-# ---------------------------------------------------------------- Tutoriales
-
-## Los tutoriales solo aparecen en la Jornada 1 de la campaña, una vez cada uno.
 func tutorial_pendiente(clave: String) -> bool:
 	return tutoriales_habilitados and not modo_reto and nivel_actual == 1 and not tutoriales.get(clave, false)
 
@@ -110,7 +98,6 @@ func omitir_tutoriales() -> void:
 	for clave in ["pueblo", "tienda", "regreso", "restaurante"]:
 		tutoriales[clave] = true
 
-## Mientras se aprende a moverse y a comprar, el reloj de la mañana no avanza.
 func tutorial_manana_activo() -> bool:
 	return tutorial_pendiente("pueblo") or tutorial_pendiente("tienda")
 
@@ -135,10 +122,7 @@ func nueva_partida(nueva_dificultad: String) -> void:
 	ultimo_informe = {}
 	iniciar_manana()
 
-## Prepara la fase de mañana del día actual y toma la "foto" para poder reiniciar la jornada.
 func iniciar_manana() -> void:
-	# La afición vuelve cada día: la reputación arranca en al menos 75 % (si traes más, se
-	# conserva). Evita que un mal día deje la siguiente jornada imposible de ganar.
 	if config.piso_reputacion:
 		reputacion = maxf(reputacion, REPUTACION_INICIAL)
 	_reiniciar_estadisticas()
@@ -153,7 +137,6 @@ func iniciar_manana() -> void:
 	reputacion_cambiada.emit(reputacion)
 	inventario_cambiado.emit()
 
-## Reto Imposible: una Gran Final con el balance original de Difícil. No toca la partida guardada.
 func iniciar_reto_imposible() -> void:
 	modo_reto = true
 	dificultad = ConfiguracionDificultad.IMPOSIBLE
@@ -170,7 +153,6 @@ func iniciar_reto_imposible() -> void:
 	ultimo_informe = {}
 	iniciar_manana()
 
-## Un nivel se puede repetir desde Selección de nivel cuando ya se superó en la campaña.
 func nivel_superado(nivel: int) -> bool:
 	return nivel < nivel_desbloqueado or (nivel == 3 and temporada_completada)
 
@@ -178,7 +160,6 @@ func seleccionar_nivel(nivel: int) -> void:
 	nivel_actual = clampi(nivel, 1, nivel_desbloqueado)
 	iniciar_manana()
 
-## "Reiniciar jornada": vuelve a la mañana con el dinero e inventario que tenía al inicio.
 func reiniciar_jornada() -> void:
 	if not _snapshot.is_empty():
 		_restaurar(_snapshot)
@@ -198,8 +179,6 @@ func info_nivel(nivel: int = nivel_actual) -> Dictionary:
 
 func meta_ventas() -> int:
 	return int(META_VENTAS.get(dificultad, 1200))
-
-# ---------------------------------------------------------------- Valores derivados
 
 func duracion_partido() -> float:
 	return float(info_nivel()["duracion"]) + config.duracion_extra
@@ -234,7 +213,6 @@ func multiplicador_cocina() -> float:
 	return config.multiplicador_cocina * (0.75 if int(mejoras["cocina"]) > 0 else 1.0)
 
 func intervalo_llegada() -> float:
-	# Promoción 2x1: ~40% más clientes (intervalo ÷ 1.4).
 	return config.intervalo_llegada / (1.4 if promo_activa else 1.0)
 
 func paciencia_base() -> float:
@@ -246,8 +224,6 @@ func probabilidad_vip() -> float:
 func tiempo_limpieza() -> float:
 	return config.tiempo_limpieza * (1.3 if nivel_actual == 3 else 1.0) * (0.6 if int(mejoras["limpieza"]) > 0 else 1.0)
 
-## Tamaño del grupo que llega (1, 2 o 4), según la dificultad.
-## En la Jornada Regular (nivel 1) llegan parejas, pero las familias empiezan en la Liguilla.
 func tamano_grupo() -> int:
 	var tirada := randf()
 	var familia := config.probabilidad_familia if nivel_actual >= config.familias_desde_nivel else 0.0
@@ -263,11 +239,8 @@ func probabilidad_bebida() -> float:
 func numero_mesas() -> int:
 	return 8 if terraza_desbloqueada else 6
 
-## Capacidad de cada mesa (las mesas 1-3 son de 2 personas, el resto de 4).
 func capacidad_mesa(numero: int) -> int:
 	return 2 if numero <= 3 else 4
-
-# ---------------------------------------------------------------- Dinero, reputación y compras
 
 func cambiar_dinero(cantidad: int) -> void:
 	dinero += cantidad
@@ -282,7 +255,6 @@ func cambiar_reputacion(delta: float, motivo: String = "") -> void:
 	if reputacion <= 0.0 and anterior > 0.0:
 		reputacion_agotada.emit()
 
-## Compra en la mañana. Devuelve "" si tuvo éxito o el motivo del rechazo.
 func comprar(insumo: String, cantidad: int) -> String:
 	if not Catalogo.INSUMOS.has(insumo) or cantidad <= 0:
 		return "Producto no válido."
@@ -301,7 +273,6 @@ func costo_urgente(insumo: String, cantidad: int) -> int:
 	var descuento := 0.7 if int(mejoras["proveedor"]) > 0 else 1.0
 	return int(ceil(float(precio_insumo(insumo) * cantidad) * config.urgente_multiplicador_costo * descuento))
 
-## Paga un pedido urgente por teléfono. La entrega la programa el restaurante.
 func pagar_urgente(insumo: String, cantidad: int) -> bool:
 	var costo := costo_urgente(insumo, cantidad)
 	if costo > dinero:
@@ -317,7 +288,6 @@ func recibir_urgente(insumo: String, cantidad: int) -> void:
 	inventario_cambiado.emit()
 	aviso.emit("Llegó el proveedor: +%d %s" % [cantidad, Catalogo.nombre_insumo(insumo)])
 
-## Consume los insumos de un platillo. Devuelve false si faltan.
 func preparar(platillo: String, porciones: int = 1) -> bool:
 	if inventario.consumir_receta(platillo, porciones):
 		inventario_cambiado.emit()
@@ -325,7 +295,6 @@ func preparar(platillo: String, porciones: int = 1) -> bool:
 		return true
 	return false
 
-## Un pedido no se pudo preparar por falta de insumos (cuenta para el Nivel 1).
 func registrar_quiebre(platillo: String) -> void:
 	estadisticas["quiebres"] += 1
 	aviso.emit("Quiebre de stock: no alcanza para %s." % platillo)
@@ -341,7 +310,6 @@ func _revisar_stock_bajo(platillo: String) -> void:
 func registrar_venta(platillo: String, propina: int, porciones: int = 1) -> void:
 	var total := Catalogo.precio(platillo) * porciones + propina
 	if promo_activa:
-		# Promoción 2x1: los clientes atraídos dejan un bono y una buena reseña.
 		total += BONO_PROMO_DINERO
 		estadisticas["bono_promo"] = int(estadisticas.get("bono_promo", 0)) + BONO_PROMO_DINERO
 		cambiar_reputacion(BONO_PROMO_REPUTACION)
@@ -353,8 +321,6 @@ func registrar_venta(platillo: String, propina: int, porciones: int = 1) -> void
 func registrar_estadistica(clave: String, cantidad: int = 1) -> void:
 	estadisticas[clave] = int(estadisticas.get(clave, 0)) + cantidad
 
-# ---------------------------------------------------------------- Reservaciones
-
 func _generar_reservaciones() -> void:
 	reservaciones = []
 	if nivel_actual < 2:
@@ -365,7 +331,6 @@ func _generar_reservaciones() -> void:
 	var cantidad := 4 if nivel_actual == 2 else 6
 	var minutos := MINUTOS_RESERVA.duplicate()
 	for i in range(cantidad):
-		# Algunos horarios se repiten a propósito para que haya que repartir mesas.
 		var minuto: int = minutos[rng.randi_range(0, minutos.size() - 1)]
 		reservaciones.append({
 			"id": "R-%d%02d" % [nivel_actual, i + 1],
@@ -384,7 +349,6 @@ func buscar_reservacion(id: String) -> Dictionary:
 			return r
 	return {}
 
-## Asigna una mesa. Devuelve "ok", "duplicada", "capacidad" o "invalida".
 func asignar_reservacion(id: String, mesa: int) -> String:
 	var reserva := buscar_reservacion(id)
 	if reserva.is_empty() or reserva["estado"] in ["llego", "atendida"] or mesa < 1 or mesa > numero_mesas():
@@ -412,8 +376,6 @@ func reservacion_para_mesa(mesa: int, minuto_actual: float, ventana: float = 10.
 			return r
 	return {}
 
-# ---------------------------------------------------------------- Cierre de jornada
-
 func objetivo_cumplido() -> bool:
 	match nivel_actual:
 		1:
@@ -439,7 +401,6 @@ func detalle_objetivo() -> Array[String]:
 func _marca(ok: bool) -> String:
 	return "✔" if ok else "✘"
 
-## Cierra la jornada, calcula la merma nocturna y la progresión. Devuelve el informe.
 func cerrar_jornada(motivo_derrota: String = "") -> Dictionary:
 	var exito := motivo_derrota == "" and objetivo_cumplido()
 	var nivel_jugado := nivel_actual
@@ -479,8 +440,6 @@ func cerrar_jornada(motivo_derrota: String = "") -> Dictionary:
 		_guardar_datos(_capturar())
 	return ultimo_informe
 
-## Puntuación de una jornada (sistema de recompensa): premia ventas, pedidos, VIP,
-## reservaciones y reputación, y castiga clientes perdidos, quiebres, duplicados y merma.
 const PUNTOS_JORNADA_SUPERADA := 500
 
 func calcular_puntos(e: Dictionary, reputacion_final: float, costo_merma: int, exito: bool) -> int:
@@ -497,14 +456,12 @@ func calcular_puntos(e: Dictionary, reputacion_final: float, costo_merma: int, e
 		puntos += PUNTOS_JORNADA_SUPERADA
 	return maxi(0, puntos)
 
-## Suma de los puntos de las jornadas superadas en la temporada.
 func puntos_temporada() -> int:
 	var total := 0
 	for informe in historial:
 		total += int(informe.get("puntos", 0))
 	return total
 
-## Compra una mejora en el reporte de cierre.
 func comprar_mejora(id: String) -> bool:
 	if not MEJORAS.has(id):
 		return false
@@ -523,8 +480,6 @@ func _reiniciar_estadisticas() -> void:
 		"gasto_urgente": 0, "sustitutos": 0, "agotados": 0, "duplicados": 0, "reservas_atendidas": 0,
 		"reservas_sin_mesa": 0, "vip_atendidos": 0, "compras": 0, "goles": 0, "reputacion_inicial": reputacion,
 	}
-
-# ---------------------------------------------------------------- Guardado
 
 func _capturar() -> Dictionary:
 	return {
@@ -588,8 +543,6 @@ func cargar() -> bool:
 func borrar_guardado() -> void:
 	if hay_partida_guardada():
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE_PATH))
-
-# ---------------------------------------------------------------- Escenas y controles
 
 func cambiar_escena(ruta: String) -> void:
 	var entrada := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)

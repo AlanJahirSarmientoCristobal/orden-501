@@ -1,8 +1,5 @@
 extends Control
 
-## Final de la temporada (scenes/ui/victory.tscn): La 501 se vuelve el restaurante de referencia
-## del pueblo, se desbloquea la terraza y se muestra el reporte de la temporada.
-
 @onready var _subtitulo: Label = $Centro/Panel/Caja/Subtitulo
 @onready var _tabla: GridContainer = $Centro/Panel/Caja/CentroTabla/Tabla
 

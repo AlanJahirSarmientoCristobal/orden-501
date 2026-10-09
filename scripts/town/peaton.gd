@@ -1,11 +1,8 @@
 extends Node2D
 class_name Peaton
 
-## Vecino que camina por el pueblo siguiendo una ruta (solo ambientación, no choca).
-
 const VELOCIDAD := 70.0
 
-## Puntos que recorre, ida y vuelta (en el Inspector).
 @export var ruta: Array[Vector2] = []
 @export var frames: SpriteFrames
 
@@ -34,7 +31,6 @@ func _siguiente() -> void:
 	_sprite.play()
 	var tween := create_tween()
 	tween.tween_property(self, "position", destino, direccion.length() / VELOCIDAD)
-	# Pausa breve en cada punto, como si platicara o viera un aparador.
 	tween.tween_callback(_detenerse)
 	tween.tween_interval(randf_range(0.5, 2.5))
 	tween.tween_callback(_siguiente)

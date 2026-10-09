@@ -1,19 +1,10 @@
 extends Node
 
-## Simulador de balance: un "jugador" automático juega la temporada completa respetando
-## las limitaciones reales de Dani (camina a su velocidad, usa sprint con estamina,
-## mantiene Espacio para limpiar, carga máximo 3 platillos y tarda en decidir).
-## No es una prueba de pasa/falla: imprime las estadísticas de cada jornada.
-##
-## Uso: godot --headless --path . res://tests/simulador_partida.tscn -- <dificultad> [intentos]
-## Para verlo jugar (con ventana): godot --path . res://tests/simulador_partida.tscn -- dificil 3 ver
-## En modo "ver" muestra la mañana (pueblo y compras), la jornada a x2 y el reporte de cierre.
-
-const VELOCIDAD_SIM := 12.0          # Engine.time_scale durante la jornada
-const VELOCIDAD_VER := 2.0           # Engine.time_scale en modo "ver"
-const ALCANCE := 70.0                # distancia a la que Dani puede interactuar
-const REACCION := 0.35               # segundos que tarda el jugador entre acciones
-const DECISION_DIALOGO := 1.2        # segundos para leer y elegir en el diálogo de faltantes
+const VELOCIDAD_SIM := 12.0
+const VELOCIDAD_VER := 2.0
+const ALCANCE := 70.0
+const REACCION := 0.35
+const DECISION_DIALOGO := 1.2
 
 var dificultad := "dificil"
 var intentos_por_nivel := 2
@@ -21,12 +12,10 @@ var resultados: Array[Dictionary] = []
 var _respaldo := ""
 var _habia_guardado := false
 
-# Estado del jugador simulado
 var _accion := {}
 var _espera := 0.0
 var _urgentes_recientes := {}
 
-# Modo "ver"
 var ver := false
 var _estado: Label
 var _compras: Dictionary = {}
@@ -126,7 +115,6 @@ func _run() -> void:
 		GameState.borrar_guardado()
 	get_tree().quit(0)
 
-## Reto Imposible: una sola Gran Final, con reintentos.
 func _jugar_reto() -> void:
 	GameState.iniciar_reto_imposible()
 	for intento in range(intentos_por_nivel):
@@ -146,15 +134,11 @@ func _jugar_reto() -> void:
 		f.store_string(_respaldo)
 	get_tree().quit(0)
 
-# ---------------------------------------------------------------- Mañana
-
-## Compra razonable: estima la demanda del partido y reparte dinero y almacén,
-## guardando una reserva para pedidos urgentes.
 func _compras_de_la_manana() -> void:
 	var config := GameState.config
 	var llegadas := GameState.duracion_partido() * (85.0 / 90.0) / GameState.intervalo_llegada() + 2 + GameState.nivel_actual
 	var personas_promedio := 1.0 + config.probabilidad_pareja * 1.0 + config.probabilidad_familia * 3.0
-	var porciones := llegadas * personas_promedio * 1.15      # rondas extra por goles
+	var porciones := llegadas * personas_promedio * 1.15
 	var bebida := GameState.probabilidad_bebida() + 0.1
 	var comida := 1.0 - bebida
 	var demanda := {}
@@ -164,7 +148,6 @@ func _compras_de_la_manana() -> void:
 		_sumar_receta(demanda, platillo, porciones * bebida / 3.0)
 	if GameState.nivel_actual >= 2:
 		_sumar_receta(demanda, Catalogo.COMBO, llegadas * GameState.probabilidad_vip())
-	# Resta lo que ya hay en el almacén
 	for insumo in demanda:
 		demanda[insumo] = maxf(0.0, demanda[insumo] - GameState.inventario.total(insumo))
 	var reserva := int(GameState.dinero * 0.10)
@@ -180,8 +163,6 @@ func _compras_de_la_manana() -> void:
 		if cantidad > 0 and GameState.comprar(insumo, cantidad) == "":
 			_compras[insumo] = cantidad
 
-## Como haría un jugador en la tablet: cada reservación a una mesa donde quepa,
-## sin repetir mesa en el mismo horario.
 func _asignar_reservaciones() -> void:
 	var ocupadas := {}
 	for reserva in GameState.reservaciones:
@@ -194,7 +175,6 @@ func _asignar_reservaciones() -> void:
 				ocupadas[clave] = true
 				break
 
-## Modo "ver": el pueblo de fondo con la lista de lo que compró el bot.
 func _ver_manana() -> void:
 	var compras := _compras.duplicate()
 	_compras.clear()
@@ -238,8 +218,6 @@ func _comprar_mejoras() -> void:
 		if costo > 0 and GameState.dinero - costo >= GameState.config.dinero_inicial * 0.7:
 			GameState.comprar_mejora(id)
 
-# ---------------------------------------------------------------- Jornada
-
 func _jugar_jornada() -> Dictionary:
 	var resto: Node = load(GameState.ESCENA_RESTAURANTE).instantiate()
 	add_child(resto)
@@ -249,17 +227,14 @@ func _jugar_jornada() -> Dictionary:
 	_urgentes_recientes = {}
 	Engine.time_scale = VELOCIDAD_VER if ver else VELOCIDAD_SIM
 	if ver:
-		# El bot mueve a Dani directamente; se apaga su control por teclado para animarlo.
 		resto.dani.set_physics_process(false)
 	while is_instance_valid(resto) and not resto.terminado:
 		_paso(resto, get_process_delta_time())
 		await get_tree().process_frame
 	Engine.time_scale = 1.0
 	var informe: Dictionary = GameState.ultimo_informe.duplicate(true)
-	# terminar_jornada cambia de escena tras una pausa: se espera y se limpia.
 	await get_tree().create_timer(2.2).timeout
 	if ver:
-		# El restaurante es hijo del bot (no la escena actual): se quita para que solo se vea el reporte.
 		if is_instance_valid(resto):
 			resto.queue_free()
 		var motivo := str(informe["motivo"])
@@ -304,7 +279,6 @@ func _paso(resto: Node, delta: float) -> void:
 	var destino: Vector2 = _accion["destino"]
 	var distancia := dani.global_position.distance_to(destino)
 	if distancia > ALCANCE * 0.8:
-		# Caminar (con sprint si hay estamina). Se descuenta un 20 % por rodear muebles.
 		var corre := dani.actualizar_estamina(delta, true, true)
 		var velocidad := Dani.VELOCIDAD_BASE * GameState.multiplicador_velocidad() * (Dani.MULTIPLICADOR_SPRINT if corre else 1.0) * 0.8
 		if ver:
@@ -316,7 +290,6 @@ func _paso(resto: Node, delta: float) -> void:
 		dani._sprite.stop()
 		dani._sprite.frame = 0
 	dani.actualizar_estamina(delta, false, false)
-	# Limpiar requiere mantener Espacio.
 	if _accion["tipo"] == "limpiar":
 		_accion["progreso"] = float(_accion.get("progreso", 0.0)) + delta
 		if _accion["progreso"] < GameState.tiempo_limpieza():
@@ -347,11 +320,9 @@ func _ejecutar(resto: Node, accion: Dictionary) -> void:
 		"recoger", "devolver":
 			objetivo.interactuar(dani)
 
-## Prioridades de un jugador cuidadoso.
 func _elegir_accion(resto: Node) -> Dictionary:
 	var dani: Dani = resto.dani
 	var pos := dani.global_position
-	# 1. Servir lo que trae en la bandeja
 	var mejor := {}
 	for mesa in resto.mesas:
 		var c: Cliente = mesa.cliente
@@ -359,17 +330,14 @@ func _elegir_accion(resto: Node) -> Dictionary:
 			mejor = _mas_cercana(mejor, {"tipo": "servir", "objetivo": mesa, "destino": mesa.global_position}, pos)
 	if not mejor.is_empty():
 		return mejor
-	# 2. Devolver platillos sin cliente si la bandeja está llena
 	if not dani.puede_cargar() and not resto.cocina._sobrantes(dani).is_empty():
 		return {"tipo": "devolver", "objetivo": resto.cocina, "destino": resto.cocina.global_position}
-	# 3. Recoger platillos listos
 	if dani.puede_cargar():
 		for estacion in [resto.cocina, resto.barra]:
 			if not estacion.listos.is_empty():
 				mejor = _mas_cercana(mejor, {"tipo": "recoger", "objetivo": estacion, "destino": estacion.global_position}, pos)
 		if not mejor.is_empty():
 			return mejor
-	# 4. Tomar pedidos (primero el de menor paciencia)
 	var urgente: Mesa = null
 	for mesa in resto.mesas:
 		var c: Cliente = mesa.cliente
@@ -378,7 +346,6 @@ func _elegir_accion(resto: Node) -> Dictionary:
 				urgente = mesa
 	if urgente:
 		return {"tipo": "tomar", "objetivo": urgente, "destino": urgente.global_position}
-	# 5. Limpiar mesas sucias
 	for mesa in resto.mesas:
 		if mesa.estado == Mesa.EstadoMesa.SUCIA:
 			mejor = _mas_cercana(mejor, {"tipo": "limpiar", "objetivo": mesa, "destino": mesa.global_position}, pos)
@@ -391,19 +358,15 @@ func _mas_cercana(actual: Dictionary, candidata: Dictionary, pos: Vector2) -> Di
 
 func _resolver_faltante(resto: Node) -> void:
 	var opciones: Array = resto._dialogo._opciones
-	# Sustituto si existe; si no, pedido urgente si alcanza el dinero; si no, agotado.
 	var elegida: Array = opciones[0]
 	var texto := str(elegida[0])
 	if not texto.begins_with("Ofrecer sustituto") and GameState.dinero < 150:
 		elegida = opciones[opciones.size() - 1]
 	resto._dialogo._elegir(elegida[1])
 
-## Un buen jugador pide urgente antes de que se acabe un insumo (con dinero de sobra).
 func _pedidos_urgentes(resto: Node) -> void:
 	for insumo in Catalogo.INSUMOS:
 		var en_camino: bool = resto.entregas.any(func(e): return e["insumo"] == insumo)
-		# Umbral pensado para que alcance a una familia de 4 mientras llega el proveedor.
-		# No tiene caso pedir si el partido termina antes de que llegue.
 		var queda: float = (1.0 - resto.minuto / 90.0) * resto.duracion
 		if en_camino or GameState.inventario.total(insumo) > 8 or queda < GameState.demora_urgente() + 10.0:
 			continue

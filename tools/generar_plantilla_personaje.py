@@ -1,14 +1,3 @@
-"""Genera la plantilla y un ejemplo de hoja de sprites para los personajes propios.
-
-    python tools/generar_plantilla_personaje.py
-
-Salida en Assets/sprites/personajes/plantillas/ (esa carpeta el juego no la usa):
-  plantilla_32px.png   cuadrícula vacía de 4x3 cuadros de 32 px para dibujar encima
-  guia_plantilla.png   la misma cuadrícula ampliada con el nombre de cada cuadro
-  ejemplo_dani.png     el Dani actual (Kenney) en el formato exacto, como referencia
-
-Una hoja terminada se guarda como Assets/sprites/personajes/<clave>.png (por ejemplo dani.png).
-"""
 import os
 from PIL import Image, ImageDraw, ImageFont
 
@@ -19,7 +8,6 @@ CUADRO = 32
 COLUMNAS = ["De pie", "Paso A", "De pie", "Paso B"]
 FILAS = ["Abajo (de frente)", "Arriba (de espaldas)", "Lado (mira a la DERECHA)"]
 
-
 def plantilla():
     img = Image.new("RGBA", (CUADRO * 4, CUADRO * 3), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
@@ -28,10 +16,8 @@ def plantilla():
             x, y = c * CUADRO, f * CUADRO
             fondo = (255, 0, 255, 40) if (f + c) % 2 == 0 else (0, 200, 255, 40)
             d.rectangle([x, y, x + CUADRO - 1, y + CUADRO - 1], fill=fondo)
-            # Línea del piso: los pies van en la última fila de píxeles, centrados.
             d.line([x + 8, y + CUADRO - 1, x + CUADRO - 9, y + CUADRO - 1], fill=(255, 80, 80, 160))
     return img
-
 
 def guia(base):
     z = 6
@@ -57,18 +43,15 @@ def guia(base):
            fill=(255, 200, 120), font=f)
     return img
 
-
 def ejemplo_dani():
-    """El Dani de Kenney (16 px) ampliado a cuadros de 32 px en el orden de la plantilla."""
     base = 429
     img = Image.new("RGBA", (CUADRO * 4, CUADRO * 3), (0, 0, 0, 0))
-    for fila in range(3):          # abajo, arriba, lado
+    for fila in range(3):
         for c, paso in enumerate([0, 1, 0, 2]):
             tile = Image.open(TILES % (base + fila + paso * 27)).convert("RGBA")
             tile = tile.resize((CUADRO, CUADRO), Image.NEAREST)
             img.paste(tile, (c * CUADRO, fila * CUADRO))
     return img
-
 
 if __name__ == "__main__":
     os.makedirs(SALIDA, exist_ok=True)

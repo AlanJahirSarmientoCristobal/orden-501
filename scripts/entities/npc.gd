@@ -1,9 +1,6 @@
 extends Node2D
 class_name NPC
 
-## Personaje fijo con nombre: vendedores, vecinos del pueblo y el Chef.
-## Su aspecto, nombre y pose se configuran en el Inspector.
-
 @export var frames: SpriteFrames
 @export var nombre := ""
 @export var animacion: StringName = &"down"

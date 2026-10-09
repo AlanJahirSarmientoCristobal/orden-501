@@ -1,37 +1,34 @@
 extends RefCounted
 class_name ConfiguracionDificultad
 
-## Valores de cada nivel de dificultad (tabla de la sección 12 del documento de diseño).
-
 const FACIL := "facil"
 const NORMAL := "normal"
 const DIFICIL := "dificil"
-## Reto Imposible: Difícil con el balance original (antes de ajustarlo). Solo desde Selección de nivel.
 const IMPOSIBLE := "imposible"
-const TODAS := [FACIL, NORMAL, DIFICIL]      # Dificultades de la campaña
+const TODAS := [FACIL, NORMAL, DIFICIL]
 
 var id: String
 var nombre: String
-var paciencia_cliente: float        # segundos
-var multiplicador_cocina: float     # tiempo de cocinado
-var intervalo_llegada: float        # segundos entre clientes
-var probabilidad_vip: float         # 0..1
-var tiempo_limpieza: float          # segundos manteniendo Espacio ("mesas se ensucian")
+var paciencia_cliente: float
+var multiplicador_cocina: float
+var intervalo_llegada: float
+var probabilidad_vip: float
+var tiempo_limpieza: float
 var etiqueta_suciedad: String
 var dinero_inicial: int
 var urgente_multiplicador_costo: float
-var urgente_demora: float           # segundos
+var urgente_demora: float
 var dias_caducidad: int
-var tiempo_pueblo: float            # segundos; 0 = sin límite
-var reputacion_minima: float        # porcentaje
-var probabilidad_pareja: float      # 0..1 (grupos de 2)
-var probabilidad_familia: float     # 0..1 (grupos de 4)
-var familias_desde_nivel: int       # Nivel a partir del cual llegan familias
-var precio_insumos: float           # Multiplicador de los precios del catálogo
-var paciencia_vip: float            # Fracción de la paciencia normal que tiene un VIP
-var paciencia_fila: float           # Ritmo al que baja la paciencia en la fila de la entrada
-var duracion_extra: float           # Segundos extra de cada partido
-var piso_reputacion: bool           # Cada mañana la reputación arranca en al menos 75 %
+var tiempo_pueblo: float
+var reputacion_minima: float
+var probabilidad_pareja: float
+var probabilidad_familia: float
+var familias_desde_nivel: int
+var precio_insumos: float
+var paciencia_vip: float
+var paciencia_fila: float
+var duracion_extra: float
+var piso_reputacion: bool
 
 const _TABLA := {
 	FACIL: {
@@ -89,7 +86,6 @@ static func obtener(dificultad: String) -> ConfiguracionDificultad:
 	config.piso_reputacion = bool(datos.get("piso_reputacion", true))
 	return config
 
-## Texto de resumen para el menú de dificultad.
 func describir() -> String:
 	var pueblo := "Sin límite" if tiempo_pueblo <= 0.0 else "%d min" % int(tiempo_pueblo / 60.0)
 	var grupos := "Solo clientes individuales" if probabilidad_pareja + probabilidad_familia <= 0.0 else "Parejas %d%% · Familias de 4: %d%%" % [int(probabilidad_pareja * 100.0), int(probabilidad_familia * 100.0)]

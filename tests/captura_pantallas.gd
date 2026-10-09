@@ -1,8 +1,5 @@
 extends Node
 
-## Herramienta de desarrollo: abre cada pantalla y guarda una captura PNG.
-## Ejecutar SIN --headless: godot --path . res://tests/captura_pantallas.tscn -- <carpeta>
-
 var carpeta := "user://capturas"
 var _actual: Node
 
@@ -88,7 +85,6 @@ func _run() -> void:
 	await _capturar("06_inventario")
 	pueblo._inventario.cerrar()
 
-	# Práctica del restaurante (Jornada 1)
 	GameState.iniciar_jornada()
 	var practica := await _abrir("res://scenes/restaurant/restaurant.tscn")
 	await _esperar(3.0)
@@ -111,7 +107,6 @@ func _run() -> void:
 	Engine.time_scale = 4.0
 	await _esperar(18.0)
 	Engine.time_scale = 1.0
-	# Toma el pedido de la primera mesa ocupada para mostrar el flujo.
 	for mesa in resto.mesas:
 		if mesa.cliente and mesa.cliente.estado == Cliente.Estado.ORDENANDO:
 			resto.dani.position = mesa.position + Vector2(0, 60)
@@ -119,7 +114,6 @@ func _run() -> void:
 			break
 	await _esperar(0.5)
 	await _capturar("07_restaurante")
-	# Una familia de 4 y una pareja sentadas
 	for grupo in [4, 2]:
 		for m in resto.mesas:
 			if m.esta_libre() and m.capacidad >= grupo and (grupo == 4 or m.capacidad == 2):

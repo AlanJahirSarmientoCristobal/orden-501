@@ -1,8 +1,6 @@
 extends Cliente
 class_name ClienteVIP
 
-## Pide el Combo VIP (más caro), deja más propina y tiene muy poca paciencia.
-
 func nombre_tipo() -> String:
 	return "★ VIP"
 

@@ -1,16 +1,11 @@
 extends FaseManana
 
-## Fase de mañana: el pueblo (scenes/town/town.tscn). El mapa es un TileMap (Kenney RPG Urban);
-## letreros, vecinos, peatones, puertas y la cámara de Dani son nodos de la escena.
-## scenes/town/mapa_pueblo.json guarda las zonas que usa el minimapa.
-
 const DATOS_MAPA := "res://scenes/town/mapa_pueblo.json"
 
-var tile := 48.0                        # Tamaño de un tile en pantalla (16 px × escala 3)
+var tile := 48.0
 var tamano := Vector2(2592, 1440)
 var datos := {}
 
-## Lo que dicen los vecinos (en el mismo orden que los nodos Interacciones/Platicar...).
 const CONSEJOS := [
 	{"nombre": "Doña Mari", "texto": "\"Dicen que en el medio tiempo todos piden bebidas. ¡Que no te falte hielo!\""},
 	{"nombre": "Profe Juve", "texto": "\"La carne, el pollo, la verdura, el pan y el hielo caducan. Compra lo que vayas a usar.\""},
@@ -24,7 +19,6 @@ func _ready() -> void:
 	datos = JSON.parse_string(FileAccess.get_file_as_string(DATOS_MAPA))
 	tile = float(datos["tile"]) * float(datos["escala"])
 	tamano = Vector2(float(datos["columnas"]), float(datos["filas"])) * tile
-	# Al volver de una tienda, Dani aparece frente a su puerta.
 	if GameState.posicion_pueblo != Vector2.ZERO:
 		dani.position = GameState.posicion_pueblo
 	preparar_fase()
@@ -37,7 +31,6 @@ func _ready() -> void:
 		if GameState.posicion_pueblo == Vector2.ZERO:
 			GameState.aviso.emit("Día %d · Mañana. Recorre el pueblo y compra para: %s" % [GameState.dia, GameState.info_nivel()["nombre"]])
 
-## Convierte coordenadas en tiles (del JSON) a píxeles del mundo.
 func _a_mundo(p: Array) -> Vector2:
 	return Vector2(float(p[0]), float(p[1])) * tile
 
@@ -52,7 +45,6 @@ func _rect_calle(clave: String) -> Rect2:
 func puerta(lugar: String) -> Vector2:
 	return _a_mundo(datos["lugares"][lugar]["puerta"])
 
-## El minimapa (nodo HUD/Minimapa) se llena con las zonas del JSON del mapa.
 func _preparar_minimapa() -> void:
 	var mapa: Minimapa = $HUD/Minimapa
 	mapa.tamano_mundo = tamano
@@ -75,7 +67,6 @@ func _cerrar_intro() -> void:
 	GameState.guardar()
 	_iniciar_tutorial()
 
-## Jornada 1: primero los controles básicos; al volver de la tienda, cómo abrir el restaurante.
 func _iniciar_tutorial() -> void:
 	if GameState.tutorial_pendiente("pueblo"):
 		var inicio := dani.global_position
@@ -104,8 +95,6 @@ func _iniciar_tutorial() -> void:
 				"hecho": func() -> bool: return false},
 		]
 		add_child(Tutorial.crear("regreso", pasos))
-
-# ---------------------------------------------------------------- Interacciones (señal "usado")
 
 func _al_entrar_tienda(_dani: Node, tienda: String) -> void:
 	_entrar_tienda(tienda, puerta(tienda) + Vector2(0, tile * 0.6))

@@ -1,24 +1,18 @@
 extends CanvasLayer
 class_name Tutorial
 
-## Guía por objetivos de la Jornada 1. Muestra el paso actual en una franja sobre el HUD,
-## lo marca en cuanto el jugador lo cumple y pasa al siguiente. [T] omite los tutoriales.
-## Cada paso es {"texto": String, "detalle": String, "hecho": Callable -> bool}.
-
 signal terminado
 
 var clave := ""
 var pasos: Array[Dictionary] = []
 var indice := 0
-var _espera := 0.0          # pausa breve para que se vea el "¡Bien!" antes del siguiente paso
+var _espera := 0.0
 var _cerrando := false
 
-# Nodos de la escena scenes/ui/tutorial.tscn
 @onready var _titulo: Label = $Panel/Fila/Titulo
 @onready var _texto: Label = $Panel/Fila/Columna/Texto
 @onready var _detalle: Label = $Panel/Fila/Columna/Detalle
 
-## Crea el tutorial (escena tutorial.tscn) con sus pasos.
 static func crear(nueva_clave: String, nuevos_pasos: Array[Dictionary]) -> Tutorial:
 	var tutorial: Tutorial = load("res://scenes/ui/tutorial.tscn").instantiate()
 	tutorial.clave = nueva_clave

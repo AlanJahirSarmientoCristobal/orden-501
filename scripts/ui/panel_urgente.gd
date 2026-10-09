@@ -1,9 +1,6 @@
 extends PanelModal
 class_name PanelUrgente
 
-## Pedido urgente por teléfono al proveedor (tecla Q o el teléfono de la barra).
-## Es más caro que el mercado y tarda en llegar según la dificultad.
-
 const PAQUETES := [3, 6]
 
 var restaurante: Node
@@ -22,7 +19,6 @@ func _process(delta: float) -> void:
 	_refresco += delta
 	if _refresco >= 0.5:
 		_refresco = 0.0
-		# Solo se reconstruye si cambió algo visible (dinero, existencias o entregas).
 		var firma := _firma()
 		if firma != _ultima_firma:
 			construir()

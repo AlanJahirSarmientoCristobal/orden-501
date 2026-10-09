@@ -1,9 +1,5 @@
 extends Node
 
-## Pruebas del núcleo: dificultad, inventario, compras, caducidad, reservaciones,
-## condiciones de nivel, reinicio de jornada y guardado.
-## Ejecutar: godot --headless --path . res://tests/test_nucleo.tscn
-
 var fallos: Array[String] = []
 var _respaldo := ""
 var _habia_guardado := false
@@ -64,7 +60,6 @@ func _probar_inventario() -> void:
 	inv.consumir_receta(Catalogo.HAMBURGUESA)
 	inv.consumir_receta(Catalogo.HAMBURGUESA)
 	inv.consumir_receta(Catalogo.HAMBURGUESA)
-	# FIFO: se gastaron las 2 del día 1 y 1 del día 2.
 	_check(inv.total("carne") == 2, "Consumo de receta incorrecto")
 	_check(inv.dias_restantes("carne", 2, 2) == 2, "La carne vieja debió consumirse primero (FIFO)")
 	inv.agregar("cerveza", 4, 1)
@@ -95,7 +90,6 @@ func _probar_compras() -> void:
 	GameState.posicion_pueblo = Vector2(10, 10)
 	GameState.iniciar_manana()
 	_check(is_equal_approx(GameState.tiempo_manana, 120.0) and GameState.posicion_pueblo == Vector2.ZERO, "Una nueva mañana debe reiniciar el reloj y la posición")
-	# Monster: un solo producto con 7 diseños que rotan.
 	_check(Catalogo.INSUMOS["monster"]["tienda"] == Catalogo.CERVECERIA, "El Monster se vende en la Cervecería")
 	_check(AssetPaths.disenos_de("monster").size() == 7, "El Monster debe tener 7 diseños")
 	var primero := AssetPaths.siguiente_diseno("monster")
@@ -133,7 +127,6 @@ func _probar_condiciones_y_cierre() -> void:
 	_check(informe["exito"], "El cierre debió marcar éxito")
 	_check(GameState.nivel_actual == 2 and GameState.nivel_desbloqueado == 2, "No se desbloqueó el nivel 2")
 	_check(GameState.dia == 2, "El día no avanzó")
-	# En Normal los insumos duran 2 días: el pan del día 1 aún no caduca al pasar al día 2.
 	_check(informe["merma"].is_empty(), "No debería haber merma tras un día en Normal")
 	_check(int(informe["puntos"]) >= GameState.PUNTOS_JORNADA_SUPERADA, "Una jornada superada debe dar al menos el bono de puntos")
 	_check(GameState.puntos_temporada() == int(informe["puntos"]), "Los puntos de la temporada no suman las jornadas")
@@ -160,7 +153,7 @@ func _probar_condiciones_y_cierre() -> void:
 func _probar_reinicio_y_guardado() -> void:
 	GameState.nueva_partida("normal")
 	GameState.comprar("carne", 5)
-	GameState.iniciar_manana()   # Nueva foto con la carne comprada
+	GameState.iniciar_manana()
 	var dinero_manana := GameState.dinero
 	GameState.comprar("pollo", 5)
 	GameState.iniciar_jornada()
@@ -173,7 +166,6 @@ func _probar_reinicio_y_guardado() -> void:
 
 	GameState.mejoras["bandeja"] = 1
 	GameState.guardar()
-	# Se altera el estado en memoria (sin guardar) y se comprueba que la carga lo recupera.
 	GameState.dificultad = "facil"
 	GameState.mejoras["bandeja"] = 0
 	GameState.inventario = Inventario.new()
@@ -184,23 +176,19 @@ func _probar_reinicio_y_guardado() -> void:
 func _probar_mejoras() -> void:
 	GameState.nueva_partida("normal")
 	GameState.dinero = 10000
-	# Costos escalonados: el segundo nivel cuesta más
 	var primero := GameState.costo_mejora("velocidad")
 	_check(GameState.comprar_mejora("velocidad"), "No se compró el primer nivel de Tenis")
 	var segundo := GameState.costo_mejora("velocidad")
 	_check(segundo > primero, "El segundo nivel debe costar más que el primero")
 	_check(GameState.comprar_mejora("velocidad"), "No se compró el segundo nivel de Tenis")
 	_check(GameState.costo_mejora("velocidad") == -1 and not GameState.comprar_mejora("velocidad"), "Tenis no debe pasar de 2 niveles")
-	# Trapeador industrial
 	var limpieza := GameState.tiempo_limpieza()
 	GameState.comprar_mejora("limpieza")
 	_check(is_equal_approx(GameState.tiempo_limpieza(), limpieza * 0.6), "El trapeador debe reducir la limpieza 40%")
-	# Proveedor preferente
 	var costo := GameState.costo_urgente("carne", 6)
 	var demora := GameState.demora_urgente()
 	GameState.comprar_mejora("proveedor")
 	_check(GameState.costo_urgente("carne", 6) < costo and GameState.demora_urgente() < demora, "El proveedor preferente debe abaratar y acelerar lo urgente")
-	# Promoción 2x1: más clientes y bono por pedido
 	GameState.comprar_mejora("promo")
 	GameState.iniciar_jornada()
 	_check(GameState.promo_activa and GameState.intervalo_llegada() < GameState.config.intervalo_llegada, "La promoción debe traer más clientes")

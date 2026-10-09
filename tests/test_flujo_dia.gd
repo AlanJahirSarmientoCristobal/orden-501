@@ -1,9 +1,5 @@
 extends Node
 
-## Prueba de extremo a extremo: un "bot" juega un día completo con el partido real
-## (pueblo → restaurante → reporte → siguiente día) a velocidad acelerada.
-## Ejecutar: godot --headless --path . res://tests/test_flujo_dia.tscn
-
 const VELOCIDAD := 20.0
 const LIMITE_SEGUNDOS := 120.0
 
@@ -17,7 +13,6 @@ func _ready() -> void:
 
 func _run() -> void:
 	_respaldar()
-	# El nodo de prueba sobrevive a los cambios de escena.
 	var marcador := Node.new()
 	get_tree().root.add_child(marcador)
 	get_tree().current_scene = marcador
@@ -32,7 +27,6 @@ func _run() -> void:
 	var pueblo := get_tree().current_scene
 	_check(pueblo != null and pueblo.name == "Town", "No se abrió el pueblo")
 
-	# La calle no debe tener colisión: Dani cruza la avenida de banqueta a banqueta.
 	var cruzar: Dani = pueblo.dani
 	var t: float = pueblo.tile
 	cruzar.global_position = Vector2(22.5 * t, 12.5 * t)
@@ -40,8 +34,6 @@ func _run() -> void:
 		cruzar.move_and_collide(Vector2(0, 8))
 	_check(cruzar.global_position.y >= 16.4 * t, "Dani no pudo cruzar la avenida (quedó en y=%d)" % int(cruzar.global_position.y))
 
-	# Entrar a la Cervecería, comprar 4 Monster en el menú de la caja (teclas simuladas)
-	# y salir cruzando la puerta caminando.
 	var puerta: Vector2 = pueblo.puerta("cerveceria") + Vector2(0, pueblo.tile * 0.6)
 	pueblo._entrar_tienda(Catalogo.CERVECERIA, puerta)
 	await _esperar_escena("Cerveceria")
@@ -53,15 +45,15 @@ func _run() -> void:
 	var indice_monster := menu.productos.find("monster")
 	for i in range(indice_monster):
 		await _tecla(KEY_DOWN)
-	await _tecla(KEY_SPACE)        # Elegir Monster → ¿Cuántos?
+	await _tecla(KEY_SPACE)
 	_check(menu.estado == MenuCompra.Estado.CANTIDAD, "No apareció el selector de cantidad")
 	for i in range(3):
-		await _tecla(KEY_UP)       # x04
-	await _tecla(KEY_SPACE)        # ¿Está bien?
-	await _tecla(KEY_SPACE)        # Sí
+		await _tecla(KEY_UP)
+	await _tecla(KEY_SPACE)
+	await _tecla(KEY_SPACE)
 	_check(GameState.inventario.total("monster") == 4, "El menú no compró 4 Monster (hay %d)" % GameState.inventario.total("monster"))
-	await _tecla(KEY_ESCAPE)       # Mensaje → lista
-	await _tecla(KEY_ESCAPE)       # Cerrar menú
+	await _tecla(KEY_ESCAPE)
+	await _tecla(KEY_ESCAPE)
 	_check(not menu.esta_abierto() and not tienda.dani.bloqueado, "El menú no se cerró")
 	var sale: Dani = tienda.dani
 	for i in range(120):
@@ -133,18 +125,15 @@ func _esperar_escena(nombre: String) -> void:
 		await get_tree().process_frame
 	fallos.append("No se llegó a la escena %s" % nombre)
 
-## El bot: toma pedidos, resuelve faltantes, recoge, sirve y limpia.
 func _jugar_un_paso(resto: Node) -> void:
 	if resto.terminado:
 		return
 	var dani: Dani = resto.dani
-	# Anticipa el desabasto con pedidos urgentes, como haría un buen gerente.
 	for insumo in Catalogo.INSUMOS:
 		var en_camino: bool = resto.entregas.any(func(e): return e["insumo"] == insumo)
 		if GameState.inventario.total(insumo) <= 5 and not en_camino:
 			resto.pedir_urgente(insumo, 6)
 	if resto._dialogo.esta_abierto():
-		# Elige la primera opción del diálogo de faltante (sustituto si existe).
 		var opcion: Array = resto._dialogo._opciones[0]
 		resto._dialogo._elegir(opcion[1])
 	for estacion in [resto.cocina, resto.barra]:
@@ -159,7 +148,6 @@ func _jugar_un_paso(resto: Node) -> void:
 				mesa.interactuar(dani)
 			elif c.estado == Cliente.Estado.ESPERANDO_COMIDA and dani.tiene_platillo(c.pedido):
 				mesa.interactuar(dani)
-	# Si la bandeja se llena con platillos sin cliente, se devuelven.
 	if not dani.puede_cargar():
 		resto.cocina.interactuar(dani)
 

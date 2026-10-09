@@ -1,20 +1,15 @@
 extends Interactuable
 class_name Estacion
 
-## Estación donde se preparan pedidos (escena estacion.tscn): el pase de cocina o la barra de bebidas.
-## Recibe comandas en cola, las prepara y Dani recoge los platillos listos.
-
 signal cola_cambiada
 
-## "cocina" (pase de cocina, 1 platillo a la vez) o "barra" (barra de bebidas, 2 a la vez).
 @export_enum("cocina", "barra") var tipo := "cocina"
 var simultaneos := 1
-var cola: Array[Dictionary] = []          # {"platillo", "cliente"}
-var preparando: Array[Dictionary] = []    # {"platillo", "cliente", "restante", "total"}
-var listos: Array[Dictionary] = []        # {"platillo", "cliente"}
-var pausada := false                      # Apagón: no se prepara nada
+var cola: Array[Dictionary] = []
+var preparando: Array[Dictionary] = []
+var listos: Array[Dictionary] = []
+var pausada := false
 
-# Nodos de la escena scenes/restaurant/estacion.tscn
 @onready var _barra: ProgressBar = $Barra
 @onready var _vista_listos: HBoxContainer = $Listos
 @onready var _estado: Label = $Estado
@@ -36,7 +31,6 @@ func _process(delta: float) -> void:
 		var total := float(Catalogo.PLATILLOS[orden["platillo"]]["tiempo"])
 		if tipo == Catalogo.COCINA:
 			total *= GameState.multiplicador_cocina()
-		# Un pedido para varias personas tarda más (35 % extra por persona adicional).
 		total *= 1.0 + 0.35 * float(int(orden.get("porciones", 1)) - 1)
 		orden["restante"] = total
 		orden["total"] = total
@@ -57,11 +51,9 @@ func _process(delta: float) -> void:
 		_barra.visible = true
 		_barra.value = 1.0 - float(primero["restante"]) / float(primero["total"])
 
-## Quita todo lo relacionado con un cliente que se fue.
 func cancelar(cliente: Cliente) -> void:
 	cola = cola.filter(func(o): return o["cliente"] != cliente)
 	preparando = preparando.filter(func(o): return o["cliente"] != cliente)
-	# Lo que ya estaba listo se queda en el pase: otro cliente puede aprovecharlo.
 	for o in listos:
 		if o["cliente"] == cliente:
 			o["cliente"] = null
@@ -96,8 +88,6 @@ func _actualizar_vista() -> void:
 	_estado.text = "%s · %d en cola" % [nombre, cola.size() + preparando.size()]
 	cola_cambiada.emit()
 
-# ---------------------------------------------------------------- Interacción
-
 func obtener_texto(dani: Node) -> String:
 	if not listos.is_empty():
 		if dani.puede_cargar():
@@ -111,7 +101,6 @@ func interactuar(dani: Node) -> void:
 	super.interactuar(dani)
 	if not listos.is_empty():
 		var recogidos := 0
-		# Primero lo que tiene cliente esperando.
 		listos.sort_custom(func(a, b): return a["cliente"] != null and b["cliente"] == null)
 		while not listos.is_empty() and dani.puede_cargar():
 			var orden: Dictionary = listos.pop_front()
@@ -131,7 +120,6 @@ func interactuar(dani: Node) -> void:
 		GameState.aviso.emit("Se desecharon %d platillo(s) sin cliente." % sobrantes.size())
 		AudioManager.sfx("limpiar")
 
-## Platillos en la bandeja que ya ningún cliente está esperando.
 func _sobrantes(dani: Node) -> Array[String]:
 	var esperados: Array[String] = []
 	for c in get_tree().get_nodes_in_group("clientes"):

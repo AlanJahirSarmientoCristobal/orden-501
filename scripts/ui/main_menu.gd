@@ -1,8 +1,5 @@
 extends Control
 
-## Menú principal (scenes/menu/main_menu.tscn): nueva partida con selección de dificultad,
-## continuar, niveles superados, Reto Imposible y controles.
-
 @onready var _secundario: PanelContainer = $Columnas/Secundario
 @onready var _paneles := {
 	"dificultad": $Columnas/Secundario/Dificultad,
@@ -18,7 +15,6 @@ func _ready() -> void:
 		var tarjeta: Node = _paneles["dificultad"].get_node(id.capitalize())
 		tarjeta.get_node("Caja/Descripcion").text = ConfiguracionDificultad.obtener(id).describir()
 
-## Muestra uno de los paneles de la derecha (dificultad, niveles o controles).
 func _mostrar(panel: String) -> void:
 	_secundario.visible = true
 	for clave in _paneles:
@@ -40,8 +36,6 @@ func _continuar() -> void:
 	else:
 		GameState.cambiar_escena(GameState.ESCENA_PUEBLO)
 
-## Los tres niveles se desbloquean al superarlos en la campaña; el Reto Imposible
-## siempre está disponible, pero solo desde aquí.
 func _mostrar_niveles() -> void:
 	var hay_partida := GameState.cargar()
 	var niveles: VBoxContainer = _paneles["niveles"]

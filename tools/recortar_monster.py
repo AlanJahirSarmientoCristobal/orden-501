@@ -1,20 +1,10 @@
-"""Recorta la hoja de diseños de Monster en 7 sprites con fondo transparente.
-
-Uso:
-    python tools/recortar_monster.py [Assets/sprites/monster/monster_hoja.png]
-
-Genera Assets/sprites/monster/monster_1.png ... monster_N.png (de izquierda a derecha).
-El fondo (blanco y la sombra gris clara) se elimina por relleno desde los bordes, así que
-el interior blanco de una lata no se borra porque está rodeado por su contorno negro.
-"""
 import sys
 from collections import deque
 from pathlib import Path
 
 from PIL import Image
 
-ALTURA_FINAL = 40  # píxeles de alto de cada sprite resultante
-
+ALTURA_FINAL = 40
 
 def es_fondo(pixel):
     r, g, b, a = pixel
@@ -23,7 +13,6 @@ def es_fondo(pixel):
     claro = min(r, g, b) >= 185
     gris = max(r, g, b) - min(r, g, b) <= 22
     return claro and gris
-
 
 def quitar_fondo(img):
     ancho, alto = img.size
@@ -47,12 +36,10 @@ def quitar_fondo(img):
         cola.extend(((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)))
     return img
 
-
 def columnas_con_contenido(img):
     ancho, alto = img.size
     px = img.load()
     return [any(px[x, y][3] > 0 for y in range(alto)) for x in range(ancho)]
-
 
 def segmentos(columnas, separacion_min=6):
     resultado, inicio, vacias = [], None, 0
@@ -71,7 +58,6 @@ def segmentos(columnas, separacion_min=6):
         resultado.append((inicio, fin))
     return resultado
 
-
 def main():
     raiz = Path(__file__).resolve().parent.parent
     hoja = Path(sys.argv[1]) if len(sys.argv) > 1 else raiz / "Assets/sprites/monster/monster_hoja.png"
@@ -89,7 +75,6 @@ def main():
         recorte.save(salida)
         print(f"{salida.name}: {recorte.width}x{recorte.height}")
     print(f"{len(partes)} diseños recortados.")
-
 
 if __name__ == "__main__":
     main()

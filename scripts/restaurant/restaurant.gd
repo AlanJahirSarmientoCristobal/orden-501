@@ -7,17 +7,17 @@ extends Node2D
 const AREA_JUEGO := Rect2(0, 100, 1000, 620)
 const PUERTA := Vector2(552, 770)
 const INICIO_FILA := Vector2(660, 652)
-const ORIGEN_TILES := Vector2(0, 4)
-const COLUMNAS_TILES := 21
 const MAX_FILA := 5
 const MINUTOS_PARTIDO := 90.0
 
-const POS_MESAS := [Vector2(330, 250), Vector2(540, 250), Vector2(750, 250), Vector2(330, 450), Vector2(540, 450), Vector2(750, 450)]
-const POS_TERRAZA := [Vector2(930, 250), Vector2(930, 450)]
 
 var dani: Dani
-var cocina: Estacion
-var barra: Estacion
+# Nodos de la escena scenes/restaurant/restaurant.tscn
+@onready var cocina: Estacion = $Cocina
+@onready var barra: Estacion = $Barra
+@onready var _neon: Sprite2D = $Neon
+@onready var _televisores: Array[Sprite2D] = [$Pantallas/TV1, $Pantallas/TV2]
+@onready var _pantallas: Array[Label] = [$Pantallas/Marcador1, $Pantallas/Marcador2]
 var mesas: Array[Mesa] = []
 var fila: Array[Cliente] = []
 var entregas: Array[Dictionary] = []     # {"insumo", "cantidad", "restante"}
@@ -60,9 +60,6 @@ var _hud_reputacion: Label
 var _hud_bandeja: Label
 var _panel_lateral: VBoxContainer
 var _lateral := {}
-var _pantallas: Array[Label] = []
-var _televisores: Array[Sprite2D] = []
-var _neon: Sprite2D
 var _cuadro_tv := 0.0
 var _gol_en_pantalla := 0.0
 var _parpadeo := 0.0
@@ -79,9 +76,7 @@ func _ready() -> void:
 		_equipos = [partes[0].strip_edges(), partes[1].strip_edges()]
 	_generar_goles()
 	_generar_eventos()
-	_construir_escenario()
-	_construir_estaciones()
-	_construir_mesas()
+	_preparar_mesas()
 
 	dani = $Dani
 	dani.bandeja_cambiada.connect(func(_b): _actualizar_hud())
@@ -181,131 +176,23 @@ func _al_agotar_reputacion() -> void:
 
 # ---------------------------------------------------------------- Construcción
 
-func _construir_escenario() -> void:
-	# Interior con tiles de Kenney (Roguelike RPG + Indoors). Cada tile mide 48 px;
-	# la fila 0 empieza en y = 4, así la fila 2 (el piso) empieza en y = 100.
-	var fondo := ColorRect.new()
-	fondo.color = Color("15171f")
-	fondo.size = Vector2(1280, 720)
-	fondo.z_index = -20
-	add_child(fondo)
-	var interior := Interior.new()
-	interior.position = ORIGEN_TILES
-	interior.z_index = -10
-	add_child(interior)
-	var R := Interior.RPG
-	var I := Interior.INDOOR
-	for x in range(COLUMNAS_TILES):
-		interior.poner(x, 0, R, Interior.PARED_ALTA, 0)
-		interior.poner(x, 1, R, Interior.PARED_BAJA, 0)
-	interior.rellenar(3, 2, COLUMNAS_TILES - 3, 13, R, Interior.PISO_MADERA)
-	interior.rellenar(0, 2, 3, 13, R, Interior.PISO_PIEDRA)
-	if GameState.terraza_desbloqueada:
-		interior.rellenar(18, 2, 3, 13, R, Interior.PISO_CLARO)
-	# Ventanas entre las pantallas
-	for x in [10, 11]:
-		interior.columna(x, 0, R, [158, 215], 0)
-	# Cocina: estufa, horno y mostradores con trastes; pase de cocina (mostrador gris)
-	interior.fila(0, 2, I, [392, 393])
-	interior.columna(0, 3, I, [328, 329, 330, 331])
-	interior.columna(2, 3, I, [361, 361, 361, 388])
-	# Barra de bebidas (madera), refrigerador y repisa con botellas
-	interior.columna(2, 8, I, [390, 417, 444])
-	interior.columna(0, 8, R, [207, 264])
-	interior.columna(1, 8, R, [784, 785])
-	interior.columna(1, 8, R, [738, 852], 2)
-	interior.fila(0, 11, R, [23, 24])
-	interior.fila(0, 12, R, [24, 23])
-	# Mueble del teléfono
-	interior.poner(2, 12, I, 408)
-	interior.poner(2, 12, R, 1017, 2)
-	# Pared inferior con la entrada al centro y tapete
-	for x in range(COLUMNAS_TILES):
-		if x < 10 or x > 12:
-			interior.poner(x, 14, R, Interior.BORDE_INF[1], 0)
-	interior.poner(9, 14, R, Interior.BORDE_INF_CORTE[0], 0)
-	interior.poner(13, 14, R, Interior.BORDE_INF_CORTE[1], 0)
-	interior.fila(10, 12, R, [922, 923, 924], 0)
-	interior.fila(10, 13, R, [1036, 1037, 1038], 0)
-	# Plantas
-	interior.poner(20, 2, I, 16)
-	interior.poner(3, 13, I, 17)
-
-	_pared(Rect2(0, 52, 1000, 48))                 # Pared superior
-	_pared(Rect2(-40, 60, 40, 700))                # Izquierda
-	_pared(Rect2(1000, 60, 40, 700))               # Derecha (panel lateral)
-	_pared(Rect2(0, 700, 480, 40))                 # Pared inferior (entrada entre x 480 y 624)
-	_pared(Rect2(624, 700, 376, 40))
-	_pared(Rect2(480, 740, 144, 20))
-	_pared(Rect2(96, 148, 48, 192))                # Mostrador del pase
-	_pared(Rect2(96, 388, 48, 144))                # Barra
-	_pared(Rect2(96, 580, 48, 48))                 # Mueble del teléfono
-	_pared(Rect2(0, 100, 96, 628))                 # Cocina y trastienda
-	_pared(Rect2(144, 628, 48, 48))                # Maceta
-	for i in range(2):
-		var tv := Sprite2D.new()
-		tv.texture = AssetPaths.textura("tv_1")
-		tv.scale = Vector2(2.5, 2.5)
-		tv.position = Vector2(350 + i * 380, 80)
-		add_child(tv)
-		_televisores.append(tv)
-		var marcador := UIKit.etiqueta("", 10, Color("d9ffd9"), true)
-		marcador.position = Vector2(tv.position.x - 90, 57)
-		marcador.size = Vector2(180, 16)
-		marcador.add_theme_constant_override("outline_size", 0)
-		add_child(marcador)
-		_pantallas.append(marcador)
-	_neon = Sprite2D.new()
-	_neon.texture = AssetPaths.textura("neon_on")
-	_neon.scale = Vector2(2.5, 2.5)
-	_neon.position = Vector2(110, 79)
-	add_child(_neon)
-	var etiqueta_tel := UIKit.etiqueta("TELÉFONO", 9, UIKit.TEXTO, true)
-	etiqueta_tel.position = Vector2(80, 626)
-	etiqueta_tel.size = Vector2(80, 12)
-	add_child(etiqueta_tel)
-	queue_redraw()
-
-func _pared(rect: Rect2) -> void:
-	var cuerpo := StaticBody2D.new()
-	cuerpo.collision_layer = 1
-	cuerpo.position = rect.get_center()
-	var forma := CollisionShape2D.new()
-	var caja := RectangleShape2D.new()
-	caja.size = rect.size
-	forma.shape = caja
-	cuerpo.add_child(forma)
-	add_child(cuerpo)
-
-func _draw() -> void:
-	# El piso, las paredes y los muebles son tiles (ver _construir_escenario).
-	# Separador del panel lateral
-	draw_rect(Rect2(1000, 52, 280, 668), Color("1b1f2a"))
-
-func _construir_estaciones() -> void:
-	cocina = Estacion.new()
-	cocina.configurar(Catalogo.COCINA, Vector2(170, 235))
-	add_child(cocina)
-	barra = Estacion.new()
-	barra.configurar(Catalogo.BARRA, Vector2(170, 480))
-	add_child(barra)
-	add_child(PuntoInteraccion.crear("Teléfono: pedido urgente al proveedor", Vector2(170, 600), abrir_urgente, 40))
-
-func _construir_mesas() -> void:
-	var posiciones: Array = POS_MESAS.duplicate()
-	if GameState.terraza_desbloqueada:
-		posiciones.append_array(POS_TERRAZA)
-	for i in range(posiciones.size()):
-		var mesa := Mesa.new()
-		mesa.configurar(i + 1, posiciones[i], i >= 6)
-		mesa.restaurante = self
-		add_child(mesa)
+## Las mesas 1-6 siempre están; las 7-8 (nodo Terraza) solo después de ganar la Gran Final.
+func _preparar_mesas() -> void:
+	for mesa in $Mesas.get_children():
 		mesas.append(mesa)
 	if GameState.terraza_desbloqueada:
-		var l := UIKit.etiqueta("TERRAZA", 14, UIKit.VERDE, true)
-		l.position = Vector2(860, 110)
-		l.size = Vector2(140, 20)
-		add_child(l)
+		$Terraza.visible = true
+		$Interior/PisoTerraza.visible = true
+		for hijo in $Terraza.get_children():
+			if hijo is Mesa:
+				mesas.append(hijo)
+	else:
+		$Terraza.queue_free()
+	for mesa in mesas:
+		mesa.restaurante = self
+
+func _al_usar_telefono(_dani: Node) -> void:
+	abrir_urgente()
 
 func _generar_goles() -> void:
 	var cantidad := randi_range(1, 2) if GameState.nivel_actual < 3 else 3

@@ -1,8 +1,8 @@
 extends FaseManana
 
-## Fase de mañana: el pueblo, construido con TileMap (Kenney RPG Urban, mismo estilo que su Sample).
-## El mapa está en scenes/town/mapa_pueblo.tscn y se puede editar en el editor de Godot;
-## la ubicación de puertas y zonas se lee de scenes/town/mapa_pueblo.json.
+## Fase de mañana: el pueblo (scenes/town/town.tscn). El mapa es un TileMap (Kenney RPG Urban);
+## letreros, vecinos, peatones, puertas y la cámara de Dani son nodos de la escena.
+## scenes/town/mapa_pueblo.json guarda las zonas que usa el minimapa.
 
 const DATOS_MAPA := "res://scenes/town/mapa_pueblo.json"
 
@@ -10,13 +10,11 @@ var tile := 48.0                        # Tamaño de un tile en pantalla (16 px 
 var tamano := Vector2(2592, 1440)
 var datos := {}
 
+## Lo que dicen los vecinos (en el mismo orden que los nodos Interacciones/Platicar...).
 const CONSEJOS := [
-	{"nombre": "Doña Mari", "lugar": "plaza", "desfase": Vector2(0, 2.5), "sprite": "dona_mari",
-		"texto": "\"Dicen que en el medio tiempo todos piden bebidas. ¡Que no te falte hielo!\""},
-	{"nombre": "Profe Juve", "lugar": "parque", "desfase": Vector2(0, 4.0), "sprite": "profe_juve",
-		"texto": "\"La carne, el pollo, la verdura, el pan y el hielo caducan. Compra lo que vayas a usar.\""},
-	{"nombre": "Capitán del equipo", "lugar": "cancha", "desfase": Vector2(0, 0.5), "sprite": "capitan",
-		"texto": "\"Cuando metemos gol, la banda pide otra ronda. ¡Ten cerveza, refresco y Monster!\""},
+	{"nombre": "Doña Mari", "texto": "\"Dicen que en el medio tiempo todos piden bebidas. ¡Que no te falte hielo!\""},
+	{"nombre": "Profe Juve", "texto": "\"La carne, el pollo, la verdura, el pan y el hielo caducan. Compra lo que vayas a usar.\""},
+	{"nombre": "Capitán del equipo", "texto": "\"Cuando metemos gol, la banda pide otra ronda. ¡Ten cerveza, refresco y Monster!\""},
 ]
 
 func nombre_lugar() -> String:
@@ -26,15 +24,10 @@ func _ready() -> void:
 	datos = JSON.parse_string(FileAccess.get_file_as_string(DATOS_MAPA))
 	tile = float(datos["tile"]) * float(datos["escala"])
 	tamano = Vector2(float(datos["columnas"]), float(datos["filas"])) * tile
-	_crear_limites()
-	_crear_letreros()
-	_crear_personajes()
-	_crear_interacciones()
-
-	var inicio := GameState.posicion_pueblo if GameState.posicion_pueblo != Vector2.ZERO else _a_mundo(datos["inicio"])
-	colocar_dani(inicio)
+	# Al volver de una tienda, Dani aparece frente a su puerta.
+	if GameState.posicion_pueblo != Vector2.ZERO:
+		dani.position = GameState.posicion_pueblo
 	preparar_fase()
-	queue_redraw()
 
 	if not GameState.intro_vista:
 		_mostrar_intro.call_deferred()
@@ -113,83 +106,16 @@ func _iniciar_tutorial() -> void:
 		]
 		add_child(Tutorial.new("regreso", pasos))
 
-# ---------------------------------------------------------------- Construcción
+# ---------------------------------------------------------------- Interacciones (señal "usado")
 
-func _crear_limites() -> void:
-	pared(Rect2(-40, -40, tamano.x + 80, 40))
-	pared(Rect2(-40, tamano.y, tamano.x + 80, 40))
-	pared(Rect2(-40, 0, 40, tamano.y))
-	pared(Rect2(tamano.x, 0, 40, tamano.y))
+func _al_entrar_tienda(_dani: Node, tienda: String) -> void:
+	_entrar_tienda(tienda, puerta(tienda) + Vector2(0, tile * 0.6))
 
-func _draw() -> void:
-	# Líneas de la cancha sobre el pasto del tilemap.
-	var cancha := _rect("cancha").grow(-tile * 0.5)
-	cancha.position.y += tile * 0.5
-	cancha.size.y -= tile * 0.5
-	var blanco := Color(1, 1, 1, 0.85)
-	draw_rect(cancha, blanco, false, 4.0)
-	draw_line(Vector2(cancha.get_center().x, cancha.position.y), Vector2(cancha.get_center().x, cancha.end.y), blanco, 4.0)
-	draw_arc(cancha.get_center(), tile * 0.9, 0, TAU, 32, blanco, 4.0)
-	for lado in [cancha.position.x, cancha.end.x - tile * 1.2]:
-		draw_rect(Rect2(lado, cancha.get_center().y - tile * 0.8, tile * 1.2, tile * 1.6), blanco, false, 3.0)
+func _al_entrar_restaurante(_dani: Node) -> void:
+	_confirmar_restaurante()
 
-func _crear_letreros() -> void:
-	_letrero("LA 501 · SPORTS BAR", "restaurante", UIKit.ACENTO)
-	_letrero("MERCADO CENTRAL", "mercado", Color("f7c686"))
-	_letrero("CERVECERÍA LA ESQUINA", "cerveceria", Color("f2d16b"))
-	var plaza := _rect("plaza")
-	etiqueta_mapa("PLAZA 501", Vector2(plaza.position.x, plaza.position.y + tile * 0.2), plaza.size.x, Color("fff0a6"), 16)
-	var parque := _rect("parque")
-	etiqueta_mapa("PARQUE DE LA RIBERA", Vector2(parque.position.x, parque.position.y + parque.size.y * 0.5 - 70), parque.size.x, Color("e6f5c9"), 16)
-	var cancha := _rect("cancha")
-	etiqueta_mapa("CANCHA DEL BARRIO", Vector2(cancha.position.x, cancha.position.y + tile * 1.2), cancha.size.x, Color("e6f5c9"), 14)
-
-func _letrero(texto: String, lugar: String, color: Color) -> void:
-	var r := _rect(lugar)
-	var l := etiqueta_mapa(texto, Vector2(r.position.x + tile * 0.5, r.position.y + tile * 0.9), r.size.x - tile, color, 18)
-	l.add_theme_stylebox_override("normal", UIKit.estilo(Color("1b1f2a", 0.9), 4, color, 2, 4))
-
-func _crear_personajes() -> void:
-	npc("vendedor_mercado", puerta("mercado") + Vector2(tile * 2, 0), "")
-	for consejo in CONSEJOS:
-		npc(consejo["sprite"], _posicion_consejo(consejo), consejo["nombre"])
-	# Vecinos que caminan por las banquetas.
-	var av: Rect2 = _rect_calle("avenida")
-	var avv: Rect2 = _rect_calle("avenida_vertical")
-	var sur: Rect2 = _rect_calle("calle_sur")
-	var arriba := av.position.y - tile * 0.5
-	var abajo := av.end.y + tile * 0.5
-	var izq := avv.position.x - tile * 0.5
-	var der := avv.end.x + tile * 0.5
-	var rutas: Array = [
-		["cliente_1", [Vector2(tile, arriba), Vector2(izq - tile, arriba)]],
-		["cliente_2", [Vector2(der + tile, abajo), Vector2(tamano.x - tile, abajo)]],
-		["cliente_3", [Vector2(izq, tile), Vector2(izq, tamano.y - tile)]],
-		["cliente_vip", [Vector2(der, tamano.y - tile), Vector2(der, tile)]],
-		["cliente_1", [Vector2(der + tile, sur.position.y - tile * 0.5), Vector2(tamano.x - tile, sur.position.y - tile * 0.5)]],
-		["cliente_2", [Vector2(tile, abajo), Vector2(izq - tile, abajo)]],
-	]
-	for ruta in rutas:
-		var puntos: Array[Vector2] = []
-		puntos.assign(ruta[1])
-		add_child(Peaton.crear(ruta[0], puntos))
-
-func _posicion_consejo(consejo: Dictionary) -> Vector2:
-	var lugar: Dictionary = datos["lugares"][consejo["lugar"]]
-	var centro := _rect(consejo["lugar"]).get_center()
-	for clave in ["fuente", "estanque"]:
-		if lugar.has(clave):
-			centro = _a_mundo(lugar[clave])
-	return centro + consejo["desfase"] * tile
-
-func _crear_interacciones() -> void:
-	var p_mercado := puerta("mercado")
-	var p_cerveceria := puerta("cerveceria")
-	add_child(PuntoInteraccion.crear("Entrar al Mercado", p_mercado, _entrar_tienda.bind(Catalogo.MERCADO, p_mercado + Vector2(0, tile * 0.6)), 44))
-	add_child(PuntoInteraccion.crear("Entrar a la Cervecería", p_cerveceria, _entrar_tienda.bind(Catalogo.CERVECERIA, p_cerveceria + Vector2(0, tile * 0.6)), 44))
-	add_child(PuntoInteraccion.crear("Abrir La 501 (empezar la jornada)", puerta("restaurante"), _confirmar_restaurante, 44))
-	for consejo in CONSEJOS:
-		add_child(PuntoInteraccion.crear("Platicar con %s" % consejo["nombre"], _posicion_consejo(consejo), _platicar.bind(consejo), 40))
+func _al_platicar(_dani: Node, indice: int) -> void:
+	_platicar(CONSEJOS[indice])
 
 func _platicar(consejo: Dictionary) -> void:
 	GameState.aviso.emit("%s: %s" % [consejo["nombre"], consejo["texto"]])
@@ -201,7 +127,7 @@ func _entrar_tienda(tienda: String, regreso: Vector2) -> void:
 	GameState.tienda_actual = tienda
 	GameState.posicion_pueblo = regreso
 	AudioManager.sfx("click")
-	GameState.cambiar_escena(GameState.ESCENA_TIENDA)
+	GameState.cambiar_escena(GameState.escena_tienda(tienda))
 
 func _confirmar_restaurante() -> void:
 	var mensaje := "Durante la jornada no podrás volver al pueblo; si algo se acaba tendrás que pedirlo por teléfono (más caro y tarda en llegar).\n\nAlmacén: %d unidades. ¿Abrir el restaurante?" % GameState.inventario.total_unidades()

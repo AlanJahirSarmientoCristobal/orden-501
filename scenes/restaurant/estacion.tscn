@@ -1,0 +1,66 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/restaurant/estacion.gd" id="1_script"]
+
+[sub_resource type="CircleShape2D" id="Forma_alcance"]
+radius = 58.0
+
+[sub_resource type="StyleBoxFlat" id="Barra_fondo"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0, 0, 0, 0.6)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Barra_relleno"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.94902, 0.709804, 0.266667, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[node name="Estacion" type="Area2D" groups=["interactuables", "estaciones"]]
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+script = ExtResource("1_script")
+
+[node name="Alcance" type="CollisionShape2D" parent="."]
+shape = SubResource("Forma_alcance")
+
+[node name="Barra" type="ProgressBar" parent="."]
+visible = false
+offset_left = -30.0
+offset_top = -58.0
+offset_right = 30.0
+offset_bottom = -50.0
+theme_override_styles/background = SubResource("Barra_fondo")
+theme_override_styles/fill = SubResource("Barra_relleno")
+max_value = 1.0
+show_percentage = false
+
+[node name="Listos" type="HBoxContainer" parent="."]
+offset_left = -50.0
+offset_top = -34.0
+offset_right = 50.0
+offset_bottom = -10.0
+theme_override_constants/separation = 2
+
+[node name="Estado" type="Label" parent="."]
+offset_left = -70.0
+offset_top = 24.0
+offset_right = 70.0
+offset_bottom = 38.0
+theme_override_colors/font_color = Color(0.662745, 0.690196, 0.752941, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.03, 0.05, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 10
+horizontal_alignment = 1

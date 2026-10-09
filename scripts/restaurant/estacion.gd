@@ -1,48 +1,26 @@
 extends Interactuable
 class_name Estacion
 
-## Estación donde se preparan pedidos: el pase de cocina (Chef) o la barra de bebidas.
+## Estación donde se preparan pedidos (escena estacion.tscn): el pase de cocina o la barra de bebidas.
 ## Recibe comandas en cola, las prepara y Dani recoge los platillos listos.
 
 signal cola_cambiada
 
-var tipo := Catalogo.COCINA
+## "cocina" (pase de cocina, 1 platillo a la vez) o "barra" (barra de bebidas, 2 a la vez).
+@export_enum("cocina", "barra") var tipo := "cocina"
 var simultaneos := 1
 var cola: Array[Dictionary] = []          # {"platillo", "cliente"}
 var preparando: Array[Dictionary] = []    # {"platillo", "cliente", "restante", "total"}
 var listos: Array[Dictionary] = []        # {"platillo", "cliente"}
 var pausada := false                      # Apagón: no se prepara nada
 
-var _vista_listos: HBoxContainer
-var _barra: ProgressBar
-var _estado: Label
-
-func configurar(nuevo_tipo: String, pos: Vector2) -> void:
-	tipo = nuevo_tipo
-	position = pos
-	simultaneos = 1 if tipo == Catalogo.COCINA else 2
-	radio = 58.0
+# Nodos de la escena scenes/restaurant/estacion.tscn
+@onready var _barra: ProgressBar = $Barra
+@onready var _vista_listos: HBoxContainer = $Listos
+@onready var _estado: Label = $Estado
 
 func _ready() -> void:
-	super._ready()
-	add_to_group("estaciones")
-	_barra = ProgressBar.new()
-	_barra.position = Vector2(-30, -58)
-	_barra.size = Vector2(60, 8)
-	_barra.show_percentage = false
-	_barra.max_value = 1.0
-	_barra.visible = false
-	_barra.add_theme_stylebox_override("fill", UIKit.estilo(UIKit.ACENTO, 3, Color.TRANSPARENT, 0, 0))
-	_barra.add_theme_stylebox_override("background", UIKit.estilo(Color(0, 0, 0, 0.6), 3, Color.TRANSPARENT, 0, 0))
-	add_child(_barra)
-	_vista_listos = UIKit.hbox(2)
-	_vista_listos.position = Vector2(-50, -34)
-	_vista_listos.size = Vector2(100, 24)
-	add_child(_vista_listos)
-	_estado = UIKit.etiqueta("", 10, UIKit.TEXTO_TENUE, true)
-	_estado.position = Vector2(-70, 24)
-	_estado.size = Vector2(140, 14)
-	add_child(_estado)
+	simultaneos = 1 if tipo == Catalogo.COCINA else 2
 	_actualizar_vista()
 
 func agregar_pedido(platillo: String, cliente: Cliente) -> void:

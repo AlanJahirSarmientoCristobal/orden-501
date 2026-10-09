@@ -4,7 +4,7 @@ class_name FaseManana
 ## Base de la fase de mañana, compartida por el pueblo y el interior de las tiendas:
 ## HUD, reloj de la mañana, tablet (E), inventario (I), reservaciones (R) y pausa.
 
-var dani: Dani
+@onready var dani: Dani = $Dani
 var terminando := false
 
 var _hud_dinero: Label
@@ -21,11 +21,6 @@ var _aviso_30s := false
 ## Nombre del lugar para la barra superior (lo define cada escena).
 func nombre_lugar() -> String:
 	return "PUEBLO"
-
-## Coloca al nodo Dani de la escena (cada escena de la mañana lo tiene como hijo).
-func colocar_dani(posicion: Vector2) -> void:
-	dani = $Dani
-	dani.position = posicion
 
 func preparar_fase() -> void:
 	AudioManager.musica("manana")
@@ -84,47 +79,6 @@ func ir_al_restaurante() -> void:
 	terminando = true
 	GameState.iniciar_jornada()
 	GameState.cambiar_escena(GameState.ESCENA_RESTAURANTE)
-
-# ---------------------------------------------------------------- Utilidades de construcción
-
-func pared(rect: Rect2) -> void:
-	var cuerpo := StaticBody2D.new()
-	cuerpo.collision_layer = 1
-	cuerpo.position = rect.get_center()
-	var forma := CollisionShape2D.new()
-	var caja := RectangleShape2D.new()
-	caja.size = rect.size
-	forma.shape = caja
-	cuerpo.add_child(forma)
-	add_child(cuerpo)
-
-func sprite(clave: String, pos: Vector2, escala: float) -> Sprite2D:
-	var tex := AssetPaths.textura(clave)
-	if tex == null:
-		return null
-	var s := Sprite2D.new()
-	s.texture = tex
-	s.position = pos
-	s.scale = Vector2(escala, escala)
-	add_child(s)
-	return s
-
-func etiqueta_mapa(texto: String, pos: Vector2, ancho: float, color: Color, tam: int = 18) -> Label:
-	var l := UIKit.etiqueta(texto, tam, color, true)
-	l.position = pos
-	l.size = Vector2(ancho, tam + 12)
-	add_child(l)
-	return l
-
-## Agrega un personaje fijo (escena scenes/entities/npc.tscn).
-func npc(clave: String, pos: Vector2, nombre: String, animacion: StringName = &"down") -> NPC:
-	var personaje: NPC = load("res://scenes/entities/npc.tscn").instantiate()
-	personaje.frames = AssetPaths.frames(clave)
-	personaje.nombre = nombre
-	personaje.animacion = animacion
-	personaje.position = pos
-	add_child(personaje)
-	return personaje
 
 # ---------------------------------------------------------------- HUD
 

@@ -5,20 +5,17 @@ class_name Peaton
 
 const VELOCIDAD := 70.0
 
-var ruta: Array[Vector2] = []
+## Puntos que recorre, ida y vuelta (en el Inspector).
+@export var ruta: Array[Vector2] = []
+@export var frames: SpriteFrames
+
 var _indice := 0
 
 @onready var _sprite: AnimatedSprite2D = $Sprite
 
-## Crea un peatón (escena scenes/town/peaton.tscn) con el aspecto indicado.
-static func crear(clave: String, puntos: Array[Vector2]) -> Peaton:
-	var p: Peaton = load("res://scenes/town/peaton.tscn").instantiate()
-	p.ruta = puntos
-	p.position = puntos[0]
-	p.get_node("Sprite").sprite_frames = AssetPaths.frames(clave)
-	return p
-
 func _ready() -> void:
+	if frames:
+		_sprite.sprite_frames = frames
 	_indice = randi_range(0, ruta.size() - 1)
 	position = ruta[_indice]
 	_siguiente()

@@ -1,100 +1,30 @@
 extends Interactuable
 class_name Mesa
 
-## Mesa del restaurante. Estados: LIMPIA, OCUPADA o SUCIA.
+## Mesa del restaurante (escenas mesa_2.tscn y mesa_4.tscn). Estados: LIMPIA, OCUPADA o SUCIA.
 ## Una mesa desocupada queda sucia y nadie puede sentarse hasta que Dani la limpie.
 
 enum EstadoMesa { LIMPIA, OCUPADA, SUCIA }
 
-var numero := 1
+## Número de mesa (en el Inspector). La capacidad sale del número: 1-3 para 2 personas, el resto para 4.
+@export var numero := 1
+@export var terraza := false
+
 var capacidad := 2
 var estado: EstadoMesa = EstadoMesa.LIMPIA
 var cliente: Cliente = null
-var terraza := false
 var restaurante: Node = null
 
-var _cuerpo: StaticBody2D
-var _etiqueta: Label
-var _cartel: Label
-var _platos: Node2D
-
-func configurar(nuevo_numero: int, pos: Vector2, es_terraza: bool = false) -> void:
-	numero = nuevo_numero
-	capacidad = GameState.capacidad_mesa(numero)
-	position = pos
-	terraza = es_terraza
-	radio = 64.0
+# Nodos de la escena (scenes/restaurant/mesa_2.tscn o mesa_4.tscn)
+@onready var _etiqueta: Label = $Etiqueta
+@onready var _cartel: Label = $Cartel
+@onready var _platos: Node2D = $Platos
 
 func _ready() -> void:
-	super._ready()
-	add_to_group("mesas")
-	_cuerpo = StaticBody2D.new()
-	_cuerpo.collision_layer = 1
-	var forma := CollisionShape2D.new()
-	var rect := RectangleShape2D.new()
-	rect.size = _tamano_mesa() - Vector2(8, 8)
-	forma.shape = rect
-	_cuerpo.add_child(forma)
-	add_child(_cuerpo)
-
-	_etiqueta = UIKit.etiqueta("MESA %d · %d pers." % [numero, capacidad], 11, UIKit.TEXTO, true)
-	_etiqueta.position = Vector2(-60, 70)
-	_etiqueta.size = Vector2(120, 14)
-	add_child(_etiqueta)
-
-	_cartel = UIKit.etiqueta("", 11, UIKit.AZUL, true)
-	_cartel.position = Vector2(-70, -94)
-	_cartel.size = Vector2(140, 14)
-	add_child(_cartel)
-
-	_construir_muebles()
-	_platos = Node2D.new()
-	_platos.z_index = 1
-	var plato := Sprite2D.new()
-	plato.texture = Interior.textura(Interior.RPG, 1081)
-	plato.scale = Vector2(2.5, 2.5)
-	plato.position = Vector2(-10, -4)
-	_platos.add_child(plato)
-	var tazon := Sprite2D.new()
-	tazon.texture = Interior.textura(Interior.RPG, 854)
-	tazon.scale = Vector2(2.5, 2.5)
-	tazon.position = Vector2(12, 6)
-	_platos.add_child(tazon)
-	_platos.visible = false
-	add_child(_platos)
-
-func _tamano_mesa() -> Vector2:
-	return Vector2(48, 48) if capacidad <= 2 else Vector2(96, 48)
-
-## Mesa y sillas con tiles del pack Roguelike Indoors.
-## 2 personas: mesa redonda de 1 tile; 4 personas: mesa ovalada de 2x1.
-func _construir_muebles() -> void:
-	var I := Interior.INDOOR
-	if capacidad <= 2:
-		_tile(I, 7, Vector2(0, 0))
-		_tile(I, 54, Vector2(0, -44))    # Silla de arriba (donde se sienta el cliente)
-		_tile(I, 55, Vector2(0, 44))     # Silla de abajo, de espaldas
-	else:
-		_tile(I, 3, Vector2(-24, 0))
-		_tile(I, 4, Vector2(24, 0))
-		for x in [-24, 24]:
-			_tile(I, 54, Vector2(x, -44))
-			_tile(I, 55, Vector2(x, 44))
+	capacidad = GameState.capacidad_mesa(numero)
+	_etiqueta.text = "MESA %d · %d pers." % [numero, capacidad]
 	if terraza:
-		for hijo in _muebles:
-			hijo.modulate = Color(1.08, 1.05, 0.95)
-
-var _muebles: Array[Sprite2D] = []
-
-func _tile(fuente: String, id: int, desfase: Vector2) -> Sprite2D:
-	var s := Sprite2D.new()
-	s.texture = Interior.textura(fuente, id)
-	s.scale = Vector2(Interior.ESCALA, Interior.ESCALA)
-	s.position = desfase
-	s.z_index = -1
-	add_child(s)
-	_muebles.append(s)
-	return s
+		$Muebles.modulate = Color(1.08, 1.05, 0.95)
 
 ## Sillas en coordenadas locales: primero las de arriba (el cliente principal usa la primera).
 func asientos_locales() -> Array[Vector2]:
@@ -118,14 +48,12 @@ func esta_libre() -> bool:
 func ocupar(nuevo_cliente: Cliente) -> void:
 	cliente = nuevo_cliente
 	estado = EstadoMesa.OCUPADA
-	queue_redraw()
 
 ## El cliente se fue: la mesa queda sucia (si llegó a sentarse) o libre.
 func liberar(ensuciar: bool) -> void:
 	cliente = null
 	estado = EstadoMesa.SUCIA if ensuciar else EstadoMesa.LIMPIA
 	_platos.visible = ensuciar
-	queue_redraw()
 
 func actualizar_cartel(texto_cartel: String) -> void:
 	_cartel.text = texto_cartel

@@ -44,7 +44,7 @@ func _run() -> void:
 	# y salir cruzando la puerta caminando.
 	var puerta: Vector2 = pueblo.puerta("cerveceria") + Vector2(0, pueblo.tile * 0.6)
 	pueblo._entrar_tienda(Catalogo.CERVECERIA, puerta)
-	await _esperar_escena("Store")
+	await _esperar_escena("Cerveceria")
 	var tienda := get_tree().current_scene
 	_check(tienda.tienda == Catalogo.CERVECERIA, "No se entró a la Cervecería")
 	tienda.abrir_menu()

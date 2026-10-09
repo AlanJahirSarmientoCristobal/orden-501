@@ -1,19 +1,271 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=4]
 
-[ext_resource type="Script" path="res://scripts/restaurant/restaurant.gd" id="1_script"]
-[ext_resource type="PackedScene" path="res://scenes/entities/dani.tscn" id="2_dani"]
-[ext_resource type="PackedScene" path="res://scenes/entities/npc.tscn" id="3_npc"]
-[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/chef.tres" id="4_chef"]
+[ext_resource type="Script" path="res://scripts/restaurant/restaurant.gd" id="1_6a52p"]
+[ext_resource type="TileSet" path="res://Assets/tilesets/interiores.tres" id="2_6whu3"]
+[ext_resource type="Texture2D" path="res://Assets/sprites/restaurante/tv_1.png" id="3_8iurx"]
+[ext_resource type="Texture2D" path="res://Assets/sprites/restaurante/neon_on.png" id="4_61y4y"]
+[ext_resource type="PackedScene" path="res://scenes/restaurant/estacion.tscn" id="5_penpo"]
+[ext_resource type="Script" path="res://scripts/entities/interactuable.gd" id="6_6gsge"]
+[ext_resource type="PackedScene" path="res://scenes/restaurant/mesa_2.tscn" id="7_ayhsx"]
+[ext_resource type="PackedScene" path="res://scenes/restaurant/mesa_4.tscn" id="8_oonqw"]
+[ext_resource type="PackedScene" path="res://scenes/entities/npc.tscn" id="9_88rii"]
+[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/chef.tres" id="10_vi10e"]
+[ext_resource type="PackedScene" path="res://scenes/entities/dani.tscn" id="11_5ko6n"]
 
-[node name="Restaurant" type="Node2D"]
-script = ExtResource("1_script")
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jjjah"]
+size = Vector2(1000, 48)
 
-[node name="Chef" parent="." instance=ExtResource("3_npc")]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pi8l1"]
+size = Vector2(40, 700)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_isbye"]
+size = Vector2(40, 700)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hen54"]
+size = Vector2(480, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xbdov"]
+size = Vector2(376, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gune4"]
+size = Vector2(144, 20)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_nhdkw"]
+size = Vector2(48, 192)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_b5exk"]
+size = Vector2(48, 144)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kh3m8"]
+size = Vector2(48, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_y1ct5"]
+size = Vector2(96, 628)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ba61f"]
+size = Vector2(48, 48)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_x6yub"]
+radius = 40.0
+
+[node name="Restaurant" type="Node2D" unique_id=698233332]
+script = ExtResource("1_6a52p")
+
+[node name="Fondo" type="ColorRect" parent="." unique_id=648656265]
+z_index = -20
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.08235294, 0.09019608, 0.12156863, 1)
+
+[node name="Interior" type="Node2D" parent="." unique_id=293133626]
+z_index = -10
+position = Vector2(0, 4)
+
+[node name="Colisiones" type="StaticBody2D" parent="Interior" unique_id=612844124]
+
+[node name="Suelo" type="TileMapLayer" parent="Interior" unique_id=893570307]
+scale = Vector2(3, 3)
+tile_map_data = PackedByteArray("AAAAAAAAAAASAA8AAAAAAAEAAAANAA8AAAABAAAAAAASAA8AAAABAAEAAAANAA8AAAACAAAAAAASAA8AAAACAAEAAAANAA8AAAADAAAAAAASAA8AAAADAAEAAAANAA8AAAAEAAAAAAASAA8AAAAEAAEAAAANAA8AAAAFAAAAAAASAA8AAAAFAAEAAAANAA8AAAAGAAAAAAASAA8AAAAGAAEAAAANAA8AAAAHAAAAAAASAA8AAAAHAAEAAAANAA8AAAAIAAAAAAASAA8AAAAIAAEAAAANAA8AAAAJAAAAAAASAA8AAAAJAAEAAAANAA8AAAAKAAAAAAAsAAIAAAAKAAEAAAAsAAMAAAALAAAAAAAsAAIAAAALAAEAAAAsAAMAAAAMAAAAAAASAA8AAAAMAAEAAAANAA8AAAANAAAAAAASAA8AAAANAAEAAAANAA8AAAAOAAAAAAASAA8AAAAOAAEAAAANAA8AAAAPAAAAAAASAA8AAAAPAAEAAAANAA8AAAAQAAAAAAASAA8AAAAQAAEAAAANAA8AAAARAAAAAAASAA8AAAARAAEAAAANAA8AAAASAAAAAAASAA8AAAASAAEAAAANAA8AAAATAAAAAAASAA8AAAATAAEAAAANAA8AAAAUAAAAAAASAA8AAAAUAAEAAAANAA8AAAADAAIAAAAFAAIAAAAEAAIAAAAFAAIAAAAFAAIAAAAFAAIAAAAGAAIAAAAFAAIAAAAHAAIAAAAFAAIAAAAIAAIAAAAFAAIAAAAJAAIAAAAFAAIAAAAKAAIAAAAFAAIAAAALAAIAAAAFAAIAAAAMAAIAAAAFAAIAAAANAAIAAAAFAAIAAAAOAAIAAAAFAAIAAAAPAAIAAAAFAAIAAAAQAAIAAAAFAAIAAAARAAIAAAAFAAIAAAASAAIAAAAFAAIAAAATAAIAAAAFAAIAAAAUAAIAAAAFAAIAAAADAAMAAAAFAAIAAAAEAAMAAAAFAAIAAAAFAAMAAAAFAAIAAAAGAAMAAAAFAAIAAAAHAAMAAAAFAAIAAAAIAAMAAAAFAAIAAAAJAAMAAAAFAAIAAAAKAAMAAAAFAAIAAAALAAMAAAAFAAIAAAAMAAMAAAAFAAIAAAANAAMAAAAFAAIAAAAOAAMAAAAFAAIAAAAPAAMAAAAFAAIAAAAQAAMAAAAFAAIAAAARAAMAAAAFAAIAAAASAAMAAAAFAAIAAAATAAMAAAAFAAIAAAAUAAMAAAAFAAIAAAADAAQAAAAFAAIAAAAEAAQAAAAFAAIAAAAFAAQAAAAFAAIAAAAGAAQAAAAFAAIAAAAHAAQAAAAFAAIAAAAIAAQAAAAFAAIAAAAJAAQAAAAFAAIAAAAKAAQAAAAFAAIAAAALAAQAAAAFAAIAAAAMAAQAAAAFAAIAAAANAAQAAAAFAAIAAAAOAAQAAAAFAAIAAAAPAAQAAAAFAAIAAAAQAAQAAAAFAAIAAAARAAQAAAAFAAIAAAASAAQAAAAFAAIAAAATAAQAAAAFAAIAAAAUAAQAAAAFAAIAAAADAAUAAAAFAAIAAAAEAAUAAAAFAAIAAAAFAAUAAAAFAAIAAAAGAAUAAAAFAAIAAAAHAAUAAAAFAAIAAAAIAAUAAAAFAAIAAAAJAAUAAAAFAAIAAAAKAAUAAAAFAAIAAAALAAUAAAAFAAIAAAAMAAUAAAAFAAIAAAANAAUAAAAFAAIAAAAOAAUAAAAFAAIAAAAPAAUAAAAFAAIAAAAQAAUAAAAFAAIAAAARAAUAAAAFAAIAAAASAAUAAAAFAAIAAAATAAUAAAAFAAIAAAAUAAUAAAAFAAIAAAADAAYAAAAFAAIAAAAEAAYAAAAFAAIAAAAFAAYAAAAFAAIAAAAGAAYAAAAFAAIAAAAHAAYAAAAFAAIAAAAIAAYAAAAFAAIAAAAJAAYAAAAFAAIAAAAKAAYAAAAFAAIAAAALAAYAAAAFAAIAAAAMAAYAAAAFAAIAAAANAAYAAAAFAAIAAAAOAAYAAAAFAAIAAAAPAAYAAAAFAAIAAAAQAAYAAAAFAAIAAAARAAYAAAAFAAIAAAASAAYAAAAFAAIAAAATAAYAAAAFAAIAAAAUAAYAAAAFAAIAAAADAAcAAAAFAAIAAAAEAAcAAAAFAAIAAAAFAAcAAAAFAAIAAAAGAAcAAAAFAAIAAAAHAAcAAAAFAAIAAAAIAAcAAAAFAAIAAAAJAAcAAAAFAAIAAAAKAAcAAAAFAAIAAAALAAcAAAAFAAIAAAAMAAcAAAAFAAIAAAANAAcAAAAFAAIAAAAOAAcAAAAFAAIAAAAPAAcAAAAFAAIAAAAQAAcAAAAFAAIAAAARAAcAAAAFAAIAAAASAAcAAAAFAAIAAAATAAcAAAAFAAIAAAAUAAcAAAAFAAIAAAADAAgAAAAFAAIAAAAEAAgAAAAFAAIAAAAFAAgAAAAFAAIAAAAGAAgAAAAFAAIAAAAHAAgAAAAFAAIAAAAIAAgAAAAFAAIAAAAJAAgAAAAFAAIAAAAKAAgAAAAFAAIAAAALAAgAAAAFAAIAAAAMAAgAAAAFAAIAAAANAAgAAAAFAAIAAAAOAAgAAAAFAAIAAAAPAAgAAAAFAAIAAAAQAAgAAAAFAAIAAAARAAgAAAAFAAIAAAASAAgAAAAFAAIAAAATAAgAAAAFAAIAAAAUAAgAAAAFAAIAAAADAAkAAAAFAAIAAAAEAAkAAAAFAAIAAAAFAAkAAAAFAAIAAAAGAAkAAAAFAAIAAAAHAAkAAAAFAAIAAAAIAAkAAAAFAAIAAAAJAAkAAAAFAAIAAAAKAAkAAAAFAAIAAAALAAkAAAAFAAIAAAAMAAkAAAAFAAIAAAANAAkAAAAFAAIAAAAOAAkAAAAFAAIAAAAPAAkAAAAFAAIAAAAQAAkAAAAFAAIAAAARAAkAAAAFAAIAAAASAAkAAAAFAAIAAAATAAkAAAAFAAIAAAAUAAkAAAAFAAIAAAADAAoAAAAFAAIAAAAEAAoAAAAFAAIAAAAFAAoAAAAFAAIAAAAGAAoAAAAFAAIAAAAHAAoAAAAFAAIAAAAIAAoAAAAFAAIAAAAJAAoAAAAFAAIAAAAKAAoAAAAFAAIAAAALAAoAAAAFAAIAAAAMAAoAAAAFAAIAAAANAAoAAAAFAAIAAAAOAAoAAAAFAAIAAAAPAAoAAAAFAAIAAAAQAAoAAAAFAAIAAAARAAoAAAAFAAIAAAASAAoAAAAFAAIAAAATAAoAAAAFAAIAAAAUAAoAAAAFAAIAAAADAAsAAAAFAAIAAAAEAAsAAAAFAAIAAAAFAAsAAAAFAAIAAAAGAAsAAAAFAAIAAAAHAAsAAAAFAAIAAAAIAAsAAAAFAAIAAAAJAAsAAAAFAAIAAAAKAAsAAAAFAAIAAAALAAsAAAAFAAIAAAAMAAsAAAAFAAIAAAANAAsAAAAFAAIAAAAOAAsAAAAFAAIAAAAPAAsAAAAFAAIAAAAQAAsAAAAFAAIAAAARAAsAAAAFAAIAAAASAAsAAAAFAAIAAAATAAsAAAAFAAIAAAAUAAsAAAAFAAIAAAADAAwAAAAFAAIAAAAEAAwAAAAFAAIAAAAFAAwAAAAFAAIAAAAGAAwAAAAFAAIAAAAHAAwAAAAFAAIAAAAIAAwAAAAFAAIAAAAJAAwAAAAFAAIAAAAKAAwAAAAKABAAAAALAAwAAAALABAAAAAMAAwAAAAMABAAAAANAAwAAAAFAAIAAAAOAAwAAAAFAAIAAAAPAAwAAAAFAAIAAAAQAAwAAAAFAAIAAAARAAwAAAAFAAIAAAASAAwAAAAFAAIAAAATAAwAAAAFAAIAAAAUAAwAAAAFAAIAAAADAA0AAAAFAAIAAAAEAA0AAAAFAAIAAAAFAA0AAAAFAAIAAAAGAA0AAAAFAAIAAAAHAA0AAAAFAAIAAAAIAA0AAAAFAAIAAAAJAA0AAAAFAAIAAAAKAA0AAAAKABIAAAALAA0AAAALABIAAAAMAA0AAAAMABIAAAANAA0AAAAFAAIAAAAOAA0AAAAFAAIAAAAPAA0AAAAFAAIAAAAQAA0AAAAFAAIAAAARAA0AAAAFAAIAAAASAA0AAAAFAAIAAAATAA0AAAAFAAIAAAAUAA0AAAAFAAIAAAADAA4AAAAOAAwAAAAEAA4AAAAOAAwAAAAFAA4AAAAOAAwAAAAGAA4AAAAOAAwAAAAHAA4AAAAOAAwAAAAIAA4AAAAOAAwAAAAJAA4AAAAPAAwAAAAKAA4AAAAFAAIAAAALAA4AAAAFAAIAAAAMAA4AAAAFAAIAAAANAA4AAAANAAwAAAAOAA4AAAAOAAwAAAAPAA4AAAAOAAwAAAAQAA4AAAAOAAwAAAARAA4AAAAOAAwAAAASAA4AAAAOAAwAAAATAA4AAAAOAAwAAAAUAA4AAAAOAAwAAAAAAAIAAAAGAAIAAAABAAIAAAAGAAIAAAACAAIAAAAGAAIAAAAAAAMAAAAGAAIAAAABAAMAAAAGAAIAAAACAAMAAAAGAAIAAAAAAAQAAAAGAAIAAAABAAQAAAAGAAIAAAACAAQAAAAGAAIAAAAAAAUAAAAGAAIAAAABAAUAAAAGAAIAAAACAAUAAAAGAAIAAAAAAAYAAAAGAAIAAAABAAYAAAAGAAIAAAACAAYAAAAGAAIAAAAAAAcAAAAGAAIAAAABAAcAAAAGAAIAAAACAAcAAAAGAAIAAAAAAAgAAAAGAAIAAAABAAgAAAAGAAIAAAACAAgAAAAGAAIAAAAAAAkAAAAGAAIAAAABAAkAAAAGAAIAAAACAAkAAAAGAAIAAAAAAAoAAAAGAAIAAAABAAoAAAAGAAIAAAACAAoAAAAGAAIAAAAAAAsAAAAGAAIAAAABAAsAAAAGAAIAAAACAAsAAAAGAAIAAAAAAAwAAAAGAAIAAAABAAwAAAAGAAIAAAACAAwAAAAGAAIAAAAAAA0AAAAGAAIAAAABAA0AAAAGAAIAAAACAA0AAAAGAAIAAAAAAA4AAAAOAAwAAAABAA4AAAAOAAwAAAACAA4AAAAOAAwAAAA=")
+tile_set = ExtResource("2_6whu3")
+
+[node name="PisoTerraza" type="TileMapLayer" parent="Interior" unique_id=1180938183]
+visible = false
+scale = Vector2(3, 3)
+tile_map_data = PackedByteArray("AAASAAIAAAAHAAIAAAATAAIAAAAHAAIAAAAUAAIAAAAHAAIAAAASAAMAAAAHAAIAAAATAAMAAAAHAAIAAAAUAAMAAAAHAAIAAAASAAQAAAAHAAIAAAATAAQAAAAHAAIAAAAUAAQAAAAHAAIAAAASAAUAAAAHAAIAAAATAAUAAAAHAAIAAAAUAAUAAAAHAAIAAAASAAYAAAAHAAIAAAATAAYAAAAHAAIAAAAUAAYAAAAHAAIAAAASAAcAAAAHAAIAAAATAAcAAAAHAAIAAAAUAAcAAAAHAAIAAAASAAgAAAAHAAIAAAATAAgAAAAHAAIAAAAUAAgAAAAHAAIAAAASAAkAAAAHAAIAAAATAAkAAAAHAAIAAAAUAAkAAAAHAAIAAAASAAoAAAAHAAIAAAATAAoAAAAHAAIAAAAUAAoAAAAHAAIAAAASAAsAAAAHAAIAAAATAAsAAAAHAAIAAAAUAAsAAAAHAAIAAAASAAwAAAAHAAIAAAATAAwAAAAHAAIAAAAUAAwAAAAHAAIAAAASAA0AAAAHAAIAAAATAA0AAAAHAAIAAAAUAA0AAAAHAAIAAAASAA4AAAAHAAIAAAATAA4AAAAHAAIAAAAUAA4AAAAHAAIAAAA=")
+tile_set = ExtResource("2_6whu3")
+
+[node name="Objetos" type="TileMapLayer" parent="Interior" unique_id=1107238443]
+z_index = 1
+scale = Vector2(3, 3)
+tile_map_data = PackedByteArray("AAAAAAIAAQAOAA4AAAABAAIAAQAPAA4AAAAAAAMAAQAEAAwAAAAAAAQAAQAFAAwAAAAAAAUAAQAGAAwAAAAAAAYAAQAHAAwAAAACAAMAAQAKAA0AAAACAAQAAQAKAA0AAAACAAUAAQAKAA0AAAACAAYAAQAKAA4AAAACAAgAAQAMAA4AAAACAAkAAQAMAA8AAAACAAoAAQAMABAAAAAAAAgAAAAkAAMAAAAAAAkAAAAkAAQAAAABAAgAAAArAA0AAAABAAkAAAAsAA0AAAAAAAsAAAAXAAAAAAABAAsAAAAYAAAAAAAAAAwAAAAYAAAAAAABAAwAAAAXAAAAAAACAAwAAQADAA8AAAAUAAIAAQAQAAAAAAADAA0AAQARAAAAAAA=")
+tile_set = ExtResource("2_6whu3")
+
+[node name="Encima" type="TileMapLayer" parent="Interior" unique_id=1146038417]
+z_index = 2
+scale = Vector2(3, 3)
+tile_map_data = PackedByteArray("AAABAAgAAAA2AAwAAAABAAkAAAA2AA4AAAACAAwAAAAwABEAAAA=")
+tile_set = ExtResource("2_6whu3")
+
+[node name="FondoPanel" type="ColorRect" parent="." unique_id=1186611397]
+offset_left = 1000.0
+offset_top = 52.0
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.105882354, 0.12156863, 0.16470589, 1)
+
+[node name="Paredes" type="StaticBody2D" parent="." unique_id=1940954028]
+
+[node name="Superior" type="CollisionShape2D" parent="Paredes" unique_id=2047331685]
+position = Vector2(500, 76)
+shape = SubResource("RectangleShape2D_jjjah")
+
+[node name="Izquierda" type="CollisionShape2D" parent="Paredes" unique_id=1643544775]
+position = Vector2(-20, 410)
+shape = SubResource("RectangleShape2D_pi8l1")
+
+[node name="Derecha" type="CollisionShape2D" parent="Paredes" unique_id=147820937]
+position = Vector2(1020, 410)
+shape = SubResource("RectangleShape2D_isbye")
+
+[node name="InferiorIzq" type="CollisionShape2D" parent="Paredes" unique_id=1820132779]
+position = Vector2(240, 720)
+shape = SubResource("RectangleShape2D_hen54")
+
+[node name="InferiorDer" type="CollisionShape2D" parent="Paredes" unique_id=1340732395]
+position = Vector2(812, 720)
+shape = SubResource("RectangleShape2D_xbdov")
+
+[node name="Entrada" type="CollisionShape2D" parent="Paredes" unique_id=1095910209]
+position = Vector2(552, 750)
+shape = SubResource("RectangleShape2D_gune4")
+
+[node name="Pase" type="CollisionShape2D" parent="Paredes" unique_id=70503335]
+position = Vector2(120, 244)
+shape = SubResource("RectangleShape2D_nhdkw")
+
+[node name="Barra" type="CollisionShape2D" parent="Paredes" unique_id=1962581485]
+position = Vector2(120, 460)
+shape = SubResource("RectangleShape2D_b5exk")
+
+[node name="Telefono" type="CollisionShape2D" parent="Paredes" unique_id=1832483643]
+position = Vector2(120, 604)
+shape = SubResource("RectangleShape2D_kh3m8")
+
+[node name="Cocina" type="CollisionShape2D" parent="Paredes" unique_id=574478199]
+position = Vector2(48, 414)
+shape = SubResource("RectangleShape2D_y1ct5")
+
+[node name="Maceta" type="CollisionShape2D" parent="Paredes" unique_id=869713112]
+position = Vector2(168, 652)
+shape = SubResource("RectangleShape2D_ba61f")
+
+[node name="Pantallas" type="Node2D" parent="." unique_id=1528929145]
+
+[node name="TV1" type="Sprite2D" parent="Pantallas" unique_id=808153112]
+position = Vector2(350, 80)
+scale = Vector2(2.5, 2.5)
+texture = ExtResource("3_8iurx")
+
+[node name="Marcador1" type="Label" parent="Pantallas" unique_id=1742040279]
+offset_left = 260.0
+offset_top = 57.0
+offset_right = 440.0
+offset_bottom = 80.0
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.8509804, 1, 0.8509804, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.03, 0.05, 1)
+theme_override_constants/outline_size = 0
+horizontal_alignment = 1
+
+[node name="TV2" type="Sprite2D" parent="Pantallas" unique_id=238304032]
+position = Vector2(730, 80)
+scale = Vector2(2.5, 2.5)
+texture = ExtResource("3_8iurx")
+
+[node name="Marcador2" type="Label" parent="Pantallas" unique_id=1785167573]
+offset_left = 640.0
+offset_top = 57.0
+offset_right = 820.0
+offset_bottom = 80.0
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(0.8509804, 1, 0.8509804, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.03, 0.05, 1)
+theme_override_constants/outline_size = 0
+horizontal_alignment = 1
+
+[node name="Neon" type="Sprite2D" parent="." unique_id=2063723572]
+position = Vector2(110, 79)
+scale = Vector2(2.5, 2.5)
+texture = ExtResource("4_61y4y")
+
+[node name="EtiquetaTelefono" type="Label" parent="." unique_id=419520748]
+offset_left = 80.0
+offset_top = 626.0
+offset_right = 162.0
+offset_bottom = 649.0
+theme_override_font_sizes/font_size = 9
+theme_override_colors/font_color = Color(0.95686275, 0.9372549, 0.8901961, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.03, 0.05, 1)
+theme_override_constants/outline_size = 3
+text = "TELÉFONO"
+horizontal_alignment = 1
+
+[node name="Cocina" parent="." unique_id=808413667 instance=ExtResource("5_penpo")]
+position = Vector2(170, 235)
+
+[node name="Barra" parent="." unique_id=663573070 instance=ExtResource("5_penpo")]
+position = Vector2(170, 480)
+tipo = "barra"
+
+[node name="Telefono" type="Area2D" parent="." unique_id=901211551 groups=["interactuables"]]
+position = Vector2(170, 600)
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+script = ExtResource("6_6gsge")
+texto = "Teléfono: pedido urgente al proveedor"
+
+[node name="Alcance" type="CollisionShape2D" parent="Telefono" unique_id=958585507]
+shape = SubResource("CircleShape2D_x6yub")
+
+[node name="Mesas" type="Node2D" parent="." unique_id=1204294785]
+
+[node name="Mesa1" parent="Mesas" unique_id=1153987539 instance=ExtResource("7_ayhsx")]
+position = Vector2(330, 250)
+
+[node name="Mesa2" parent="Mesas" unique_id=855309740 instance=ExtResource("7_ayhsx")]
+position = Vector2(540, 250)
+numero = 2
+
+[node name="Mesa3" parent="Mesas" unique_id=1782948968 instance=ExtResource("7_ayhsx")]
+position = Vector2(750, 250)
+numero = 3
+
+[node name="Mesa4" parent="Mesas" unique_id=2122006147 instance=ExtResource("8_oonqw")]
+position = Vector2(330, 450)
+numero = 4
+
+[node name="Mesa5" parent="Mesas" unique_id=762573248 instance=ExtResource("8_oonqw")]
+position = Vector2(540, 450)
+numero = 5
+
+[node name="Mesa6" parent="Mesas" unique_id=1734029896 instance=ExtResource("8_oonqw")]
+position = Vector2(750, 450)
+numero = 6
+
+[node name="Terraza" type="Node2D" parent="." unique_id=998578823]
+visible = false
+
+[node name="Mesa7" parent="Terraza" unique_id=310758207 instance=ExtResource("8_oonqw")]
+position = Vector2(930, 250)
+numero = 7
+terraza = true
+
+[node name="Mesa8" parent="Terraza" unique_id=1986638858 instance=ExtResource("8_oonqw")]
+position = Vector2(930, 450)
+numero = 8
+terraza = true
+
+[node name="Letrero" type="Label" parent="Terraza" unique_id=1434685933]
+offset_left = 860.0
+offset_top = 110.0
+offset_right = 1000.0
+offset_bottom = 136.0
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.37254903, 0.827451, 0.5529412, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.03, 0.05, 1)
+theme_override_constants/outline_size = 3
+text = "TERRAZA"
+horizontal_alignment = 1
+
+[node name="Chef" parent="." unique_id=928803433 instance=ExtResource("9_88rii")]
 position = Vector2(72, 215)
-frames = ExtResource("4_chef")
+frames = ExtResource("10_vi10e")
 nombre = "CHEF"
 animacion = &"side"
 animado = true
 
-[node name="Dani" parent="." instance=ExtResource("2_dani")]
+[node name="Dani" parent="." unique_id=591917924 instance=ExtResource("11_5ko6n")]
 position = Vector2(560, 600)
+
+[connection signal="usado" from="Telefono" to="." method="_al_usar_telefono"]

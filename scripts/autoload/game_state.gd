@@ -14,7 +14,10 @@ const SAVE_PATH := "user://orden501_save.json"
 
 const ESCENA_MENU := "res://scenes/menu/main_menu.tscn"
 const ESCENA_PUEBLO := "res://scenes/town/town.tscn"
-const ESCENA_TIENDA := "res://scenes/town/store.tscn"
+## Escena de cada tienda: scenes/town/mercado.tscn o scenes/town/cerveceria.tscn.
+static func escena_tienda(tienda: String) -> String:
+	return "res://scenes/town/%s.tscn" % tienda
+
 const ESCENA_RESTAURANTE := "res://scenes/restaurant/restaurant.tscn"
 const ESCENA_REPORTE := "res://scenes/ui/closing_report.tscn"
 const ESCENA_VICTORIA := "res://scenes/ui/victory.tscn"

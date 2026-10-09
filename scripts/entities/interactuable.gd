@@ -2,6 +2,8 @@ extends Area2D
 class_name Interactuable
 
 ## Base para todo lo que Dani puede usar con Espacio: tiendas, mesas, cocina, barra, teléfono...
+## Es un Area2D en la capa 8 (CAPA_INTERACTUABLES) con un CollisionShape2D que marca su alcance;
+## al usarse emite la señal "usado", que cada escena conecta a su acción.
 ## Las subclases sobrescriben obtener_texto(), interactuar() y, si hace falta mantener
 ## pulsado Espacio, tiempo_mantener().
 
@@ -9,27 +11,8 @@ const CAPA_INTERACTUABLES := 8
 
 signal usado(dani: Node)
 
+## Texto que aparece sobre Dani al acercarse ("[Espacio] ...").
 @export var texto := "Interactuar"
-@export var radio := 56.0
-
-func _ready() -> void:
-	collision_layer = CAPA_INTERACTUABLES
-	collision_mask = 0
-	monitoring = false
-	monitorable = true
-	add_to_group("interactuables")
-	if get_child_count() == 0 or not _tiene_forma():
-		var forma := CollisionShape2D.new()
-		var circulo := CircleShape2D.new()
-		circulo.radius = radio
-		forma.shape = circulo
-		add_child(forma)
-
-func _tiene_forma() -> bool:
-	for hijo in get_children():
-		if hijo is CollisionShape2D:
-			return true
-	return false
 
 func obtener_texto(_dani: Node) -> String:
 	return texto

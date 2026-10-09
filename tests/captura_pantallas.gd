@@ -52,12 +52,12 @@ func _run() -> void:
 	pueblo.dani.position = pueblo.puerta("cerveceria") + Vector2(0, 40)
 	await _esperar(0.8)
 	await _capturar("04c_pueblo_cerveceria")
-	pueblo.dani.position = pueblo._posicion_consejo(pueblo.CONSEJOS[1]) + Vector2(0, 60)
+	pueblo.dani.position = pueblo.get_node("Personajes/ProfeJuve").position + Vector2(0, 60)
 	await _esperar(0.8)
 	await _capturar("04d_pueblo_parque")
 
 	GameState.tienda_actual = Catalogo.MERCADO
-	var mercado := await _abrir("res://scenes/town/store.tscn")
+	var mercado := await _abrir(GameState.escena_tienda(Catalogo.MERCADO))
 	await _capturar("05a_interior_mercado")
 	mercado.abrir_menu()
 	await _esperar(0.3)
@@ -72,8 +72,8 @@ func _run() -> void:
 	await _capturar("05b3_menu_confirmar")
 	mercado._menu.cerrar()
 	GameState.tienda_actual = Catalogo.CERVECERIA
-	var cerveceria := await _abrir("res://scenes/town/store.tscn")
-	cerveceria.dani.position = cerveceria.interior.a_mundo(12.5, 10.3)
+	var cerveceria := await _abrir(GameState.escena_tienda(Catalogo.CERVECERIA))
+	cerveceria.dani.position = Vector2(856, 618)
 	await _esperar(1.5)
 	await _capturar("05c_interior_cerveceria")
 	cerveceria.abrir_menu()

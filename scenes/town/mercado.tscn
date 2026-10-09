@@ -1,0 +1,199 @@
+[gd_scene format=4]
+
+[ext_resource type="Script" path="res://scripts/town/store.gd" id="1_335f4"]
+[ext_resource type="TileSet" path="res://Assets/tilesets/interiores.tres" id="2_mr5ci"]
+[ext_resource type="PackedScene" path="res://scenes/entities/npc.tscn" id="3_6eeyt"]
+[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/vendedor_mercado.tres" id="4_q3luk"]
+[ext_resource type="Script" path="res://scripts/entities/interactuable.gd" id="5_qlfvt"]
+[ext_resource type="PackedScene" path="res://scenes/entities/dani.tscn" id="6_iynv7"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rode4"]
+size = Vector2(816, 144)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_67sk2"]
+size = Vector2(48, 576)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_x1ou1"]
+size = Vector2(48, 576)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fw0j7"]
+size = Vector2(336, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_s6oio"]
+size = Vector2(336, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_40p64"]
+size = Vector2(48, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rv0su"]
+size = Vector2(48, 96)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_d3k6o"]
+size = Vector2(144, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mor87"]
+size = Vector2(192, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_f56uy"]
+size = Vector2(144, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_g4o30"]
+size = Vector2(192, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_raywx"]
+size = Vector2(96, 144)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ohcyl"]
+size = Vector2(240, 144)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xnlef"]
+size = Vector2(144, 48)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_oop4e"]
+radius = 40.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_x2e8p"]
+size = Vector2(144, 24)
+
+[node name="Mercado" type="Node2D" unique_id=191961363]
+script = ExtResource("1_335f4")
+
+[node name="Fondo" type="ColorRect" parent="." unique_id=1111408232]
+z_index = -20
+offset_right = 1280.0
+offset_bottom = 720.0
+color = Color(0.08235294, 0.09019608, 0.12156863, 1)
+
+[node name="Interior" type="Node2D" parent="." unique_id=517504324]
+z_index = -10
+position = Vector2(232, 100)
+
+[node name="Colisiones" type="StaticBody2D" parent="Interior" unique_id=1736093906]
+
+[node name="Solido1" type="CollisionShape2D" parent="Interior/Colisiones" unique_id=1239559280]
+position = Vector2(408, 72)
+shape = SubResource("RectangleShape2D_rode4")
+
+[node name="Solido2" type="CollisionShape2D" parent="Interior/Colisiones" unique_id=525233970]
+position = Vector2(24, 288)
+shape = SubResource("RectangleShape2D_67sk2")
+
+[node name="Solido3" type="CollisionShape2D" parent="Interior/Colisiones" unique_id=1959560802]
+position = Vector2(792, 288)
+shape = SubResource("RectangleShape2D_x1ou1")
+
+[node name="Solido4" type="CollisionShape2D" parent="Interior/Colisiones" unique_id=158436426]
+position = Vector2(168, 552)
+shape = SubResource("RectangleShape2D_fw0j7")
+
+[node name="Solido5" type="CollisionShape2D" parent="Interior/Colisiones" unique_id=327562487]
+position = Vector2(648, 552)
+shape = SubResource("RectangleShape2D_s6oio")
+
+[node name="Solido6" type="CollisionShape2D" parent="Interior/Colisiones" unique_id=285036465]
+position = Vector2(744, 168)
+shape = SubResource("RectangleShape2D_40p64")
+
+[node name="Solido7" type="CollisionShape2D" parent="Interior/Colisiones" unique_id=173320230]
+position = Vector2(744, 336)
+shape = SubResource("RectangleShape2D_rv0su")
+
+[node name="Solido8" type="CollisionShape2D" parent="Interior/Colisiones" unique_id=1332904199]
+position = Vector2(648, 456)
+shape = SubResource("RectangleShape2D_d3k6o")
+
+[node name="Solido9" type="CollisionShape2D" parent="Interior/Colisiones" unique_id=1767952255]
+position = Vector2(192, 168)
+shape = SubResource("RectangleShape2D_mor87")
+
+[node name="Solido10" type="CollisionShape2D" parent="Interior/Colisiones" unique_id=1134157352]
+position = Vector2(408, 168)
+shape = SubResource("RectangleShape2D_f56uy")
+
+[node name="Solido11" type="CollisionShape2D" parent="Interior/Colisiones" unique_id=1894262990]
+position = Vector2(624, 168)
+shape = SubResource("RectangleShape2D_g4o30")
+
+[node name="Solido12" type="CollisionShape2D" parent="Interior/Colisiones" unique_id=1951057745]
+position = Vector2(96, 360)
+shape = SubResource("RectangleShape2D_raywx")
+
+[node name="Solido13" type="CollisionShape2D" parent="Interior/Colisiones" unique_id=664515209]
+position = Vector2(408, 360)
+shape = SubResource("RectangleShape2D_ohcyl")
+
+[node name="Solido14" type="CollisionShape2D" parent="Interior/Colisiones" unique_id=1478204850]
+position = Vector2(408, 619.19995)
+shape = SubResource("RectangleShape2D_xnlef")
+
+[node name="Suelo" type="TileMapLayer" parent="Interior" unique_id=2010523183]
+scale = Vector2(3, 3)
+tile_map_data = PackedByteArray("AAAAAAAAAAAQAAwAAAABAAAAAAAOAAwAAAACAAAAAAAOAAwAAAADAAAAAAAOAAwAAAAEAAAAAAAOAAwAAAAFAAAAAAAOAAwAAAAGAAAAAAAOAAwAAAAHAAAAAAAOAAwAAAAIAAAAAAAOAAwAAAAJAAAAAAAOAAwAAAAKAAAAAAAOAAwAAAALAAAAAAAOAAwAAAAMAAAAAAAOAAwAAAANAAAAAAAOAAwAAAAOAAAAAAAOAAwAAAAPAAAAAAAOAAwAAAAQAAAAAAARAAwAAAABAAEAAAASAA8AAAABAAIAAAANAA8AAAACAAEAAAASAA8AAAACAAIAAAANAA8AAAADAAEAAAASAA8AAAADAAIAAAANAA8AAAAEAAEAAAAsAAIAAAAEAAIAAAAsAAMAAAAFAAEAAAASAA8AAAAFAAIAAAANAA8AAAAGAAEAAAASAA8AAAAGAAIAAAANAA8AAAAHAAEAAAASAA8AAAAHAAIAAAANAA8AAAAIAAEAAAASAA8AAAAIAAIAAAANAA8AAAAJAAEAAAASAA8AAAAJAAIAAAANAA8AAAAKAAEAAAASAA8AAAAKAAIAAAANAA8AAAALAAEAAAASAA8AAAALAAIAAAANAA8AAAAMAAEAAAAsAAIAAAAMAAIAAAAsAAMAAAANAAEAAAASAA8AAAANAAIAAAANAA8AAAAOAAEAAAASAA8AAAAOAAIAAAANAA8AAAAPAAEAAAASAA8AAAAPAAIAAAANAA8AAAAAAAEAAAAPAA0AAAAQAAEAAAAPAA0AAAAAAAIAAAAPAA0AAAAQAAIAAAAPAA0AAAAAAAMAAAAPAA0AAAAQAAMAAAAPAA0AAAAAAAQAAAAPAA0AAAAQAAQAAAAPAA0AAAAAAAUAAAAPAA0AAAAQAAUAAAAPAA0AAAAAAAYAAAAPAA0AAAAQAAYAAAAPAA0AAAAAAAcAAAAPAA0AAAAQAAcAAAAPAA0AAAAAAAgAAAAPAA0AAAAQAAgAAAAPAA0AAAAAAAkAAAAPAA0AAAAQAAkAAAAPAA0AAAAAAAoAAAAPAA0AAAAQAAoAAAAPAA0AAAABAAMAAAAGAAIAAAACAAMAAAAGAAIAAAADAAMAAAAGAAIAAAAEAAMAAAAGAAIAAAAFAAMAAAAGAAIAAAAGAAMAAAAGAAIAAAAHAAMAAAAGAAIAAAAIAAMAAAAGAAIAAAAJAAMAAAAGAAIAAAAKAAMAAAAGAAIAAAALAAMAAAAGAAIAAAAMAAMAAAAGAAIAAAANAAMAAAAGAAIAAAAOAAMAAAAGAAIAAAAPAAMAAAAGAAIAAAABAAQAAAAGAAIAAAACAAQAAAAGAAIAAAADAAQAAAAGAAIAAAAEAAQAAAAGAAIAAAAFAAQAAAAGAAIAAAAGAAQAAAAGAAIAAAAHAAQAAAAGAAIAAAAIAAQAAAAGAAIAAAAJAAQAAAAGAAIAAAAKAAQAAAAGAAIAAAALAAQAAAAGAAIAAAAMAAQAAAAGAAIAAAANAAQAAAAGAAIAAAAOAAQAAAAGAAIAAAAPAAQAAAAGAAIAAAABAAUAAAAGAAIAAAACAAUAAAAGAAIAAAADAAUAAAAGAAIAAAAEAAUAAAAGAAIAAAAFAAUAAAAGAAIAAAAGAAUAAAAGAAIAAAAHAAUAAAAGAAIAAAAIAAUAAAAGAAIAAAAJAAUAAAAGAAIAAAAKAAUAAAAGAAIAAAALAAUAAAAGAAIAAAAMAAUAAAAGAAIAAAANAAUAAAAGAAIAAAAOAAUAAAAGAAIAAAAPAAUAAAAGAAIAAAABAAYAAAAGAAIAAAACAAYAAAAGAAIAAAADAAYAAAAGAAIAAAAEAAYAAAAGAAIAAAAFAAYAAAAGAAIAAAAGAAYAAAAGAAIAAAAHAAYAAAAGAAIAAAAIAAYAAAAGAAIAAAAJAAYAAAAGAAIAAAAKAAYAAAAGAAIAAAALAAYAAAAGAAIAAAAMAAYAAAAGAAIAAAANAAYAAAAGAAIAAAAOAAYAAAAGAAIAAAAPAAYAAAAGAAIAAAABAAcAAAAGAAIAAAACAAcAAAAGAAIAAAADAAcAAAAGAAIAAAAEAAcAAAAGAAIAAAAFAAcAAAAGAAIAAAAGAAcAAAAGAAIAAAAHAAcAAAAGAAIAAAAIAAcAAAAGAAIAAAAJAAcAAAAGAAIAAAAKAAcAAAAGAAIAAAALAAcAAAAGAAIAAAAMAAcAAAAGAAIAAAANAAcAAAAGAAIAAAAOAAcAAAAGAAIAAAAPAAcAAAAGAAIAAAABAAgAAAAGAAIAAAACAAgAAAAGAAIAAAADAAgAAAAGAAIAAAAEAAgAAAAGAAIAAAAFAAgAAAAGAAIAAAAGAAgAAAAGAAIAAAAHAAgAAAAGAAIAAAAIAAgAAAAGAAIAAAAJAAgAAAAGAAIAAAAKAAgAAAAGAAIAAAALAAgAAAAGAAIAAAAMAAgAAAAGAAIAAAANAAgAAAAGAAIAAAAOAAgAAAAGAAIAAAAPAAgAAAAGAAIAAAABAAkAAAAGAAIAAAACAAkAAAAGAAIAAAADAAkAAAAGAAIAAAAEAAkAAAAGAAIAAAAFAAkAAAAGAAIAAAAGAAkAAAAGAAIAAAAHAAkAAAAGAAIAAAAIAAkAAAAGAAIAAAAJAAkAAAAGAAIAAAAKAAkAAAAGAAIAAAALAAkAAAAGAAIAAAAMAAkAAAAGAAIAAAANAAkAAAAGAAIAAAAOAAkAAAAGAAIAAAAPAAkAAAAGAAIAAAABAAoAAAAGAAIAAAACAAoAAAAGAAIAAAADAAoAAAAGAAIAAAAEAAoAAAAGAAIAAAAFAAoAAAAGAAIAAAAGAAoAAAAGAAIAAAAHAAoAAAAGAAIAAAAIAAoAAAAGAAIAAAAJAAoAAAAGAAIAAAAKAAoAAAAGAAIAAAALAAoAAAAGAAIAAAAMAAoAAAAGAAIAAAANAAoAAAAGAAIAAAAOAAoAAAAGAAIAAAAPAAoAAAAGAAIAAAAAAAsAAAAQAA0AAAAQAAsAAAARAA0AAAABAAsAAAAOAAwAAAACAAsAAAAOAAwAAAADAAsAAAAOAAwAAAAEAAsAAAAOAAwAAAAFAAsAAAAOAAwAAAAGAAsAAAAPAAwAAAAHAAsAAAAGAAIAAAAIAAsAAAAGAAIAAAAJAAsAAAAGAAIAAAAKAAsAAAANAAwAAAALAAsAAAAOAAwAAAAMAAsAAAAOAAwAAAANAAsAAAAOAAwAAAAOAAsAAAAOAAwAAAAPAAsAAAAOAAwAAAA=")
+tile_set = ExtResource("2_mr5ci")
+
+[node name="Objetos" type="TileMapLayer" parent="Interior" unique_id=146908933]
+z_index = 1
+scale = Vector2(3, 3)
+tile_map_data = PackedByteArray("AAACAAMAAQAAAAwAAAADAAMAAQABAAwAAAAEAAMAAQABAAwAAAAFAAMAAQACAAwAAAAHAAMAAQAAAAwAAAAIAAMAAQABAAwAAAAJAAMAAQACAAwAAAALAAMAAAAKAAUAAAAMAAMAAAAKAAQAAAANAAMAAAAKAAQAAAAOAAMAAAAKAAYAAAABAAYAAAAOAAcAAAABAAcAAAAOAAcAAAABAAgAAAAOAAcAAAACAAYAAAAOAAcAAAACAAcAAAAXAAAAAAACAAgAAAAOAAcAAAAGAAcAAAAKAAEAAAAHAAcAAAALAAEAAAAIAAcAAAAKAAEAAAAJAAcAAAALAAEAAAAKAAcAAAAKAAEAAAAGAAgAAAAOAAYAAAAHAAgAAAAQAAYAAAAIAAgAAAAOAAYAAAAJAAgAAAAQAAYAAAAKAAgAAAAOAAYAAAAPAAMAAQAQAAAAAAAPAAYAAAAXAAAAAAAPAAcAAAAYAAAAAAAMAAkAAQAAAA8AAAANAAkAAQABAA8AAAAOAAkAAQACAA8AAAA=")
+tile_set = ExtResource("2_mr5ci")
+
+[node name="Encima" type="TileMapLayer" parent="Interior" unique_id=588925962]
+z_index = 2
+scale = Vector2(3, 3)
+tile_map_data = PackedByteArray("AAADAAMAAAA2AA0AAAAEAAMAAAA2AA0AAAAHAAMAAAA2AA8AAAAIAAMAAAA2AA8AAAAJAAMAAAA2AA8AAAAMAAMAAAA3AA0AAAANAAMAAAA3AA0AAAAGAAYAAAAKAAAAAAAHAAYAAAALAAAAAAAIAAYAAAAKAAAAAAAJAAYAAAALAAAAAAAKAAYAAAAKAAAAAAAOAAkAAAAwABEAAAA=")
+tile_set = ExtResource("2_mr5ci")
+
+[node name="Titulo" type="Label" parent="." unique_id=2064867036]
+offset_left = 232.0
+offset_top = 98.0
+offset_right = 1048.0
+offset_bottom = 130.0
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.9490196, 0.70980394, 0.26666668, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.03, 0.05, 1)
+theme_override_constants/outline_size = 3
+text = "MERCADO CENTRAL"
+horizontal_alignment = 1
+
+[node name="Vendedor" parent="." unique_id=787446503 instance=ExtResource("3_6eeyt")]
+position = Vector2(880, 517.6)
+frames = ExtResource("4_q3luk")
+nombre = "Don Chema"
+
+[node name="Caja" type="Area2D" parent="." unique_id=1115847221 groups=["interactuables"]]
+position = Vector2(880, 608.80005)
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+script = ExtResource("5_qlfvt")
+texto = "Comprar con Don Chema"
+
+[node name="Alcance" type="CollisionShape2D" parent="Caja" unique_id=1303031762]
+shape = SubResource("CircleShape2D_oop4e")
+
+[node name="Salida" type="Area2D" parent="." unique_id=1577083357]
+position = Vector2(640, 678.4)
+collision_layer = 0
+collision_mask = 2
+
+[node name="Forma" type="CollisionShape2D" parent="Salida" unique_id=1204711128]
+shape = SubResource("RectangleShape2D_x2e8p")
+
+[node name="LetreroSalida" type="Label" parent="." unique_id=139764779]
+z_index = 20
+offset_left = 568.0
+offset_top = 638.0
+offset_right = 712.0
+offset_bottom = 662.0
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.95686275, 0.9372549, 0.8901961, 1)
+theme_override_colors/font_outline_color = Color(0.02, 0.03, 0.05, 1)
+theme_override_constants/outline_size = 3
+text = "SALIDA"
+horizontal_alignment = 1
+
+[node name="Dani" parent="." unique_id=1787400139 instance=ExtResource("6_iynv7")]
+position = Vector2(640, 575.19995)
+
+[connection signal="usado" from="Caja" to="." method="_al_usar_caja"]
+[connection signal="body_entered" from="Salida" to="." method="_al_cruzar_puerta"]

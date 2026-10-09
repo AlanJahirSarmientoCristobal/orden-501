@@ -28,6 +28,7 @@ func _ready() -> void:
 	if GameState.posicion_pueblo != Vector2.ZERO:
 		dani.position = GameState.posicion_pueblo
 	preparar_fase()
+	_preparar_minimapa()
 
 	if not GameState.intro_vista:
 		_mostrar_intro.call_deferred()
@@ -51,10 +52,9 @@ func _rect_calle(clave: String) -> Rect2:
 func puerta(lugar: String) -> Vector2:
 	return _a_mundo(datos["lugares"][lugar]["puerta"])
 
-func extender_hud(capa: CanvasLayer) -> void:
-	var mapa := Minimapa.new()
-	mapa.position = Vector2(1058, 60)
-	mapa.size = Vector2(208, 116)
+## El minimapa (nodo HUD/Minimapa) se llena con las zonas del JSON del mapa.
+func _preparar_minimapa() -> void:
+	var mapa: Minimapa = $HUD/Minimapa
 	mapa.tamano_mundo = tamano
 	mapa.calles = [_rect_calle("avenida"), _rect_calle("avenida_vertical"), _rect_calle("calle_sur")]
 	mapa.lugares = [
@@ -65,7 +65,6 @@ func extender_hud(capa: CanvasLayer) -> void:
 		{"rect": _rect("cancha"), "color": Color("4f8f43"), "nombre": ""},
 	]
 	mapa.objetivo = dani
-	capa.add_child(mapa)
 
 func _mostrar_intro() -> void:
 	var texto := "Dani acaba de ser contratado como nuevo gerente de La 501, un restaurante que funcionaba con libretas, mensajes de WhatsApp y la memoria del personal.\n\nSe acerca la liguilla: los insumos se acaban a media jornada, hay reservaciones duplicadas y se tira comida caducada. Tu misión es poner orden hasta la Gran Final.\n\nCada mañana recorre el pueblo y compra en el Mercado y la Cervecería; cada noche atiende el restaurante durante el partido."
@@ -97,14 +96,14 @@ func _iniciar_tutorial() -> void:
 				"detalle": "El Mercado vende lo de la cocina (carne, pollo, papas, verdura y pan); la Cervecería, las bebidas y el hielo.",
 				"hecho": func() -> bool: return false},
 		]
-		add_child(Tutorial.new("pueblo", pasos))
+		add_child(Tutorial.crear("pueblo", pasos))
 	elif GameState.tutorial_pendiente("restaurante") and GameState.tutoriales.get("tienda", false):
 		var pasos: Array[Dictionary] = [
 			{"texto": "Cuando termines de comprar, entra a La 501 (está marcada en el minimapa).",
 				"detalle": "Revisa que tengas comida y bebidas. Objetivo de hoy: no quedarte sin stock y perder máximo 3 clientes.",
 				"hecho": func() -> bool: return false},
 		]
-		add_child(Tutorial.new("regreso", pasos))
+		add_child(Tutorial.crear("regreso", pasos))
 
 # ---------------------------------------------------------------- Interacciones (señal "usado")
 

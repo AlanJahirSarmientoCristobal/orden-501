@@ -7,15 +7,17 @@ class_name FaseManana
 @onready var dani: Dani = $Dani
 var terminando := false
 
-var _hud_dinero: Label
-var _hud_reputacion: Label
-var _hud_almacen: Label
-var _hud_tiempo: Label
-var _tablet: Tablet
-var _inventario: PanelInventario
-var _dialogo: DialogoOpciones
-var _notificaciones: Notificaciones
-var _pausa: MenuPausa
+# Interfaz: nodos de cada escena de la mañana (HUD, ventanas y avisos).
+@onready var _hud_lugar: Label = $HUD/Barra/Fila/Lugar
+@onready var _hud_dinero: Label = $HUD/Barra/Fila/Dinero
+@onready var _hud_reputacion: Label = $HUD/Barra/Fila/Reputacion
+@onready var _hud_almacen: Label = $HUD/Barra/Fila/Almacen
+@onready var _hud_tiempo: Label = $HUD/Barra/Fila/Tiempo
+@onready var _tablet: Tablet = $Tablet
+@onready var _inventario: PanelInventario = $Inventario
+@onready var _dialogo: DialogoOpciones = $Dialogo
+@onready var _notificaciones: Notificaciones = $Notificaciones
+@onready var _pausa: MenuPausa = $Pausa
 var _aviso_30s := false
 
 ## Nombre del lugar para la barra superior (lo define cada escena).
@@ -24,18 +26,8 @@ func nombre_lugar() -> String:
 
 func preparar_fase() -> void:
 	AudioManager.musica("manana")
-	_notificaciones = Notificaciones.new()
-	add_child(_notificaciones)
-	_tablet = Tablet.new()
 	_tablet.notificaciones = _notificaciones
-	add_child(_tablet)
-	_inventario = PanelInventario.new()
-	add_child(_inventario)
-	_dialogo = DialogoOpciones.new()
-	add_child(_dialogo)
-	_pausa = MenuPausa.new()
-	add_child(_pausa)
-	_crear_hud()
+	_hud_lugar.text = "DÍA %d · MAÑANA · %s" % [GameState.dia, nombre_lugar()]
 	_aviso_30s = GameState.config.tiempo_pueblo > 0.0 and GameState.tiempo_manana <= 30.0
 	GameState.dinero_cambiado.connect(_al_cambiar_dinero)
 	GameState.inventario_cambiado.connect(_actualizar_hud)
@@ -82,43 +74,13 @@ func ir_al_restaurante() -> void:
 
 # ---------------------------------------------------------------- HUD
 
-func _crear_hud() -> void:
-	var capa := UIKit.capa(20)
-	add_child(capa)
-	var barra := UIKit.panel(UIKit.FONDO, UIKit.BORDE, 8)
-	barra.position = Vector2(10, 8)
-	barra.size = Vector2(1260, 44)
-	var fila := UIKit.hbox(24)
-	barra.add_child(fila)
-	fila.add_child(UIKit.etiqueta("DÍA %d · MAÑANA · %s" % [GameState.dia, nombre_lugar()], 16, UIKit.ACENTO))
-	_hud_dinero = UIKit.etiqueta("", 16)
-	_hud_reputacion = UIKit.etiqueta("", 16)
-	_hud_almacen = UIKit.etiqueta("", 16)
-	_hud_tiempo = UIKit.etiqueta("", 16, UIKit.VERDE)
-	for l in [_hud_dinero, _hud_reputacion, _hud_almacen, _hud_tiempo]:
-		fila.add_child(l)
-	capa.add_child(barra)
-	var ayuda := UIKit.etiqueta("WASD Moverse · Shift Correr · Espacio Interactuar · E Tablet · I Inventario · R Reservaciones · Esc Pausa", 13, UIKit.TEXTO_TENUE, true)
-	ayuda.position = Vector2(0, 694)
-	ayuda.size = Vector2(1280, 20)
-	capa.add_child(ayuda)
-	extender_hud(capa)
-
-## Las escenas pueden agregar elementos al HUD (por ejemplo, el minimapa del pueblo).
-func extender_hud(_capa: CanvasLayer) -> void:
-	pass
-
 func _actualizar_hud() -> void:
-	if _hud_dinero == null:
-		return
 	_hud_dinero.text = "Dinero %s" % UIKit.dinero(GameState.dinero)
 	_hud_reputacion.text = "%s %d%%" % [UIKit.estrellas(GameState.reputacion), int(GameState.reputacion)]
 	_hud_almacen.text = "Almacén %d/%d" % [GameState.inventario.total_unidades(), GameState.capacidad_almacen()]
 	_actualizar_tiempo()
 
 func _actualizar_tiempo() -> void:
-	if _hud_tiempo == null:
-		return
 	if GameState.config.tiempo_pueblo <= 0.0:
 		_hud_tiempo.text = "Tiempo: sin límite"
 		return

@@ -7,6 +7,12 @@
 [ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/encargado_cerveceria.tres" id="5_e2ki5"]
 [ext_resource type="Script" path="res://scripts/entities/interactuable.gd" id="6_hgt7k"]
 [ext_resource type="PackedScene" path="res://scenes/entities/dani.tscn" id="7_n7i66"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud_manana.tscn" id="ui_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/notificaciones.tscn" id="ui_avisos"]
+[ext_resource type="PackedScene" path="res://scenes/ui/tablet.tscn" id="ui_tablet"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panel_inventario.tscn" id="ui_inventario"]
+[ext_resource type="PackedScene" path="res://scenes/ui/dialogo_opciones.tscn" id="ui_dialogo"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_pausa.tscn" id="ui_pausa"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1jvpb"]
 size = Vector2(816, 144)
@@ -52,6 +58,7 @@ radius = 40.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0jboa"]
 size = Vector2(144, 24)
+
 
 [node name="Cerveceria" type="Node2D" unique_id=1502010530]
 script = ExtResource("1_b0xkj")
@@ -195,6 +202,18 @@ horizontal_alignment = 1
 
 [node name="Dani" parent="." unique_id=1653758582 instance=ExtResource("7_n7i66")]
 position = Vector2(640, 575.19995)
+
+[node name="HUD" parent="." instance=ExtResource("ui_hud")]
+
+[node name="Notificaciones" parent="." instance=ExtResource("ui_avisos")]
+
+[node name="Tablet" parent="." instance=ExtResource("ui_tablet")]
+
+[node name="Inventario" parent="." instance=ExtResource("ui_inventario")]
+
+[node name="Dialogo" parent="." instance=ExtResource("ui_dialogo")]
+
+[node name="Pausa" parent="." instance=ExtResource("ui_pausa")]
 
 [connection signal="usado" from="Caja" to="." method="_al_usar_caja"]
 [connection signal="body_entered" from="Salida" to="." method="_al_cruzar_puerta"]

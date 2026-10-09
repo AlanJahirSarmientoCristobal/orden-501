@@ -49,16 +49,18 @@ var _cliente_practica: Cliente
 var _mesa_practica: Mesa
 var _refresco_panel := 0.0
 
-var _tablet: Tablet
-var _urgente: PanelUrgente
-var _dialogo: DialogoOpciones
-var _notificaciones: Notificaciones
-var _pausa: MenuPausa
-var _hud_reloj: Label
-var _hud_dinero: Label
-var _hud_reputacion: Label
-var _hud_bandeja: Label
-var _panel_lateral: VBoxContainer
+# Interfaz: nodos de la escena (HUD, ventanas y avisos).
+@onready var _tablet: Tablet = $Tablet
+@onready var _urgente: PanelUrgente = $Urgente
+@onready var _dialogo: DialogoOpciones = $Dialogo
+@onready var _notificaciones: Notificaciones = $Notificaciones
+@onready var _pausa: MenuPausa = $Pausa
+@onready var _hud_nivel: Label = $HUD/BarraSuperior/Fila/Nivel
+@onready var _hud_reloj: Label = $HUD/BarraSuperior/Fila/Reloj
+@onready var _hud_dinero: Label = $HUD/BarraSuperior/Fila/Dinero
+@onready var _hud_reputacion: Label = $HUD/BarraSuperior/Fila/Reputacion
+@onready var _hud_bandeja: Label = $HUD/BarraSuperior/Fila/Bandeja
+@onready var _panel_lateral: VBoxContainer = $HUD/Lateral/Contenido
 var _lateral := {}
 var _cuadro_tv := 0.0
 var _gol_en_pantalla := 0.0
@@ -81,20 +83,11 @@ func _ready() -> void:
 	dani = $Dani
 	dani.bandeja_cambiada.connect(func(_b): _actualizar_hud())
 
-	_notificaciones = Notificaciones.new()
-	add_child(_notificaciones)
-	_tablet = Tablet.new()
 	_tablet.notificaciones = _notificaciones
 	_tablet.proveedor_cocina = _cola_cocina_texto
-	add_child(_tablet)
-	_urgente = PanelUrgente.new()
 	_urgente.restaurante = self
-	add_child(_urgente)
-	_dialogo = DialogoOpciones.new()
-	add_child(_dialogo)
-	_pausa = MenuPausa.new()
-	add_child(_pausa)
-	_construir_hud()
+	_hud_nivel.text = "NIVEL %d · %s" % [GameState.nivel_actual, GameState.info_nivel()["nombre"].to_upper()]
+	_actualizar_panel_lateral()
 
 	GameState.dinero_cambiado.connect(_al_cambiar_valor)
 	GameState.inventario_cambiado.connect(_revisar_agotados)
@@ -141,7 +134,7 @@ func _iniciar_practica() -> void:
 			"detalle": "El urgente cuesta más y tarda en llegar. Objetivo de hoy: no quedarte sin stock y perder máximo 3 clientes.",
 			"hecho": func() -> bool: return PanelModal.abiertos == 0 and Input.is_action_just_pressed("interactuar")},
 	]
-	var tutorial := Tutorial.new("restaurante", pasos)
+	var tutorial := Tutorial.crear("restaurante", pasos)
 	tutorial.terminado.connect(_terminar_practica)
 	add_child(tutorial)
 
@@ -661,37 +654,6 @@ func terminar_jornada(motivo: String) -> void:
 
 # ---------------------------------------------------------------- HUD y panel lateral
 
-func _construir_hud() -> void:
-	var capa := UIKit.capa(20)
-	add_child(capa)
-	var barra_superior := UIKit.panel(UIKit.FONDO, UIKit.BORDE, 6)
-	barra_superior.position = Vector2(6, 4)
-	barra_superior.size = Vector2(1268, 50)
-	var fila_hud := UIKit.hbox(22)
-	barra_superior.add_child(fila_hud)
-	fila_hud.add_child(UIKit.etiqueta("NIVEL %d · %s" % [GameState.nivel_actual, GameState.info_nivel()["nombre"].to_upper()], 16, UIKit.ACENTO))
-	_hud_reloj = UIKit.etiqueta("", 16, Color("d9ffd9"))
-	_hud_dinero = UIKit.etiqueta("", 16)
-	_hud_reputacion = UIKit.etiqueta("", 16)
-	_hud_bandeja = UIKit.etiqueta("", 16)
-	for l in [_hud_reloj, _hud_dinero, _hud_reputacion, _hud_bandeja]:
-		fila_hud.add_child(l)
-	capa.add_child(barra_superior)
-
-	var lateral := UIKit.panel(UIKit.FONDO_CLARO, Color(UIKit.BORDE, 0.5), 10)
-	lateral.position = Vector2(1006, 62)
-	lateral.size = Vector2(268, 626)
-	lateral.clip_contents = true
-	_panel_lateral = UIKit.vbox(3)
-	lateral.add_child(_panel_lateral)
-	capa.add_child(lateral)
-
-	var ayuda := UIKit.etiqueta("Shift Correr · Espacio Usar · E Tablet\nQ Urgente · R Reservas · Esc Pausa", 10, UIKit.TEXTO_TENUE, true)
-	ayuda.position = Vector2(1006, 689)
-	ayuda.size = Vector2(268, 30)
-	capa.add_child(ayuda)
-	_actualizar_panel_lateral()
-
 func _actualizar_hud() -> void:
 	if _hud_reloj == null:
 		return
@@ -745,43 +707,28 @@ func _actualizar_panel_lateral() -> void:
 	for i in range(mini(lineas.size(), etiquetas_objetivo.size())):
 		_fijar(etiquetas_objetivo[i], lineas[i], UIKit.TEXTO)
 
+## Reúne las etiquetas del panel lateral y agrega las que dependen del día (reservaciones y objetivo).
 func _construir_panel_lateral() -> void:
 	var p := _panel_lateral
-	p.add_child(UIKit.etiqueta("STOCK", 14, UIKit.ACENTO))
 	var stock := {}
 	for insumo in Catalogo.INSUMOS:
-		stock[insumo] = UIKit.etiqueta("", 12)
-		p.add_child(stock[insumo])
-	var agotado := UIKit.etiqueta("", 11, UIKit.ROJO)
-	agotado.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	agotado.custom_minimum_size.x = 244
-	p.add_child(agotado)
-	p.add_child(HSeparator.new())
-	p.add_child(UIKit.etiqueta("COLA DE COCINA", 14, UIKit.ACENTO))
-	var etiqueta_cocina := UIKit.etiqueta("", 12)
-	var etiqueta_barra := UIKit.etiqueta("", 12)
-	var etiqueta_fila := UIKit.etiqueta("", 12)
-	for l in [etiqueta_cocina, etiqueta_barra, etiqueta_fila]:
-		p.add_child(l)
-	p.add_child(HSeparator.new())
-	p.add_child(UIKit.etiqueta("RESERVACIONES", 14, UIKit.ACENTO))
+		stock[insumo] = p.get_node("Stock/" + insumo)
 	var reservas: Array[Label] = []
 	if GameState.reservaciones.is_empty():
-		p.add_child(UIKit.etiqueta("Sin reservaciones hoy", 12, UIKit.TEXTO_TENUE))
+		p.get_node("Reservas").add_child(UIKit.etiqueta("Sin reservaciones hoy", 12, UIKit.TEXTO_TENUE))
 	for i in range(GameState.reservaciones.size()):
 		var l := UIKit.etiqueta("", 12)
-		p.add_child(l)
+		p.get_node("Reservas").add_child(l)
 		reservas.append(l)
-	p.add_child(HSeparator.new())
-	p.add_child(UIKit.etiqueta("Objetivo:", 13, UIKit.ACENTO))
 	var objetivo: Array[Label] = []
 	for i in range(GameState.detalle_objetivo().size()):
 		var l := UIKit.etiqueta("", 11)
 		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		l.custom_minimum_size.x = 244
-		p.add_child(l)
+		p.get_node("Objetivo").add_child(l)
 		objetivo.append(l)
-	_lateral = {"stock": stock, "agotados": agotado, "cocina": etiqueta_cocina, "barra": etiqueta_barra, "fila": etiqueta_fila, "reservas": reservas, "objetivo": objetivo}
+	_lateral = {"stock": stock, "agotados": p.get_node("Agotados"), "cocina": p.get_node("Cocina"), "barra": p.get_node("Barra"),
+		"fila": p.get_node("Fila"), "reservas": reservas, "objetivo": objetivo}
 
 ## Cambia texto y color solo si son distintos (evita recalcular el diseño de la interfaz).
 func _fijar(etiqueta: Label, texto: String, color: Color) -> void:

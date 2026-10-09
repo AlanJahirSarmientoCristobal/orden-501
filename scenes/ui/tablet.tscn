@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/panel_modal.tscn" id="1_r"]
+[ext_resource type="Script" path="res://scripts/ui/tablet.gd" id="2_r"]
+
+[node name="Tablet" instance=ExtResource("1_r")]
+script = ExtResource("2_r")
+
+[node name="Panel" parent="Raiz/Centro"]
+custom_minimum_size = Vector2(720, 520)
+
+[node name="Desplazable" parent="Raiz/Centro/Panel/Marco"]
+custom_minimum_size = Vector2(680, 430)

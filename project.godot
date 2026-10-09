@@ -31,6 +31,10 @@ window/stretch/aspect="expand"
 
 project/assembly_name="ORDEN 501"
 
+[gui]
+
+theme/custom="res://Assets/tema/tema.tres"
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0

@@ -8,9 +8,6 @@ var calles: Array[Rect2] = []
 var lugares: Array[Dictionary] = []    # {"rect": Rect2, "color": Color, "nombre": String}
 var objetivo: Node2D
 
-func _ready() -> void:
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
-
 var _espera := 0.0
 
 func _process(delta: float) -> void:

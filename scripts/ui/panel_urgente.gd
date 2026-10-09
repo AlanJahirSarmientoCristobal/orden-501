@@ -9,9 +9,6 @@ const PAQUETES := [3, 6]
 var restaurante: Node
 var _refresco := 0.0
 
-func tamano() -> Vector2:
-	return Vector2(700, 520)
-
 func _unhandled_input(evento: InputEvent) -> void:
 	if esta_abierto() and evento.is_action_pressed("pedido_urgente"):
 		get_viewport().set_input_as_handled()

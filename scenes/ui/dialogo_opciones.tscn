@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/ui/panel_modal.tscn" id="1_r"]
+[ext_resource type="Script" path="res://scripts/ui/dialogo_opciones.gd" id="2_r"]
+
+[node name="DialogoOpciones" instance=ExtResource("1_r")]
+script = ExtResource("2_r")
+
+[node name="Panel" parent="Raiz/Centro"]
+custom_minimum_size = Vector2(680, 470)
+
+[node name="Desplazable" parent="Raiz/Centro/Panel/Marco"]
+custom_minimum_size = Vector2(640, 380)

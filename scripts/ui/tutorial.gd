@@ -10,36 +10,22 @@ signal terminado
 var clave := ""
 var pasos: Array[Dictionary] = []
 var indice := 0
-var _titulo: Label
-var _texto: Label
-var _detalle: Label
 var _espera := 0.0          # pausa breve para que se vea el "¡Bien!" antes del siguiente paso
 var _cerrando := false
 
-func _init(nueva_clave: String = "", nuevos_pasos: Array[Dictionary] = []) -> void:
-	clave = nueva_clave
-	pasos = nuevos_pasos
-	layer = 60
+# Nodos de la escena scenes/ui/tutorial.tscn
+@onready var _titulo: Label = $Panel/Fila/Titulo
+@onready var _texto: Label = $Panel/Fila/Columna/Texto
+@onready var _detalle: Label = $Panel/Fila/Columna/Detalle
+
+## Crea el tutorial (escena tutorial.tscn) con sus pasos.
+static func crear(nueva_clave: String, nuevos_pasos: Array[Dictionary]) -> Tutorial:
+	var tutorial: Tutorial = load("res://scenes/ui/tutorial.tscn").instantiate()
+	tutorial.clave = nueva_clave
+	tutorial.pasos = nuevos_pasos
+	return tutorial
 
 func _ready() -> void:
-	var panel := UIKit.panel(Color("1b2a1f"), UIKit.VERDE, 8)
-	panel.position = Vector2(6, 4)
-	panel.size = Vector2(1268, 62)
-	var fila := UIKit.hbox(14)
-	_titulo = UIKit.etiqueta("", 15, UIKit.VERDE)
-	_titulo.custom_minimum_size.x = 150
-	fila.add_child(_titulo)
-	var columna := UIKit.vbox(0)
-	columna.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_texto = UIKit.etiqueta("", 17, UIKit.TEXTO)
-	_detalle = UIKit.etiqueta("", 12, UIKit.TEXTO_TENUE)
-	_detalle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	columna.add_child(_texto)
-	columna.add_child(_detalle)
-	fila.add_child(columna)
-	fila.add_child(UIKit.etiqueta("[T] Saltar tutorial", 12, UIKit.TEXTO_TENUE))
-	panel.add_child(fila)
-	add_child(panel)
 	_mostrar()
 
 func _mostrar() -> void:

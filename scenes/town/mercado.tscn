@@ -6,6 +6,12 @@
 [ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/vendedor_mercado.tres" id="4_q3luk"]
 [ext_resource type="Script" path="res://scripts/entities/interactuable.gd" id="5_qlfvt"]
 [ext_resource type="PackedScene" path="res://scenes/entities/dani.tscn" id="6_iynv7"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud_manana.tscn" id="ui_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/notificaciones.tscn" id="ui_avisos"]
+[ext_resource type="PackedScene" path="res://scenes/ui/tablet.tscn" id="ui_tablet"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panel_inventario.tscn" id="ui_inventario"]
+[ext_resource type="PackedScene" path="res://scenes/ui/dialogo_opciones.tscn" id="ui_dialogo"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_pausa.tscn" id="ui_pausa"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rode4"]
 size = Vector2(816, 144)
@@ -54,6 +60,7 @@ radius = 40.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_x2e8p"]
 size = Vector2(144, 24)
+
 
 [node name="Mercado" type="Node2D" unique_id=191961363]
 script = ExtResource("1_335f4")
@@ -194,6 +201,18 @@ horizontal_alignment = 1
 
 [node name="Dani" parent="." unique_id=1787400139 instance=ExtResource("6_iynv7")]
 position = Vector2(640, 575.19995)
+
+[node name="HUD" parent="." instance=ExtResource("ui_hud")]
+
+[node name="Notificaciones" parent="." instance=ExtResource("ui_avisos")]
+
+[node name="Tablet" parent="." instance=ExtResource("ui_tablet")]
+
+[node name="Inventario" parent="." instance=ExtResource("ui_inventario")]
+
+[node name="Dialogo" parent="." instance=ExtResource("ui_dialogo")]
+
+[node name="Pausa" parent="." instance=ExtResource("ui_pausa")]
 
 [connection signal="usado" from="Caja" to="." method="_al_usar_caja"]
 [connection signal="body_entered" from="Salida" to="." method="_al_cruzar_puerta"]

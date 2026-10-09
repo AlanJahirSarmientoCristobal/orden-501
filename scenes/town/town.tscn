@@ -14,6 +14,13 @@
 [ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/cliente_vip.tres" id="12_hhop4"]
 [ext_resource type="Script" path="res://scripts/entities/interactuable.gd" id="13_o16h7"]
 [ext_resource type="PackedScene" path="res://scenes/entities/dani.tscn" id="14_iu42p"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud_manana.tscn" id="ui_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/notificaciones.tscn" id="ui_avisos"]
+[ext_resource type="PackedScene" path="res://scenes/ui/tablet.tscn" id="ui_tablet"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panel_inventario.tscn" id="ui_inventario"]
+[ext_resource type="PackedScene" path="res://scenes/ui/dialogo_opciones.tscn" id="ui_dialogo"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_pausa.tscn" id="ui_pausa"]
+[ext_resource type="Script" path="res://scripts/town/minimapa.gd" id="ui_minimapa"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wpqog"]
 size = Vector2(2672, 40)
@@ -92,6 +99,7 @@ radius = 40.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_1d5la"]
 radius = 40.0
+
 
 [node name="Town" type="Node2D" unique_id=560066618]
 script = ExtResource("1_yr8sw")
@@ -359,6 +367,27 @@ limit_left = 0
 limit_top = 0
 limit_right = 2592
 limit_bottom = 1440
+
+[node name="HUD" parent="." instance=ExtResource("ui_hud")]
+
+[node name="Notificaciones" parent="." instance=ExtResource("ui_avisos")]
+
+[node name="Tablet" parent="." instance=ExtResource("ui_tablet")]
+
+[node name="Inventario" parent="." instance=ExtResource("ui_inventario")]
+
+[node name="Dialogo" parent="." instance=ExtResource("ui_dialogo")]
+
+[node name="Pausa" parent="." instance=ExtResource("ui_pausa")]
+
+[node name="Minimapa" type="Control" parent="HUD"]
+layout_mode = 3
+offset_left = 1058.0
+offset_top = 60.0
+offset_right = 1266.0
+offset_bottom = 176.0
+mouse_filter = 2
+script = ExtResource("ui_minimapa")
 
 [connection signal="usado" from="Interacciones/EntradaMercado" to="." method="_al_entrar_tienda" binds= ["mercado"]]
 [connection signal="usado" from="Interacciones/EntradaCerveceria" to="." method="_al_entrar_tienda" binds= ["cerveceria"]]

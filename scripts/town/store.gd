@@ -47,7 +47,7 @@ func _iniciar_tutorial() -> void:
 			"detalle": "Después sal por la puerta de abajo. Si te falta algo, visita la otra tienda.",
 			"hecho": func() -> bool: return not _menu.esta_abierto()},
 	]
-	add_child(Tutorial.new("tienda", pasos))
+	add_child(Tutorial.crear("tienda", pasos))
 
 func _process(delta: float) -> void:
 	super._process(delta)

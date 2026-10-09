@@ -1,0 +1,47 @@
+[gd_scene format=3]
+
+[node name="HUD" type="CanvasLayer"]
+layer = 20
+
+[node name="Barra" type="PanelContainer" parent="."]
+offset_left = 10.0
+offset_top = 8.0
+offset_right = 1270.0
+offset_bottom = 52.0
+theme_type_variation = &"PanelBarra"
+
+[node name="Fila" type="HBoxContainer" parent="Barra"]
+layout_mode = 2
+theme_override_constants/separation = 24
+
+[node name="Lugar" type="Label" parent="Barra/Fila"]
+layout_mode = 2
+theme_type_variation = &"Titulo"
+theme_override_font_sizes/font_size = 16
+
+[node name="Dinero" type="Label" parent="Barra/Fila"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+
+[node name="Reputacion" type="Label" parent="Barra/Fila"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+
+[node name="Almacen" type="Label" parent="Barra/Fila"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+
+[node name="Tiempo" type="Label" parent="Barra/Fila"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.372549, 0.827451, 0.552941, 1)
+theme_override_font_sizes/font_size = 16
+
+[node name="Ayuda" type="Label" parent="."]
+offset_left = 0.0
+offset_top = 694.0
+offset_right = 1280.0
+offset_bottom = 714.0
+theme_type_variation = &"Tenue"
+theme_override_font_sizes/font_size = 13
+text = "WASD Moverse · Shift Correr · Espacio Interactuar · E Tablet · I Inventario · R Reservaciones · Esc Pausa"
+horizontal_alignment = 1

@@ -7,9 +7,6 @@ var _mensaje := ""
 var _opciones: Array = []
 var permitir_cerrar := true
 
-func tamano() -> Vector2:
-	return Vector2(680, 470)
-
 func mostrar(titulo: String, mensaje: String, opciones: Array, se_puede_cerrar: bool = true) -> void:
 	_mensaje = mensaje
 	_opciones = opciones

@@ -1,0 +1,160 @@
+[gd_scene format=3]
+
+[node name="HUD" type="CanvasLayer"]
+layer = 20
+
+[node name="BarraSuperior" type="PanelContainer" parent="."]
+offset_left = 6.0
+offset_top = 4.0
+offset_right = 1274.0
+offset_bottom = 54.0
+theme_type_variation = &"PanelBarra"
+
+[node name="Fila" type="HBoxContainer" parent="BarraSuperior"]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="Nivel" type="Label" parent="BarraSuperior/Fila"]
+layout_mode = 2
+theme_type_variation = &"Titulo"
+theme_override_font_sizes/font_size = 16
+
+[node name="Reloj" type="Label" parent="BarraSuperior/Fila"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85098, 1, 0.85098, 1)
+theme_override_font_sizes/font_size = 16
+
+[node name="Dinero" type="Label" parent="BarraSuperior/Fila"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+
+[node name="Reputacion" type="Label" parent="BarraSuperior/Fila"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+
+[node name="Bandeja" type="Label" parent="BarraSuperior/Fila"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+
+[node name="Lateral" type="PanelContainer" parent="."]
+offset_left = 1006.0
+offset_top = 62.0
+offset_right = 1274.0
+offset_bottom = 688.0
+clip_contents = true
+theme_type_variation = &"PanelClaro"
+
+[node name="Contenido" type="VBoxContainer" parent="Lateral"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="TituloStock" type="Label" parent="Lateral/Contenido"]
+layout_mode = 2
+theme_type_variation = &"Titulo"
+theme_override_font_sizes/font_size = 14
+text = "STOCK"
+
+[node name="Stock" type="VBoxContainer" parent="Lateral/Contenido"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="carne" type="Label" parent="Lateral/Contenido/Stock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="pollo" type="Label" parent="Lateral/Contenido/Stock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="papas" type="Label" parent="Lateral/Contenido/Stock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="verdura" type="Label" parent="Lateral/Contenido/Stock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="pan" type="Label" parent="Lateral/Contenido/Stock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="cerveza" type="Label" parent="Lateral/Contenido/Stock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="refresco" type="Label" parent="Lateral/Contenido/Stock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="hielo" type="Label" parent="Lateral/Contenido/Stock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="monster" type="Label" parent="Lateral/Contenido/Stock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="Agotados" type="Label" parent="Lateral/Contenido"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.419608, 0.419608, 1)
+theme_override_font_sizes/font_size = 11
+autowrap_mode = 3
+custom_minimum_size = Vector2(244, 0)
+visible = false
+
+[node name="Separador1" type="HSeparator" parent="Lateral/Contenido"]
+layout_mode = 2
+
+[node name="TituloCocina" type="Label" parent="Lateral/Contenido"]
+layout_mode = 2
+theme_type_variation = &"Titulo"
+theme_override_font_sizes/font_size = 14
+text = "COLA DE COCINA"
+
+[node name="Cocina" type="Label" parent="Lateral/Contenido"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="Barra" type="Label" parent="Lateral/Contenido"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="Fila" type="Label" parent="Lateral/Contenido"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+
+[node name="Separador2" type="HSeparator" parent="Lateral/Contenido"]
+layout_mode = 2
+
+[node name="TituloReservas" type="Label" parent="Lateral/Contenido"]
+layout_mode = 2
+theme_type_variation = &"Titulo"
+theme_override_font_sizes/font_size = 14
+text = "RESERVACIONES"
+
+[node name="Reservas" type="VBoxContainer" parent="Lateral/Contenido"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Separador3" type="HSeparator" parent="Lateral/Contenido"]
+layout_mode = 2
+
+[node name="TituloObjetivo" type="Label" parent="Lateral/Contenido"]
+layout_mode = 2
+theme_type_variation = &"Titulo"
+theme_override_font_sizes/font_size = 13
+text = "Objetivo:"
+
+[node name="Objetivo" type="VBoxContainer" parent="Lateral/Contenido"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Ayuda" type="Label" parent="."]
+offset_left = 1006.0
+offset_top = 689.0
+offset_right = 1274.0
+offset_bottom = 719.0
+theme_type_variation = &"Tenue"
+theme_override_font_sizes/font_size = 10
+text = "Shift Correr · Espacio Usar · E Tablet\nQ Urgente · R Reservas · Esc Pausa"
+horizontal_alignment = 1

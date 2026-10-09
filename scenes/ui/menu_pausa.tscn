@@ -1,0 +1,77 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/menu_pausa.gd" id="1_r"]
+
+[node name="MenuPausa" type="CanvasLayer"]
+process_mode = 3
+layer = 60
+script = ExtResource("1_r")
+
+[node name="Raiz" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+
+[node name="Velo" type="ColorRect" parent="Raiz"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.01, 0.02, 0.05, 0.75)
+
+[node name="Centro" type="CenterContainer" parent="Raiz"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Raiz/Centro"]
+layout_mode = 2
+
+[node name="Caja" type="VBoxContainer" parent="Raiz/Centro/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Titulo" type="Label" parent="Raiz/Centro/Panel/Caja"]
+layout_mode = 2
+theme_type_variation = &"Titulo"
+theme_override_font_sizes/font_size = 30
+text = "PAUSA"
+horizontal_alignment = 1
+
+[node name="Ayuda" type="Label" parent="Raiz/Centro/Panel/Caja"]
+layout_mode = 2
+theme_type_variation = &"Tenue"
+theme_override_font_sizes/font_size = 14
+text = "Presiona Esc para continuar"
+horizontal_alignment = 1
+
+[node name="Continuar" type="Button" parent="Raiz/Centro/Panel/Caja"]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 0)
+theme_override_font_sizes/font_size = 18
+text = "Continuar"
+
+[node name="Reiniciar" type="Button" parent="Raiz/Centro/Panel/Caja"]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 0)
+theme_override_font_sizes/font_size = 18
+text = "Reiniciar jornada"
+
+[node name="MenuPrincipal" type="Button" parent="Raiz/Centro/Panel/Caja"]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 0)
+theme_override_font_sizes/font_size = 18
+text = "Menú principal"
+
+[connection signal="pressed" from="Raiz/Centro/Panel/Caja/Continuar" to="." method="alternar"]
+[connection signal="pressed" from="Raiz/Centro/Panel/Caja/Reiniciar" to="." method="_reiniciar"]
+[connection signal="pressed" from="Raiz/Centro/Panel/Caja/MenuPrincipal" to="." method="_menu"]

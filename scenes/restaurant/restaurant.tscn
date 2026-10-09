@@ -11,6 +11,12 @@
 [ext_resource type="PackedScene" path="res://scenes/entities/npc.tscn" id="9_88rii"]
 [ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/chef.tres" id="10_vi10e"]
 [ext_resource type="PackedScene" path="res://scenes/entities/dani.tscn" id="11_5ko6n"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud_restaurante.tscn" id="ui_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/notificaciones.tscn" id="ui_avisos"]
+[ext_resource type="PackedScene" path="res://scenes/ui/tablet.tscn" id="ui_tablet"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panel_urgente.tscn" id="ui_urgente"]
+[ext_resource type="PackedScene" path="res://scenes/ui/dialogo_opciones.tscn" id="ui_dialogo"]
+[ext_resource type="PackedScene" path="res://scenes/ui/menu_pausa.tscn" id="ui_pausa"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jjjah"]
 size = Vector2(1000, 48)
@@ -47,6 +53,7 @@ size = Vector2(48, 48)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_x6yub"]
 radius = 40.0
+
 
 [node name="Restaurant" type="Node2D" unique_id=698233332]
 script = ExtResource("1_6a52p")
@@ -267,5 +274,17 @@ animado = true
 
 [node name="Dani" parent="." unique_id=591917924 instance=ExtResource("11_5ko6n")]
 position = Vector2(560, 600)
+
+[node name="HUD" parent="." instance=ExtResource("ui_hud")]
+
+[node name="Notificaciones" parent="." instance=ExtResource("ui_avisos")]
+
+[node name="Tablet" parent="." instance=ExtResource("ui_tablet")]
+
+[node name="Urgente" parent="." instance=ExtResource("ui_urgente")]
+
+[node name="Dialogo" parent="." instance=ExtResource("ui_dialogo")]
+
+[node name="Pausa" parent="." instance=ExtResource("ui_pausa")]
 
 [connection signal="usado" from="Telefono" to="." method="_al_usar_telefono"]

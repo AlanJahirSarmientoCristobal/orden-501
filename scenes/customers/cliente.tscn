@@ -106,4 +106,5 @@ stretch_mode = 5
 
 [node name="Texto" type="Label" parent="Burbuja/Fila"]
 theme_override_colors/font_color = Color(0.105882, 0.121569, 0.164706, 1)
+theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 11

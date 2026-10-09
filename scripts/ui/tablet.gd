@@ -10,12 +10,8 @@ var proveedor_cocina: Callable        # Devuelve Array[String] con la cola de co
 var notificaciones: Notificaciones
 
 func _ready() -> void:
-	super._ready()
 	GameState.inventario_cambiado.connect(refrescar)
 	GameState.reservaciones_cambiadas.connect(refrescar)
-
-func tamano() -> Vector2:
-	return Vector2(720, 520)
 
 func abrir_seccion(nueva: String) -> void:
 	seccion = nueva

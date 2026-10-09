@@ -12,7 +12,7 @@ func _ready() -> void:
 	fondo.color = Color("12151d")
 	fondo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(fondo)
-	var capa := Notificaciones.new()
+	var capa: Notificaciones = load("res://scenes/ui/notificaciones.tscn").instantiate()
 	add_child(capa)
 	var margen := MarginContainer.new()
 	margen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

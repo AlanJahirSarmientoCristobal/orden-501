@@ -5,6 +5,7 @@ const TILES := "res://Assets/sprites/rpg_urban/Tiles/tile_%04d.png"
 
 const ALTURA_PERSONAJE := -14.0
 const COMIDA := "res://Assets/sprites/food_kit/Previews/%s.png"
+const COMIDA_PROPIA := "res://Assets/sprites/comida/%s.png"
 
 const TEXTURAS := {
 	"insumo_carne": COMIDA % "meat-raw",
@@ -110,6 +111,8 @@ static func textura(clave: String) -> Texture2D:
 	if _cache.has(clave):
 		return _cache[clave]
 	var ruta: String = TEXTURAS.get(clave, "")
+	if ResourceLoader.exists(COMIDA_PROPIA % clave):
+		ruta = COMIDA_PROPIA % clave
 	var tex: Texture2D = null
 	if ruta != "" and ResourceLoader.exists(ruta):
 		tex = load(ruta)

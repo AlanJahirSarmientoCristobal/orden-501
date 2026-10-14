@@ -118,6 +118,23 @@ python tools/recortar_monster.py
 
 El script genera `monster_1.png` … `monster_7.png` sin el fondo. La hoja debe ser un PNG real (si es JPEG, conviértelo a PNG antes de copiarla). Mientras no existan esos archivos, el juego dibuja 7 latas provisionales con los mismos colores.
 
+**Íconos de comida:** los 15 íconos de insumos y platillos se pueden reemplazar por propios. Las plantillas están en `Assets/sprites/comida/plantillas/`:
+
+| Archivo | Para qué sirve |
+|---|---|
+| `guia_iconos.png` | Los 15 íconos con su número, nombre, dónde se usan y el archivo que hay que guardar. |
+| `plantilla_hoja_32px.png` | Hoja vacía de 160 × 96 (5 × 3 cuadros de 32 × 32) para dibujar todos los íconos en un solo archivo. |
+| `referencia_kenney.png` | La misma hoja con los íconos actuales, para calcar encima en una capa nueva. |
+| `plantilla_icono_32px.png` | Un solo cuadro de 32 × 32 con el margen y la línea de apoyo. |
+
+Dibuja en una capa nueva, con fondo transparente, y exporta solo esa capa como `Assets/sprites/comida/hoja_iconos.png`. Después ejecuta:
+
+```powershell
+python tools/cortar_iconos_comida.py
+```
+
+El script guarda cada cuadro como `Assets/sprites/comida/<nombre>.png` (por ejemplo `insumo_carne.png`) y salta los cuadros vacíos. También se puede guardar cada ícono a mano con ese nombre. Si existe un ícono propio, el juego lo usa; si no, sigue usando el de Kenney. Para regenerar las plantillas: `python tools/generar_plantilla_comida.py`.
+
 Todos los gráficos y sonidos se referencian desde **`scripts/core/asset_paths.gd`**:
 
 - `TEXTURAS`: íconos de insumos y platillos, y decoración. Cambia la ruta por tu imagen.

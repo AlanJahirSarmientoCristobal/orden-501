@@ -177,15 +177,27 @@ El pueblo y los interiores usan tres hojas de tiles de 16 × 16 px:
 | `Assets/sprites/interiores/interiores.png` | `interiores.tres` (fuente 0) | 57 × 31 tiles, 1 px de separación |
 | `Assets/sprites/interiores/muebles.png` | `interiores.tres` (fuente 1) y las mesas | 27 × 18 tiles, 1 px de separación |
 
-Las hojas solo conservan los tiles que usa el juego; el resto está vacío. Cada tile está en la misma posición que en el paquete original de Kenney, así que para cambiar uno basta con dibujar encima de su cuadro y guardar: las escenas no se tocan.
+Las hojas solo tienen los tiles que usa el juego; el resto está vacío. Cada tile conserva su posición en la cuadrícula, así que para cambiar uno basta con dibujar encima de su cuadro y guardar: las escenas y las colisiones no se tocan.
 
-Los tiles propios los dibuja `python tools/generar_tiles_propios.py` (sobrescribe solo esos cuadros):
+**Pueblo (100 % propio, estilo rústico moderno).** Lo dibuja completo `python tools/generar_pueblo.py`, que **sobrescribe** `pueblo.png`:
 
-- **Pueblo:** pino y árbol redondo verdes (este último también con maceta), pino y árbol de otoño, pasto, banca de madera, farol verde, poste de luz y buzones rojo y azul.
-- **Interiores:** piso de madera, piso gris y piso beige, barril, barril de cerveza, caja de madera y refrigerador.
-- **Muebles:** silla de frente y de espaldas, mesa ovalada, mesa redonda y dos macetas.
+| Pieza | Tiles (columna, fila) | Diseño |
+|---|---|---|
+| Banqueta | 8–10, 0–2 | Adoquín con guarnición clara |
+| Pasto | 0–2, 0–2 | Pasto con flores y borde de piedra |
+| Agua | 8–10, 6–8 | Estanque con orilla de piedra |
+| Techo rojo | 0–2, 3–5 | Teja de barro con fascia de madera |
+| Techo gris | 8–10, 3–5 | Lámina negra engargolada con fascia de roble |
+| Fachada de ladrillo | 16, 0/2/3 y 20–22, 0/1/3 | Ladrillo aparente, viga de madera, zócalo de piedra y columnas de cantera rosa |
+| Fachada de estuco | 16, 4/5/7 y 20–22, 4/5/7 | Estuco crema, lambrín de madera, zócalo gris y columnas de piedra |
+| Ventanas | 11, 13–14 | Herrería negra, repisa de roble y jardinera con flores |
+| Puertas y vitrinas | 13, 10 · 15, 10 · 7–8, 15 · 8–10, 14 | Puerta de madera, puerta de tienda, puertas de vidrio y aparador |
+| Toldos, chimenea y panel solar | 4–6, 12 · 8–10, 12 | Toldo terracota y crema (uno con farol) |
+| Calles | 0–4, 15–17 · 9–10, 16 | Asfalto, línea amarilla, cebras y cajón de estacionamiento |
+| Autos | 15–16, 14–17 · 21–22, 16–17 | Compacto mostaza, pickup olivo, sedán azul y pickup terracota |
+| Objetos | varios | Árboles, banca, farol, poste, hidrante, buzón, bote de basura y cerca de madera |
 
-Los demás tiles (calles, edificios, paredes, mostradores, estufas, etc.) siguen siendo de Kenney (CC0). Consulta `THIRD_PARTY_LICENSES.md`.
+**Interiores.** `python tools/generar_interiores.py` dibuja (sobrescribe solo esos cuadros) los pisos de madera, gris y beige, los barriles, la caja, el refrigerador, las sillas, las mesas y las macetas. Los demás tiles de los interiores (paredes, tapetes, toldos del Mercado, ventanas, estantes, mostradores y estufas) siguen siendo de Kenney (CC0). Consulta `THIRD_PARTY_LICENSES.md`.
 
 ## Guardado
 

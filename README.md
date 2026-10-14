@@ -133,7 +133,7 @@ Dibuja en una capa nueva, con fondo transparente, y exporta solo esa capa como `
 python tools/cortar_iconos_comida.py
 ```
 
-El script guarda cada cuadro como `Assets/sprites/comida/<nombre>.png` (por ejemplo `insumo_carne.png`) y salta los cuadros vacíos. También se puede guardar cada ícono a mano con ese nombre. Si existe un ícono propio, el juego lo usa; si no, sigue usando el de Kenney. Para regenerar las plantillas: `python tools/generar_plantilla_comida.py`.
+El script guarda cada cuadro como `Assets/sprites/comida/<nombre>.png` (por ejemplo `insumo_carne.png`) y salta los cuadros vacíos. También se puede guardar cada ícono a mano con ese nombre. Si existe un ícono propio, el juego lo usa; si no, sigue usando el de Kenney. Los 15 íconos actuales los dibuja `python tools/generar_iconos_comida.py` (que **sobrescribe** la hoja y los PNG); si retocas alguno a mano, no vuelvas a correrlo. Para regenerar las plantillas: `python tools/generar_plantilla_comida.py`.
 
 Todos los gráficos y sonidos se referencian desde **`scripts/core/asset_paths.gd`**:
 

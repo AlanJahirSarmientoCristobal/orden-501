@@ -6,11 +6,11 @@ Los gráficos temporales del proyecto usan paquetes de Kenney publicados bajo Cr
 - **Roguelike RPG Pack**, Kenney (pisos, paredes, refrigeradores, barriles, puestos de mercado y comida de los interiores). Licencia en `Assets/sprites/interiores/License_roguelike_rpg.txt`.
 - **Roguelike Indoors**, Kenney (mostradores, estufa, fregadero, mesas, sillas y plantas). Licencia en `Assets/sprites/interiores/License_roguelike_indoor.txt`.
 - **Kenney Fonts** (Kenney Pixel, usada en el menú de compra). Licencia en `Assets/fonts/License_kenney_fonts.txt`.
-- **Food Kit 2.0**, Kenney (solo las imágenes de `Previews/`, usadas como íconos de insumos y platillos). Licencia en `Assets/sprites/food_kit/License.txt`.
+- **Food Kit 2.0**, Kenney (imágenes de `Previews/`; ya no se muestran en el juego, solo quedan como respaldo si falta un ícono propio). Licencia en `Assets/sprites/food_kit/License.txt`.
 
 Sitio del autor: https://kenney.nl/
 
-Las pantallas del partido y el letrero de neón (`Assets/sprites/restaurante/`) son originales del proyecto, generados con `tools/generar_sprites_restaurante.py`.
+Los íconos de comida (`Assets/sprites/comida/`, generados con `tools/generar_iconos_comida.py`), las pantallas del partido y el letrero de neón (`Assets/sprites/restaurante/`) son originales del proyecto, generados con `tools/generar_sprites_restaurante.py`.
 
 La música y los efectos de sonido se generan por código en `scripts/autoload/audio_manager.gd`; no se usan archivos de audio de terceros.
 

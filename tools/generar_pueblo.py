@@ -3,7 +3,7 @@ import sys
 from PIL import Image, ImageDraw
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from pixel_art import RAIZ, SPRITES, contorno, lienzo, oscurecer, pegar, ruido, sombrear_filas, textura
+from pixel_art import RAIZ, SPRITES, contorno, franja, lienzo, nueve, oscurecer, pegar, ruido, sombrear_filas, textura
 
 PUEBLO = os.path.join(SPRITES, "pueblo", "pueblo.png")
 COLUMNAS, FILAS = 27, 18
@@ -22,41 +22,6 @@ NOGAL = (132, 84, 48)
 NOGAL_OSCURO = (98, 62, 36)
 TERRACOTA = (196, 92, 58)
 CREMA = (240, 226, 200)
-
-
-def lados_de(columna, fila):
-    lados = set()
-    if fila == 0:
-        lados.add("arriba")
-    if fila == 2:
-        lados.add("abajo")
-    if columna == 0:
-        lados.add("izq")
-    if columna == 2:
-        lados.add("der")
-    return lados
-
-
-def franja(img, lados, colores):
-    px = img.load()
-    for i, color in reversed(list(enumerate(colores))):
-        for k in range(16):
-            if "arriba" in lados:
-                px[k, i] = color + (255,)
-            if "abajo" in lados:
-                px[k, 15 - i] = color + (255,)
-            if "izq" in lados:
-                px[i, k] = color + (255,)
-            if "der" in lados:
-                px[15 - i, k] = color + (255,)
-
-
-def nueve(hoja, columna, fila, relleno, borde):
-    for f in range(3):
-        for c in range(3):
-            img = textura(relleno)
-            borde(img, lados_de(c, f))
-            pegar(hoja, 16, columna + c, fila + f, img)
 
 
 def adoquin(x, y):
@@ -619,11 +584,11 @@ def bote():
 
 
 def dibujar_terreno(hoja):
-    nueve(hoja, 0, 0, pasto, borde_pasto)
-    nueve(hoja, 8, 0, adoquin, borde_banqueta)
-    nueve(hoja, 8, 6, agua, borde_agua)
-    nueve(hoja, 0, 3, teja, borde_techo((84, 36, 26), (170, 74, 48), [(64, 40, 26), (124, 82, 50), (156, 108, 68), (110, 48, 32)]))
-    nueve(hoja, 8, 3, lamina, borde_techo((38, 40, 48), (100, 104, 116), [(70, 48, 30), (178, 132, 82), (206, 160, 106), (52, 54, 62)]))
+    nueve(hoja, 16, 0, 0, pasto, borde_pasto)
+    nueve(hoja, 16, 8, 0, adoquin, borde_banqueta)
+    nueve(hoja, 16, 8, 6, agua, borde_agua)
+    nueve(hoja, 16, 0, 3, teja, borde_techo((84, 36, 26), (170, 74, 48), [(64, 40, 26), (124, 82, 50), (156, 108, 68), (110, 48, 32)]))
+    nueve(hoja, 16, 8, 3, lamina, borde_techo((38, 40, 48), (100, 104, 116), [(70, 48, 30), (178, 132, 82), (206, 160, 106), (52, 54, 62)]))
 
 
 def dibujar_edificios(hoja):

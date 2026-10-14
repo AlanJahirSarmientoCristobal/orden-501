@@ -197,7 +197,9 @@ Las hojas solo tienen los tiles que usa el juego; el resto está vacío. Cada ti
 | Autos | 15–16, 14–17 · 21–22, 16–17 | Compacto mostaza, pickup olivo, sedán azul y pickup terracota |
 | Objetos | varios | Árboles, banca, farol, poste, hidrante, buzón, bote de basura y cerca de madera |
 
-**Interiores.** `python tools/generar_interiores.py` dibuja (sobrescribe solo esos cuadros) los pisos de madera, gris y beige, los barriles, la caja, el refrigerador, las sillas, las mesas y las macetas. Los demás tiles de los interiores (paredes, tapetes, toldos del Mercado, ventanas, estantes, mostradores y estufas) siguen siendo de Kenney (CC0). Consulta `THIRD_PARTY_LICENSES.md`.
+**Interiores (100 % propios, mismo estilo).** Los dibuja completos `python tools/generar_interiores.py`, que **sobrescribe** `interiores.png` y `muebles.png`: muros de adobe, paredes de yeso con viga y lambrín de roble, ventanas en arco, pisos de madera, gris y beige, tapete tejido, puesto del Mercado con toldo, cajas de verdura, productos (bolillos, pollo asado, carne, botellas, tacos y cazuela), refrigerador, enfriadores con botellas, máquinas de cerveza de barril, hielera, estantes, barriles, mostradores de cemento con alacenas, caja de cobro con azulejo de terracota, barra de madera, estufa, comal, sillas, mesas y macetas.
+
+Las funciones de dibujo que comparten los dos generadores están en `tools/pixel_art.py`.
 
 ## Guardado
 

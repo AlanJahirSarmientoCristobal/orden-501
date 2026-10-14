@@ -59,3 +59,38 @@ def sombrear_filas(img, filas, factor):
             r, g, b, a = px[x, y]
             if a:
                 px[x, y] = oscurecer((r, g, b), factor) + (a,)
+
+
+def lados_de(columna, fila):
+    lados = set()
+    if fila == 0:
+        lados.add("arriba")
+    if fila == 2:
+        lados.add("abajo")
+    if columna == 0:
+        lados.add("izq")
+    if columna == 2:
+        lados.add("der")
+    return lados
+
+
+def franja(img, lados, colores):
+    px = img.load()
+    for i, color in reversed(list(enumerate(colores))):
+        for k in range(16):
+            if "arriba" in lados:
+                px[k, i] = color + (255,)
+            if "abajo" in lados:
+                px[k, 15 - i] = color + (255,)
+            if "izq" in lados:
+                px[i, k] = color + (255,)
+            if "der" in lados:
+                px[15 - i, k] = color + (255,)
+
+
+def nueve(hoja, paso, columna, fila, relleno, borde):
+    for f in range(3):
+        for c in range(3):
+            img = textura(relleno)
+            borde(img, lados_de(c, f))
+            pegar(hoja, paso, columna + c, fila + f, img)

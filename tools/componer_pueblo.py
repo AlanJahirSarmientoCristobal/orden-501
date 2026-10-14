@@ -207,7 +207,7 @@ for x in (mitad_x - 3, mitad_x + 3):
 
 nueve(suelo, 16, 6, 3, 3, AGUA, solido=True)
 lugares["plaza"] = {"rect": [14, 3, 8, 8], "fuente": [17.5, 7.5]}
-for x in (14, 20):
+for x in (15, 19):
     poner(objetos, x, 7, BANCA)
 for x, y in [(15, 4), (19, 4), (15, 10), (19, 10)]:
     arbol(x, y, MACETEROS)
@@ -223,7 +223,7 @@ for y in range(2, FILAS, 6):
     if abs(y - AV_Y - 1) > 3 and abs(y - SUR_Y - 1) > 3:
         poner(objetos, AV_X - 1, y - 1, POSTE_LUZ[0])
         poner(objetos, AV_X - 1, y, POSTE_LUZ[1])
-for x, y, t in [(2, 12, BOTE), (24, 12, BUZON), (28, 12, HIDRANTE), (44, 12, BOTE), (28, 22, BUZON), (52, 22, BOTE), (14, 12, HIDRANTE)]:
+for x, y, t in [(3, 12, BOTE), (24, 12, BUZON), (28, 12, HIDRANTE), (45, 12, BOTE), (28, 22, BUZON), (52, 22, BOTE), (15, 12, HIDRANTE)]:
     poner(objetos, x, y, t, solido=True)
 for x in range(1, COLUMNAS, 7):
     if suelo[0][x] in (8, 9, 10) and objetos[0][x] == VACIO:
@@ -257,7 +257,7 @@ for x in range(35, 53):
     if abs(x - 44) > 1:
         poner(objetos, x, 26, CERCA[(x - 35) % 3], solido=True)
 
-for x, y in [(2, 8), (12, 10), (23, 8), (30, 8), (44, 9), (52, 10), (44, 21), (2, 28), (23, 28), (33, 28)]:
+for x, y in [(2, 8), (12, 10), (23, 10), (30, 8), (44, 9), (52, 10), (44, 21), (2, 28), (23, 28), (33, 28)]:
     if objetos[y][x] == VACIO and ("objetos", x, y) not in solidos:
         arbol(x, y)
 

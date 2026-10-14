@@ -54,11 +54,11 @@ def barril(madera, clara, oscura, aro, borde):
 
 def caja():
     img, d = lienzo()
-    d.rectangle([4, 4, 12, 13], fill=(204, 154, 98))
-    d.rectangle([6, 6, 10, 11], fill=(176, 124, 72))
-    d.line([(6, 6), (10, 11)], fill=(214, 166, 110))
-    d.line([(10, 6), (6, 11)], fill=(214, 166, 110))
-    d.line([(4, 4), (12, 4)], fill=(232, 186, 130))
+    d.rectangle([4, 2, 11, 8], fill=(204, 154, 98))
+    d.rectangle([5, 4, 10, 7], fill=(176, 124, 72))
+    d.line([(5, 4), (10, 7)], fill=(214, 166, 110))
+    d.line([(10, 4), (5, 7)], fill=(214, 166, 110))
+    d.line([(4, 2), (11, 2)], fill=(232, 186, 130))
     return contorno(img, (96, 62, 36))
 
 
@@ -288,42 +288,42 @@ def caja_producto(colores, ancho_completo=False):
 
 def botella(color, claro, etiqueta):
     img, d = lienzo()
-    d.rectangle([7, 2, 8, 5], fill=color)
-    d.point((7, 1), fill=ROBLE)
-    d.point((8, 1), fill=ROBLE)
-    d.rounded_rectangle([5, 6, 10, 14], radius=1, fill=color)
-    d.line([(6, 7), (6, 13)], fill=claro)
-    d.rectangle([5, 9, 10, 11], fill=etiqueta)
+    for x in (4, 9):
+        d.point((x + 1, 2), fill=ROBLE)
+        d.line([(x + 1, 3), (x + 1, 5)], fill=color)
+        d.rectangle([x, 6, x + 2, 10], fill=color)
+        d.line([(x, 7), (x, 9)], fill=claro)
+        d.line([(x, 8), (x + 2, 8)], fill=etiqueta)
     return contorno(img, (34, 30, 30))
 
 
 def bolillos():
     img, d = lienzo()
-    d.rectangle([2, 9, 13, 12], fill=CREMA)
+    d.rectangle([2, 4, 13, 6], fill=CREMA)
     for x in (3, 8):
-        d.ellipse([x, 5, x + 5, 10], fill=(214, 150, 72))
-        d.line([(x + 1, 7), (x + 4, 7)], fill=(246, 206, 140))
+        d.ellipse([x, 1, x + 5, 5], fill=(214, 150, 72))
+        d.line([(x + 1, 3), (x + 4, 3)], fill=(246, 206, 140))
     return contorno(img, (110, 70, 34))
 
 
 def pollo_asado():
     img, d = lienzo()
-    d.ellipse([1, 8, 14, 14], fill=(244, 244, 238))
-    d.ellipse([3, 4, 12, 12], fill=(196, 112, 50))
-    d.ellipse([4, 5, 8, 8], fill=(232, 156, 82))
-    d.rectangle([11, 4, 13, 6], fill=(196, 112, 50))
-    d.point((14, 3), fill=(244, 244, 238))
-    d.point((2, 11), fill=(100, 170, 70))
-    d.point((13, 11), fill=(100, 170, 70))
+    d.ellipse([1, 3, 14, 8], fill=(244, 244, 238))
+    d.ellipse([4, 1, 11, 6], fill=(196, 112, 50))
+    d.ellipse([5, 2, 8, 4], fill=(232, 156, 82))
+    d.rectangle([11, 2, 12, 3], fill=(196, 112, 50))
+    d.point((13, 2), fill=(244, 244, 238))
+    d.point((2, 6), fill=(100, 170, 70))
+    d.point((13, 6), fill=(100, 170, 70))
     return contorno(img, (90, 50, 26))
 
 
 def corte_carne():
     img, d = lienzo()
-    d.polygon([(2, 7), (13, 6), (14, 12), (3, 13)], fill=CREMA)
-    d.ellipse([4, 6, 12, 12], fill=(196, 58, 64))
-    d.ellipse([5, 7, 9, 9], fill=(232, 98, 96))
-    d.point((10, 10), fill=(246, 222, 200))
+    d.polygon([(2, 4), (13, 3), (14, 8), (3, 9)], fill=CREMA)
+    d.ellipse([4, 3, 12, 8], fill=(196, 58, 64))
+    d.ellipse([5, 4, 8, 6], fill=(232, 98, 96))
+    d.point((10, 7), fill=(246, 222, 200))
     return contorno(img, (96, 40, 36))
 
 
@@ -370,11 +370,19 @@ def barril_cerveza_tirada():
     return contorno(img, (54, 58, 66))
 
 
-def enfriador():
+def enfriador(vacio=False):
     img, d = lienzo(16, 32)
     d.rectangle([1, 1, 14, 31], fill=HERRERIA)
     d.rectangle([3, 3, 12, 29], fill=(34, 40, 48))
     d.line([(3, 3), (12, 3)], fill=(255, 240, 200))
+    if vacio:
+        d.rectangle([3, 4, 12, 29], fill=(46, 56, 68))
+        d.rectangle([4, 5, 11, 7], fill=(70, 82, 96))
+        d.rectangle([4, 26, 11, 28], fill=ACERO_OSCURO)
+        d.line([(4, 26), (11, 26)], fill=ACERO)
+        d.line([(4, 14), (7, 11)], fill=(90, 110, 124))
+        d.line([(2, 12), (2, 18)], fill=ROBLE_CLARO)
+        return img
     colores = ((196, 128, 40), (72, 140, 60), (150, 80, 40), (200, 60, 50))
     for i, y in enumerate((10, 18, 26)):
         d.line([(3, y), (12, y)], fill=ACERO_OSCURO)
@@ -603,6 +611,7 @@ def dibujar_interiores(hoja):
     pegar(hoja, 17, 56, 14, cazuela())
     pegar(hoja, 17, 36, 6, barril_cerveza_tirada())
     pegar(hoja, 17, 37, 3, enfriador())
+    pegar(hoja, 17, 38, 3, enfriador(vacio=True))
     pegar(hoja, 17, 32, 2, hielera(False))
     pegar(hoja, 17, 33, 2, hielera(True))
     pegar(hoja, 17, 43, 13, estante(False))

@@ -168,6 +168,7 @@ text = "MERCADO CENTRAL"
 horizontal_alignment = 1
 
 [node name="Vendedor" parent="." unique_id=787446503 instance=ExtResource("3_6eeyt")]
+z_index = -10
 position = Vector2(976, 273)
 frames = ExtResource("4_q3luk")
 nombre = "Don Chema"

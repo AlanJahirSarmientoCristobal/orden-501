@@ -158,6 +158,7 @@ text = "CERVECERÍA LA ESQUINA"
 horizontal_alignment = 1
 
 [node name="Vendedor" parent="." unique_id=2105303264 instance=ExtResource("4_e2gyi")]
+z_index = -10
 position = Vector2(976, 273)
 frames = ExtResource("5_e2ki5")
 nombre = "Lupita"

@@ -13,6 +13,7 @@ sprite_frames = ExtResource("2_frames")
 animation = &"down"
 
 [node name="Nombre" type="Label" parent="."]
+z_index = 20
 offset_left = -60.0
 offset_top = 26.0
 offset_right = 60.0

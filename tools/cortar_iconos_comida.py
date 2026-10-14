@@ -13,7 +13,7 @@ def cortar(ruta_hoja):
     if hoja.size != tamano_hoja():
         sys.exit("La hoja debe medir %d x %d px y mide %d x %d." % (*tamano_hoja(), *hoja.size))
     guardados = 0
-    for i, (clave, nombre, _, _) in enumerate(ICONOS):
+    for i, (clave, nombre, _) in enumerate(ICONOS):
         x, y = posicion(i)
         icono = hoja.crop((x, y, x + CUADRO, y + CUADRO))
         if icono.getbbox() is None:

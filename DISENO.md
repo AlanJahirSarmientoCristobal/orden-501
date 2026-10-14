@@ -7,7 +7,7 @@ Resumen de cómo se implementó cada sección de `ORDEN_501_Actividad1.docx`, y 
 | Sección del documento | Implementación |
 |---|---|
 | Ciclo del día: mañana → jornada → faltante → cierre | `town.gd` → `restaurant.gd` → `closing_report.gd` |
-| Mapa del pueblo con Mercado y Cervecería | `scenes/town/mapa_pueblo.tscn` (TileMap estilo Kenney) + `scripts/town/town.gd` (puertas, minimapa, peatones y vecinos) |
+| Mapa del pueblo con Mercado y Cervecería | `scenes/town/mapa_pueblo.tscn` (TileMap) + `scripts/town/town.gd` (puertas, minimapa, peatones y vecinos) |
 | Tiendas con interior | `scenes/town/mercado.tscn` y `cerveceria.tscn` (script `store.gd`), con tiles Roguelike en `TileMapLayer`: la tienda está decorada y se compra con el vendedor en `scenes/ui/menu_compra.tscn` (estilo Pokémon Rojo Fuego) |
 | Monster (7 diseños, un solo producto) | `AssetPaths.siguiente_diseno("monster")` rota el sprite cada vez que se muestra |
 | Dinero y capacidad del almacén limitados | `GameState.comprar()`, `capacidad_almacen()` |

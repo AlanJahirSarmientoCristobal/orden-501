@@ -4,7 +4,7 @@ const CARPETA := "res://Assets/sprites/personajes/frames"
 
 func _init() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(CARPETA))
-	for clave in AssetPaths.PERSONAJES:
+	for clave in AssetPaths.CODIGOS:
 		var frames := AssetPaths.frames_personaje(clave)
 		var ruta := "%s/%s.tres" % [CARPETA, clave]
 		var err := ResourceSaver.save(frames, ruta)

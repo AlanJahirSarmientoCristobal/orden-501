@@ -281,7 +281,7 @@ print(f"Mapa guardado en {salida}")
 
 if len(sys.argv) > 1:
     from PIL import Image
-    atlas = Image.open(RAIZ / "Assets/sprites/rpg_urban/Tilemap/tilemap_packed.png").convert("RGBA")
+    atlas = Image.open(RAIZ / "Assets/sprites/pueblo/pueblo.png").convert("RGBA")
 
     def tile(i):
         return atlas.crop(((i % ATLAS_COLUMNAS) * 16, (i // ATLAS_COLUMNAS) * 16, (i % ATLAS_COLUMNAS) * 16 + 16, (i // ATLAS_COLUMNAS) * 16 + 16))

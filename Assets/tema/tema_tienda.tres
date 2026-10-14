@@ -1,6 +1,18 @@
-[gd_resource type="Theme" load_steps=4 format=3]
+[gd_resource type="Theme" format=3 uid="uid://djjaxu0edoifn"]
 
-[ext_resource type="FontFile" path="res://Assets/fonts/kenney_pixel.ttf" id="1_fuente"]
+[ext_resource type="FontFile" uid="uid://bmlisbqwoxu75" path="res://Assets/fonts/kenney_pixel.ttf" id="1_fuente"]
+
+[sub_resource type="StyleBoxFlat" id="Borde_interior"]
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.658824, 0.752941, 0.862745, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
 
 [sub_resource type="StyleBoxFlat" id="Caja"]
 content_margin_left = 18.0
@@ -19,18 +31,6 @@ corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 shadow_color = Color(0, 0, 0, 0.35)
 shadow_size = 4
-
-[sub_resource type="StyleBoxFlat" id="Borde_interior"]
-bg_color = Color(0, 0, 0, 0)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.658824, 0.752941, 0.862745, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
 
 [resource]
 default_font = ExtResource("1_fuente")

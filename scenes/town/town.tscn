@@ -1,26 +1,26 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://c4rxe3yvl55tg"]
 
-[ext_resource type="Script" path="res://scripts/town/town.gd" id="1_yr8sw"]
+[ext_resource type="Script" uid="uid://cnpmmbhj4prfr" path="res://scripts/town/town.gd" id="1_yr8sw"]
 [ext_resource type="PackedScene" path="res://scenes/town/mapa_pueblo.tscn" id="2_w25xm"]
 [ext_resource type="PackedScene" path="res://scenes/entities/npc.tscn" id="3_dmgee"]
-[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/vendedor_mercado.tres" id="4_my0xt"]
-[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/dona_mari.tres" id="5_fwvjp"]
-[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/profe_juve.tres" id="6_xbtnt"]
-[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/capitan.tres" id="7_3sg37"]
+[ext_resource type="SpriteFrames" uid="uid://c5hckb5la5owv" path="res://Assets/sprites/personajes/frames/vendedor_mercado.tres" id="4_my0xt"]
+[ext_resource type="SpriteFrames" uid="uid://dwc8hn8jy4a7d" path="res://Assets/sprites/personajes/frames/dona_mari.tres" id="5_fwvjp"]
+[ext_resource type="SpriteFrames" uid="uid://yb5l78g1ghav" path="res://Assets/sprites/personajes/frames/profe_juve.tres" id="6_xbtnt"]
+[ext_resource type="SpriteFrames" uid="uid://cg85js8ocplej" path="res://Assets/sprites/personajes/frames/capitan.tres" id="7_3sg37"]
 [ext_resource type="PackedScene" path="res://scenes/town/peaton.tscn" id="8_vky2r"]
-[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/cliente_1.tres" id="9_fwdo8"]
-[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/cliente_2.tres" id="10_wacgc"]
-[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/cliente_3.tres" id="11_s1uhr"]
-[ext_resource type="SpriteFrames" path="res://Assets/sprites/personajes/frames/cliente_vip.tres" id="12_hhop4"]
-[ext_resource type="Script" path="res://scripts/entities/interactuable.gd" id="13_o16h7"]
+[ext_resource type="SpriteFrames" uid="uid://cikjq2ywks068" path="res://Assets/sprites/personajes/frames/cliente_1.tres" id="9_fwdo8"]
+[ext_resource type="SpriteFrames" uid="uid://bct3v6v8x2of7" path="res://Assets/sprites/personajes/frames/cliente_2.tres" id="10_wacgc"]
+[ext_resource type="SpriteFrames" uid="uid://cwrarkf2xhxu0" path="res://Assets/sprites/personajes/frames/cliente_3.tres" id="11_s1uhr"]
+[ext_resource type="SpriteFrames" uid="uid://wr65834kiwwk" path="res://Assets/sprites/personajes/frames/cliente_vip.tres" id="12_hhop4"]
+[ext_resource type="Script" uid="uid://d07cqlm60f2qo" path="res://scripts/entities/interactuable.gd" id="13_o16h7"]
 [ext_resource type="PackedScene" path="res://scenes/entities/dani.tscn" id="14_iu42p"]
-[ext_resource type="PackedScene" path="res://scenes/ui/hud_manana.tscn" id="ui_hud"]
 [ext_resource type="PackedScene" path="res://scenes/ui/notificaciones.tscn" id="ui_avisos"]
-[ext_resource type="PackedScene" path="res://scenes/ui/tablet.tscn" id="ui_tablet"]
-[ext_resource type="PackedScene" path="res://scenes/ui/panel_inventario.tscn" id="ui_inventario"]
 [ext_resource type="PackedScene" path="res://scenes/ui/dialogo_opciones.tscn" id="ui_dialogo"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud_manana.tscn" id="ui_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/panel_inventario.tscn" id="ui_inventario"]
+[ext_resource type="Script" uid="uid://bys0bgv74pdd" path="res://scripts/town/minimapa.gd" id="ui_minimapa"]
 [ext_resource type="PackedScene" path="res://scenes/ui/menu_pausa.tscn" id="ui_pausa"]
-[ext_resource type="Script" path="res://scripts/town/minimapa.gd" id="ui_minimapa"]
+[ext_resource type="PackedScene" path="res://scenes/ui/tablet.tscn" id="ui_tablet"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wpqog"]
 size = Vector2(2672, 40)
@@ -100,7 +100,6 @@ radius = 40.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_1d5la"]
 radius = 40.0
 
-
 [node name="Town" type="Node2D" unique_id=560066618]
 script = ExtResource("1_yr8sw")
 
@@ -164,11 +163,11 @@ offset_left = 168.0
 offset_top = 139.2
 offset_right = 648.0
 offset_bottom = 169.2
-theme_override_styles/normal = SubResource("StyleBoxFlat_67633")
-theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(0.9490196, 0.70980394, 0.26666668, 1)
 theme_override_colors/font_outline_color = Color(0.02, 0.03, 0.05, 1)
 theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_67633")
 text = "LA 501 · SPORTS BAR"
 horizontal_alignment = 1
 
@@ -177,11 +176,11 @@ offset_left = 1512.0
 offset_top = 139.2
 offset_right = 2040.0
 offset_bottom = 169.2
-theme_override_styles/normal = SubResource("StyleBoxFlat_n51ow")
-theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(0.96862745, 0.7764706, 0.5254902, 1)
 theme_override_colors/font_outline_color = Color(0.02, 0.03, 0.05, 1)
 theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_n51ow")
 text = "MERCADO CENTRAL"
 horizontal_alignment = 1
 
@@ -190,11 +189,11 @@ offset_left = 1656.0
 offset_top = 811.2
 offset_right = 2088.0
 offset_bottom = 841.2
-theme_override_styles/normal = SubResource("StyleBoxFlat_4axs1")
-theme_override_font_sizes/font_size = 18
 theme_override_colors/font_color = Color(0.9490196, 0.81960785, 0.41960785, 1)
 theme_override_colors/font_outline_color = Color(0.02, 0.03, 0.05, 1)
 theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_4axs1")
 text = "CERVECERÍA LA ESQUINA"
 horizontal_alignment = 1
 
@@ -203,10 +202,10 @@ offset_left = 672.0
 offset_top = 153.6
 offset_right = 1056.0
 offset_bottom = 181.6
-theme_override_font_sizes/font_size = 16
 theme_override_colors/font_color = Color(1, 0.9411765, 0.6509804, 1)
 theme_override_colors/font_outline_color = Color(0.02, 0.03, 0.05, 1)
 theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 16
 text = "PLAZA 501"
 horizontal_alignment = 1
 
@@ -215,10 +214,10 @@ offset_left = 48.0
 offset_top = 1034.0
 offset_right = 1152.0
 offset_bottom = 1062.0
-theme_override_font_sizes/font_size = 16
 theme_override_colors/font_color = Color(0.9019608, 0.9607843, 0.7882353, 1)
 theme_override_colors/font_outline_color = Color(0.02, 0.03, 0.05, 1)
 theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 16
 text = "PARQUE DE LA RIBERA"
 horizontal_alignment = 1
 
@@ -227,10 +226,10 @@ offset_left = 1680.0
 offset_top = 1305.6
 offset_right = 2544.0
 offset_bottom = 1331.6
-theme_override_font_sizes/font_size = 14
 theme_override_colors/font_color = Color(0.9019608, 0.9607843, 0.7882353, 1)
 theme_override_colors/font_outline_color = Color(0.02, 0.03, 0.05, 1)
 theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 14
 text = "CANCHA DEL BARRIO"
 horizontal_alignment = 1
 
@@ -368,26 +367,27 @@ limit_top = 0
 limit_right = 2592
 limit_bottom = 1440
 
-[node name="HUD" parent="." instance=ExtResource("ui_hud")]
+[node name="HUD" parent="." unique_id=1407023628 instance=ExtResource("ui_hud")]
 
-[node name="Notificaciones" parent="." instance=ExtResource("ui_avisos")]
-
-[node name="Tablet" parent="." instance=ExtResource("ui_tablet")]
-
-[node name="Inventario" parent="." instance=ExtResource("ui_inventario")]
-
-[node name="Dialogo" parent="." instance=ExtResource("ui_dialogo")]
-
-[node name="Pausa" parent="." instance=ExtResource("ui_pausa")]
-
-[node name="Minimapa" type="Control" parent="HUD"]
+[node name="Minimapa" type="Control" parent="HUD" unique_id=1209649559]
 layout_mode = 3
+anchors_preset = 0
 offset_left = 1058.0
 offset_top = 60.0
 offset_right = 1266.0
 offset_bottom = 176.0
 mouse_filter = 2
 script = ExtResource("ui_minimapa")
+
+[node name="Notificaciones" parent="." unique_id=19577697 instance=ExtResource("ui_avisos")]
+
+[node name="Tablet" parent="." unique_id=1380181684 instance=ExtResource("ui_tablet")]
+
+[node name="Inventario" parent="." unique_id=1310625199 instance=ExtResource("ui_inventario")]
+
+[node name="Dialogo" parent="." unique_id=720237387 instance=ExtResource("ui_dialogo")]
+
+[node name="Pausa" parent="." unique_id=1041522092 instance=ExtResource("ui_pausa")]
 
 [connection signal="usado" from="Interacciones/EntradaMercado" to="." method="_al_entrar_tienda" binds= ["mercado"]]
 [connection signal="usado" from="Interacciones/EntradaCerveceria" to="." method="_al_entrar_tienda" binds= ["cerveceria"]]

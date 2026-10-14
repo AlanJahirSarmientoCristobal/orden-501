@@ -1,7 +1,7 @@
 [gd_resource type="TileSet" format=3]
 
-[ext_resource type="Texture2D" path="res://Assets/sprites/interiores/roguelike_rpg.png" id="1_ek6mv"]
-[ext_resource type="Texture2D" path="res://Assets/sprites/interiores/roguelike_indoor.png" id="2_uchb8"]
+[ext_resource type="Texture2D" path="res://Assets/sprites/interiores/interiores.png" id="1_ek6mv"]
+[ext_resource type="Texture2D" path="res://Assets/sprites/interiores/muebles.png" id="2_uchb8"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_exwek"]
 texture = ExtResource("1_ek6mv")

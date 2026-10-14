@@ -26,7 +26,7 @@ Cada personaje va en **un solo PNG** con **4 columnas × 3 filas** de cuadros de
 |---|---|
 | `plantilla_32px.png` | Cuadrícula vacía de 128 × 96 para dibujar encima (en Aseprite, Piskel, LibreSprite, etc.). |
 | `guia_plantilla.png` | La cuadrícula ampliada con el nombre de cada cuadro. |
-| `ejemplo_dani.png` | El Dani provisional (Kenney) acomodado en el formato exacto. Úsalo como referencia. |
+| `ejemplo_dani.png` | La hoja de Dani (`player.png`) en el formato exacto. Úsala como referencia. |
 
 Para regenerarlos: `python tools/generar_plantilla_personaje.py`.
 
@@ -59,9 +59,7 @@ Todas estas hojas las genera `python tools/generar_personajes.py` (que **sobresc
 
 La tabla de nombres clave está en `AssetPaths.CODIGOS` (`scripts/core/asset_paths.gd`).
 
-Al abrir el proyecto en Godot, las imágenes se importan solas y el juego las usa en lugar del sprite de Kenney. Si borras una hoja, ese personaje vuelve al sprite provisional de Kenney, así que puedes entregarlos uno por uno.
-
-Si el VIP o el crítico no tienen hoja y usan el sprite genérico, el juego los pinta de dorado o morado para distinguirlos. Con su hoja propia se muestran con sus colores originales.
+Al abrir el proyecto en Godot, las imágenes se importan solas. Las animaciones (`frames/<clave>.tres`) leen directamente la hoja, así que basta con reemplazar el PNG con el mismo nombre y tamaño.
 
 ## 3. Qué animación usa el juego y cuándo
 

@@ -366,7 +366,7 @@ DIBUJOS = {
 
 if __name__ == "__main__":
     hoja = Image.new("RGBA", tamano_hoja(), (0, 0, 0, 0))
-    for i, (clave, _, _, _) in enumerate(ICONOS):
+    for i, (clave, _, _) in enumerate(ICONOS):
         hoja.alpha_composite(contorno(DIBUJOS[clave]()), posicion(i))
     ruta = os.path.join(CARPETA, "hoja_iconos.png")
     hoja.save(ruta)

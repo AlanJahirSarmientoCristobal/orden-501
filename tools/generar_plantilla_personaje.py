@@ -3,7 +3,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SALIDA = os.path.join(RAIZ, "Assets", "sprites", "personajes", "plantillas")
-TILES = os.path.join(RAIZ, "Assets", "sprites", "rpg_urban", "Tiles", "tile_%04d.png")
+DANI = os.path.join(RAIZ, "Assets", "sprites", "personajes", "player.png")
 CUADRO = 32
 COLUMNAS = ["De pie", "Paso A", "De pie", "Paso B"]
 FILAS = ["Abajo (de frente)", "Arriba (de espaldas)", "Lado (mira a la DERECHA)"]
@@ -44,14 +44,7 @@ def guia(base):
     return img
 
 def ejemplo_dani():
-    base = 429
-    img = Image.new("RGBA", (CUADRO * 4, CUADRO * 3), (0, 0, 0, 0))
-    for fila in range(3):
-        for c, paso in enumerate([0, 1, 0, 2]):
-            tile = Image.open(TILES % (base + fila + paso * 27)).convert("RGBA")
-            tile = tile.resize((CUADRO, CUADRO), Image.NEAREST)
-            img.paste(tile, (c * CUADRO, fila * CUADRO))
-    return img
+    return Image.open(DANI).convert("RGBA")
 
 if __name__ == "__main__":
     os.makedirs(SALIDA, exist_ok=True)

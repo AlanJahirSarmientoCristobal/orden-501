@@ -1,8 +1,8 @@
 extends SceneTree
 
 const JSON_MAPA := "res://scenes/town/mapa_pueblo.json"
-const ATLAS := "res://Assets/sprites/rpg_urban/Tilemap/tilemap_packed.png"
-const TILESET := "res://Assets/tilesets/rpg_urban.tres"
+const ATLAS := "res://Assets/sprites/pueblo/pueblo.png"
+const TILESET := "res://Assets/tilesets/pueblo.tres"
 const ESCENA := "res://scenes/town/mapa_pueblo.tscn"
 
 func _init() -> void:

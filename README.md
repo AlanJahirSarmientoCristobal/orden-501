@@ -116,15 +116,15 @@ El detalle de cómo se implementó cada mecánica del documento está en `DISENO
 python tools/recortar_monster.py
 ```
 
-El script genera `monster_1.png` … `monster_7.png` sin el fondo. La hoja debe ser un PNG real (si es JPEG, conviértelo a PNG antes de copiarla). Mientras no existan esos archivos, el juego dibuja 7 latas provisionales con los mismos colores.
+El script genera `monster_1.png` … `monster_7.png` sin el fondo. La hoja debe ser un PNG real (si es JPEG, conviértelo a PNG antes de copiarla).
 
-**Íconos de comida:** los 15 íconos de insumos y platillos se pueden reemplazar por propios. Las plantillas están en `Assets/sprites/comida/plantillas/`:
+**Íconos de comida:** los 15 íconos de insumos y platillos son propios (`Assets/sprites/comida/`). Las plantillas están en `Assets/sprites/comida/plantillas/`:
 
 | Archivo | Para qué sirve |
 |---|---|
 | `guia_iconos.png` | Los 15 íconos con su número, nombre, dónde se usan y el archivo que hay que guardar. |
 | `plantilla_hoja_32px.png` | Hoja vacía de 160 × 96 (5 × 3 cuadros de 32 × 32) para dibujar todos los íconos en un solo archivo. |
-| `referencia_kenney.png` | La misma hoja con los íconos actuales, para calcar encima en una capa nueva. |
+| `referencia_actual.png` | La misma hoja con los íconos actuales, para retocarlos o calcar encima en una capa nueva. |
 | `plantilla_icono_32px.png` | Un solo cuadro de 32 × 32 con el margen y la línea de apoyo. |
 
 Dibuja en una capa nueva, con fondo transparente, y exporta solo esa capa como `Assets/sprites/comida/hoja_iconos.png`. Después ejecuta:
@@ -133,19 +133,19 @@ Dibuja en una capa nueva, con fondo transparente, y exporta solo esa capa como `
 python tools/cortar_iconos_comida.py
 ```
 
-El script guarda cada cuadro como `Assets/sprites/comida/<nombre>.png` (por ejemplo `insumo_carne.png`) y salta los cuadros vacíos. También se puede guardar cada ícono a mano con ese nombre. Si existe un ícono propio, el juego lo usa; si no, sigue usando el de Kenney. Los 15 íconos actuales los dibuja `python tools/generar_iconos_comida.py` (que **sobrescribe** la hoja y los PNG); si retocas alguno a mano, no vuelvas a correrlo. Para regenerar las plantillas: `python tools/generar_plantilla_comida.py`.
+El script guarda cada cuadro como `Assets/sprites/comida/<nombre>.png` (por ejemplo `insumo_carne.png`) y salta los cuadros vacíos. También se puede guardar cada ícono a mano con ese nombre. Los 15 íconos actuales los dibuja `python tools/generar_iconos_comida.py` (que **sobrescribe** la hoja y los PNG); si retocas alguno a mano, no vuelvas a correrlo. Para regenerar las plantillas: `python tools/generar_plantilla_comida.py`.
 
 Todos los gráficos y sonidos se referencian desde **`scripts/core/asset_paths.gd`**:
 
-- `TEXTURAS`: íconos de insumos y platillos, y decoración. Cambia la ruta por tu imagen.
+- `TEXTURAS`: íconos de insumos y platillos, pantallas del partido y letrero de neón. Cambia la ruta por tu imagen.
 - **Personajes:** cada personaje tiene una hoja de 4 × 3 cuadros en `Assets/sprites/personajes/` con su nombre clave (`player.png`, `npc1.png` … `npc11.png`); el formato y las claves están en **`PERSONAJES.md`**. Las animaciones que usan las escenas son recursos `SpriteFrames` en `Assets/sprites/personajes/frames/`: se pueden editar en el panel SpriteFrames, o regenerarse desde las hojas con `godot --headless --path . --script res://tools/generar_frames.gd`.
 - `AUDIO`: si guardas en `Assets/audio/` un archivo con el nombre indicado (por ejemplo `musica_jornada.ogg` o `gol.ogg`), el juego lo usa en lugar del sonido generado por código.
 
 ### Mapa del pueblo (TileMap)
 
-El pueblo se arma con tiles de Kenney RPG Urban, en el mismo estilo que `Assets/sprites/rpg_urban/Sample.png`:
+El pueblo se arma con la hoja de tiles `Assets/sprites/pueblo/pueblo.png` (ver "Hojas de tiles"):
 
-- `scenes/town/mapa_pueblo.tscn`: dos `TileMapLayer` (Suelo y Objetos) con el TileSet `Assets/tilesets/rpg_urban.tres`, que ya incluye las colisiones. **Se puede abrir y pintar en el editor de Godot.**
+- `scenes/town/mapa_pueblo.tscn`: dos `TileMapLayer` (Suelo y Objetos) con el TileSet `Assets/tilesets/pueblo.tres`, que ya incluye las colisiones. **Se puede abrir y pintar en el editor de Godot.**
 - `scenes/town/mapa_pueblo.json`: la ubicación de las puertas, el parque, la plaza y la cancha, que usa `town.gd`.
 
 Para regenerar el mapa desde cero (esto sobrescribe los cambios hechos a mano en la escena):
@@ -159,7 +159,7 @@ Si cambias en el editor dónde están las puertas, actualiza también sus coorde
 
 ### Interiores (tiendas y restaurante)
 
-El Mercado (`mercado.tscn`), la Cervecería (`cerveceria.tscn`) y el restaurante (`restaurant.tscn`) tienen sus pisos, paredes y muebles pintados en nodos `TileMapLayer` (Suelo, Objetos y Encima) con el TileSet `Assets/tilesets/interiores.tres` (Kenney **Roguelike RPG Pack** y **Roguelike Indoors**). Las colisiones son `StaticBody2D` con sus `CollisionShape2D`. Todo se edita en el editor: selecciona una capa y pinta con el panel TileMap.
+El Mercado (`mercado.tscn`), la Cervecería (`cerveceria.tscn`) y el restaurante (`restaurant.tscn`) tienen sus pisos, paredes y muebles pintados en nodos `TileMapLayer` (Suelo, Objetos y Encima) con el TileSet `Assets/tilesets/interiores.tres` (hojas `Assets/sprites/interiores/interiores.png` y `muebles.png`). Las colisiones son `StaticBody2D` con sus `CollisionShape2D`. Todo se edita en el editor: selecciona una capa y pinta con el panel TileMap.
 
 Las pantallas del partido y el letrero de neón son pixel art propio generado por `tools/generar_sprites_restaurante.py` (`Assets/sprites/restaurante/`): la cancha alterna dos cuadros, muestra "GOL!" en cada gol y el neón parpadea.
 
@@ -167,7 +167,25 @@ Las pantallas del partido y el letrero de neón son pixel art propio generado po
 
 El estilo de botones, paneles y etiquetas está en el Theme **`Assets/tema/tema.tres`** (configurado en *Proyecto → Configuración → GUI → Tema*), con las variaciones `Titulo`, `Tenue`, `PanelBarra`, `PanelClaro` y `PanelAviso`. El menú de compra usa `Assets/tema/tema_tienda.tres` (fuente pixel y marcos estilo Pokémon).
 
-Los gráficos temporales son de Kenney (CC0). Consulta `THIRD_PARTY_LICENSES.md`.
+### Hojas de tiles
+
+El pueblo y los interiores usan tres hojas de tiles de 16 × 16 px:
+
+| Hoja | TileSet | Cuadrícula |
+|---|---|---|
+| `Assets/sprites/pueblo/pueblo.png` | `pueblo.tres` | 27 × 18 tiles, sin separación |
+| `Assets/sprites/interiores/interiores.png` | `interiores.tres` (fuente 0) | 57 × 31 tiles, 1 px de separación |
+| `Assets/sprites/interiores/muebles.png` | `interiores.tres` (fuente 1) y las mesas | 27 × 18 tiles, 1 px de separación |
+
+Las hojas solo conservan los tiles que usa el juego; el resto está vacío. Cada tile está en la misma posición que en el paquete original de Kenney, así que para cambiar uno basta con dibujar encima de su cuadro y guardar: las escenas no se tocan.
+
+Los tiles propios los dibuja `python tools/generar_tiles_propios.py` (sobrescribe solo esos cuadros):
+
+- **Pueblo:** pino y árbol redondo verdes (este último también con maceta), pino y árbol de otoño, pasto, banca de madera, farol verde, poste de luz y buzones rojo y azul.
+- **Interiores:** piso de madera, piso gris y piso beige, barril, barril de cerveza, caja de madera y refrigerador.
+- **Muebles:** silla de frente y de espaldas, mesa ovalada, mesa redonda y dos macetas.
+
+Los demás tiles (calles, edificios, paredes, mostradores, estufas, etc.) siguen siendo de Kenney (CC0). Consulta `THIRD_PARTY_LICENSES.md`.
 
 ## Guardado
 

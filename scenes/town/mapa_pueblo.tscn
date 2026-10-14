@@ -1,6 +1,6 @@
 [gd_scene format=4]
 
-[ext_resource type="TileSet" path="res://Assets/tilesets/rpg_urban.tres" id="1_ag5pk"]
+[ext_resource type="TileSet" path="res://Assets/tilesets/pueblo.tres" id="1_ag5pk"]
 
 [node name="MapaPueblo" type="Node2D" unique_id=61350472]
 
